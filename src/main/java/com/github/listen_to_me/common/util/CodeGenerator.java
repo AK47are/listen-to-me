@@ -8,9 +8,9 @@ import java.util.Collections;
 
 public class CodeGenerator {
     public static void main(String[] args) {
-        String url = "jdbc:mysql://localhost:3306/listentome?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai";
+        String url = "jdbc:mysql://localhost:3306/listen-to-me?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai";
         String username = "root";
-        String password = "1234";
+        String password = "root";
         FastAutoGenerator.create(url, username, password)
                 .globalConfig(builder -> {
                     builder.author("kun")
