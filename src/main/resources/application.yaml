@@ -51,3 +51,7 @@ knife4j:
     enable-version: true
     enable-swagger-models: true
     swagger-model-name: 数据模型定义
+
+jwt:
+  secret: your-secure-32-character-secret-key-here
+  expiration: 86400000 # 24 小时
