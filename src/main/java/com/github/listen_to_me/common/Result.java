@@ -13,6 +13,10 @@ public class Result<T> implements Serializable {
     private String msg;
     private T data;
 
+    public static <T> Result<T> success() {
+        return build(HttpStatus.HTTP_OK, "操作成功", null);
+    }
+
     public static <T> Result<T> success(T data) {
         return build(HttpStatus.HTTP_OK, "操作成功", data);
     }
