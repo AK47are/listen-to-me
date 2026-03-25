@@ -1,0 +1,148 @@
+-- ----------------------------
+-- 1. RBAC 权限域
+-- ----------------------------
+CREATE TABLE `sys_user` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `username` varchar(64) UNIQUE NOT NULL COMMENT '账号',
+  `password` varchar(128) NOT NULL COMMENT 'BCrypt加密',
+  `nickname` varchar(64) COMMENT '昵称',
+  `avatar` varchar(500) COMMENT '头像地址',
+  `phone` varchar(20) UNIQUE COMMENT '手机号',
+  `openid` varchar(128) COMMENT '三方平台唯一标识',
+  `is_creator` tinyint(1) DEFAULT 0 COMMENT '0-听众, 1-创作者',
+  `balance` decimal(12, 2) DEFAULT 0.00 COMMENT '可提现余额',
+  `frozen_balance` decimal(12, 2) DEFAULT 0.00 COMMENT '账期内冻结金额',
+  `version` int DEFAULT 0 COMMENT '乐观锁版本号',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_phone (phone),
+  INDEX idx_openid (openid),
+  INDEX idx_is_creator (is_creator)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `sys_role` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `role_name` varchar(32) NOT NULL,
+  `role_code` varchar(32) NOT NULL COMMENT 'ROLE_ADMIN, ROLE_CREATOR',
+
+ UNIQUE INDEX uk_role_code (role_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `sys_permission` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `perm_name` varchar(64) NOT NULL,
+  `perm_code` varchar(64) NOT NULL COMMENT 'audio:upload, audio:delete',
+
+  UNIQUE INDEX uk_perm_code (perm_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 中间表：用户-角色, 角色-权限 (略，仅展示核心)
+CREATE TABLE `sys_user_role` (
+  `user_id` bigint, `role_id` bigint, PRIMARY KEY (`user_id`, `role_id`),
+  CONSTRAINT fk_user_role_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE,
+  CONSTRAINT fk_user_role_role FOREIGN KEY (`role_id`) REFERENCES `sys_role` (`id`) ON DELETE CASCADE
+
+);
+CREATE TABLE `sys_role_permission` (
+  `role_id` bigint, `perm_id` bigint, PRIMARY KEY (`role_id`, `perm_id`),
+  INDEX idx_perm_id (perm_id),
+  CONSTRAINT fk_role_perm_role FOREIGN KEY (`role_id`) REFERENCES `sys_role` (`id`) ON DELETE CASCADE,
+  CONSTRAINT fk_role_perm_perm FOREIGN KEY (`perm_id`) REFERENCES `sys_permission` (`id`) ON DELETE CASCADE
+);
+
+-- ----------------------------
+-- 2. 音频资产域
+-- ----------------------------
+CREATE TABLE `audio_info` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `creator_id` bigint NOT NULL COMMENT '对应 sys_user.id',
+  `title` varchar(255) NOT NULL,
+  `cover_url` varchar(500),
+  `raw_path` varchar(500) COMMENT 'MinIO原始路径',
+  `hls_path` varchar(500) COMMENT 'M3U8路径',
+  `price` decimal(10, 2) DEFAULT 0.00,
+  `trial_duration` int DEFAULT 0 COMMENT '试听秒数',
+  `audit_status` int DEFAULT 0 COMMENT '0-待审, 1-通过, 2-违规',
+  `status` int DEFAULT 0 COMMENT '0-草稿/下架, 1-转码中, 2-已发布',
+  `view_count` int DEFAULT 0 COMMENT '点击量/热度基数',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_creator_id (creator_id),
+  INDEX idx_audit_status (audit_status),
+  INDEX idx_status (status),
+  INDEX idx_price (price),
+  CONSTRAINT fk_audio_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `audio_transcript` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `audio_id` bigint NOT NULL,
+  `full_text` longtext COMMENT 'AI转写文本',
+  `segment_json` json COMMENT 'AI分段标题与时间戳 [{time: 0, title: "..."}]',
+
+  UNIQUE INDEX uk_audio_id (audio_id),
+  CONSTRAINT fk_transcript_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------
+-- 3. 交易业务域
+-- ----------------------------
+CREATE TABLE `order_info` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `order_sn` varchar(64) UNIQUE NOT NULL,
+  `user_id` bigint NOT NULL,
+  `audio_id` bigint NOT NULL,
+  `pay_amount` decimal(10, 2) NOT NULL,
+  `pay_status` int DEFAULT 0 COMMENT '0-待支付, 1-已支付, 2-已取消',
+  `pay_channel` varchar(20) COMMENT 'alipay, wechat',
+  `pay_time` datetime,
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+
+  INDEX idx_user_id (user_id),
+  INDEX idx_audio_id (audio_id),
+  INDEX idx_order_sn (order_sn),
+  INDEX idx_pay_status (pay_status),
+  CONSTRAINT fk_order_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE RESTRICT,
+  CONSTRAINT fk_order_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ----------------------------
+-- 4. 社交与标签域
+-- ----------------------------
+CREATE TABLE `sys_tag` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `name` varchar(32) UNIQUE NOT NULL
+);
+
+CREATE TABLE `audio_tag_relation` (
+  `audio_id` bigint, `tag_id` bigint, PRIMARY KEY (`audio_id`, `tag_id`),
+  INDEX idx_tag_id (tag_id),
+  CONSTRAINT fk_tag_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE CASCADE,
+  CONSTRAINT fk_tag_relation FOREIGN KEY (`tag_id`) REFERENCES `sys_tag` (`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `play_history` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `user_id` bigint,
+  `audio_id` bigint,
+  `last_position` int DEFAULT 0 COMMENT '秒数进度',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE INDEX uk_user_audio (user_id, audio_id),
+  INDEX idx_audio_id (audio_id),
+  CONSTRAINT fk_play_history_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE,
+  CONSTRAINT fk_play_history_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE CASCADE
+);
+
+-- ----------------------------
+-- 5. 咨询服务域
+-- ----------------------------
+CREATE TABLE `consult_slot` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `creator_id` bigint NOT NULL,
+  `start_time` datetime,
+  `end_time` datetime,
+  `status` int DEFAULT 0 COMMENT '0-可选, 1-锁定(下单中), 2-已约, 3-完成',
+  INDEX idx_creator_id (creator_id),
+  INDEX idx_status (status),
+  CONSTRAINT fk_consult_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE
+);
