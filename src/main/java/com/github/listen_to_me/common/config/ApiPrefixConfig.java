@@ -5,11 +5,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import cn.hutool.core.util.ClassUtil;
+
 @Configuration
 public class ApiPrefixConfig implements WebMvcConfigurer {
     @Override
     public void configurePathMatch(PathMatchConfigurer configurer) {
         configurer.addPathPrefix("/api",
-                c -> c.isAnnotationPresent(RestController.class));
+                c -> c.isAnnotationPresent(RestController.class)
+                        && ClassUtil.getPackage(c).startsWith("com.github.listen_to_me.controller"));
     }
 }
