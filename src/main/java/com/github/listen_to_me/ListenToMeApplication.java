@@ -5,7 +5,6 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-@MapperScan("com.github.listen_to_me.mapper")
 public class ListenToMeApplication {
 
 	public static void main(String[] args) {
