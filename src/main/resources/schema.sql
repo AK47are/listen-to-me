@@ -1,7 +1,7 @@
 -- ----------------------------
 -- 1. RBAC 权限域
 -- ----------------------------
-CREATE TABLE `sys_user` (
+CREATE TABLE IF NOT EXISTS `sys_user` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `username` varchar(64) UNIQUE NOT NULL COMMENT '账号',
   `password` varchar(128) NOT NULL COMMENT 'BCrypt加密',
@@ -21,7 +21,7 @@ CREATE TABLE `sys_user` (
   INDEX idx_is_creator (is_creator)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `sys_role` (
+CREATE TABLE IF NOT EXISTS `sys_role` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `role_name` varchar(32) NOT NULL,
   `role_code` varchar(32) NOT NULL COMMENT 'ROLE_ADMIN, ROLE_CREATOR',
@@ -29,7 +29,7 @@ CREATE TABLE `sys_role` (
  UNIQUE INDEX uk_role_code (role_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `sys_permission` (
+CREATE TABLE IF NOT EXISTS `sys_permission` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `perm_name` varchar(64) NOT NULL,
   `perm_code` varchar(64) NOT NULL COMMENT 'audio:upload, audio:delete',
@@ -38,13 +38,13 @@ CREATE TABLE `sys_permission` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 中间表：用户-角色, 角色-权限 (略，仅展示核心)
-CREATE TABLE `sys_user_role` (
+CREATE TABLE IF NOT EXISTS `sys_user_role` (
   `user_id` bigint, `role_id` bigint, PRIMARY KEY (`user_id`, `role_id`),
   CONSTRAINT fk_user_role_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE,
   CONSTRAINT fk_user_role_role FOREIGN KEY (`role_id`) REFERENCES `sys_role` (`id`) ON DELETE CASCADE
 
 );
-CREATE TABLE `sys_role_permission` (
+CREATE TABLE IF NOT EXISTS `sys_role_permission` (
   `role_id` bigint, `perm_id` bigint, PRIMARY KEY (`role_id`, `perm_id`),
   INDEX idx_perm_id (perm_id),
   CONSTRAINT fk_role_perm_role FOREIGN KEY (`role_id`) REFERENCES `sys_role` (`id`) ON DELETE CASCADE,
@@ -54,7 +54,7 @@ CREATE TABLE `sys_role_permission` (
 -- ----------------------------
 -- 2. 音频资产域
 -- ----------------------------
-CREATE TABLE `audio_info` (
+CREATE TABLE IF NOT EXISTS `audio_info` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `creator_id` bigint NOT NULL COMMENT '对应 sys_user.id',
   `title` varchar(255) NOT NULL,
@@ -74,7 +74,7 @@ CREATE TABLE `audio_info` (
   CONSTRAINT fk_audio_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE `audio_transcript` (
+CREATE TABLE IF NOT EXISTS `audio_transcript` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `audio_id` bigint NOT NULL,
   `full_text` longtext COMMENT 'AI转写文本',
@@ -87,7 +87,7 @@ CREATE TABLE `audio_transcript` (
 -- ----------------------------
 -- 3. 交易业务域
 -- ----------------------------
-CREATE TABLE `order_info` (
+CREATE TABLE IF NOT EXISTS `order_info` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `order_sn` varchar(64) UNIQUE NOT NULL,
   `user_id` bigint NOT NULL,
@@ -109,19 +109,19 @@ CREATE TABLE `order_info` (
 -- ----------------------------
 -- 4. 社交与标签域
 -- ----------------------------
-CREATE TABLE `sys_tag` (
+CREATE TABLE IF NOT EXISTS `sys_tag` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `name` varchar(32) UNIQUE NOT NULL
 );
 
-CREATE TABLE `audio_tag_relation` (
+CREATE TABLE IF NOT EXISTS `audio_tag_relation` (
   `audio_id` bigint, `tag_id` bigint, PRIMARY KEY (`audio_id`, `tag_id`),
   INDEX idx_tag_id (tag_id),
   CONSTRAINT fk_tag_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE CASCADE,
   CONSTRAINT fk_tag_relation FOREIGN KEY (`tag_id`) REFERENCES `sys_tag` (`id`) ON DELETE CASCADE
 );
 
-CREATE TABLE `play_history` (
+CREATE TABLE IF NOT EXISTS `play_history` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `user_id` bigint,
   `audio_id` bigint,
@@ -136,7 +136,7 @@ CREATE TABLE `play_history` (
 -- ----------------------------
 -- 5. 咨询服务域
 -- ----------------------------
-CREATE TABLE `consult_slot` (
+CREATE TABLE IF NOT EXISTS `consult_slot` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `creator_id` bigint NOT NULL,
   `start_time` datetime,
