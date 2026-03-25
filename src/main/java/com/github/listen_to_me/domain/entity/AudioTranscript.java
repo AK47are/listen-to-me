@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,12 +13,13 @@ import lombok.Setter;
  * 
  * </p>
  *
- * @author kun
- * @since 2026-03-24
+ * @author baomidou
+ * @since 2026-03-25
  */
 @Getter
 @Setter
 @TableName("audio_transcript")
+@Schema(name = "AudioTranscript", description = "")
 public class AudioTranscript implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,13 +29,9 @@ public class AudioTranscript implements Serializable {
 
     private Long audioId;
 
-    /**
-     * AI转写文本
-     */
+    @Schema(description = "AI转写文本")
     private String fullText;
 
-    /**
-     * AI分段标题与时间戳 [{time: 0, title: "..."}]
-     */
+    @Schema(description = "AI分段标题与时间戳 [{time: 0, title: }]")
     private String segmentJson;
 }

@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,12 +15,13 @@ import lombok.Setter;
  * 
  * </p>
  *
- * @author kun
- * @since 2026-03-24
+ * @author baomidou
+ * @since 2026-03-25
  */
 @Getter
 @Setter
 @TableName("sys_user")
+@Schema(name = "SysUser", description = "")
 public class SysUser implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,54 +29,34 @@ public class SysUser implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 账号
-     */
+    @Schema(description = "账号")
     private String username;
 
-    /**
-     * BCrypt加密
-     */
+    @Schema(description = "BCrypt加密")
     private String password;
 
-    /**
-     * 昵称
-     */
+    @Schema(description = "昵称")
     private String nickname;
 
-    /**
-     * 头像地址
-     */
+    @Schema(description = "头像地址")
     private String avatar;
 
-    /**
-     * 手机号
-     */
+    @Schema(description = "手机号")
     private String phone;
 
-    /**
-     * 三方平台唯一标识
-     */
+    @Schema(description = "三方平台唯一标识")
     private String openid;
 
-    /**
-     * 0-听众, 1-创作者
-     */
+    @Schema(description = "0-听众, 1-创作者")
     private Boolean isCreator;
 
-    /**
-     * 可提现余额
-     */
+    @Schema(description = "可提现余额")
     private BigDecimal balance;
 
-    /**
-     * 账期内冻结金额
-     */
+    @Schema(description = "账期内冻结金额")
     private BigDecimal frozenBalance;
 
-    /**
-     * 乐观锁版本号
-     */
+    @Schema(description = "乐观锁版本号")
     private Integer version;
 
     private LocalDateTime createTime;

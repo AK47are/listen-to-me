@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,12 +15,13 @@ import lombok.Setter;
  * 
  * </p>
  *
- * @author kun
- * @since 2026-03-24
+ * @author baomidou
+ * @since 2026-03-25
  */
 @Getter
 @Setter
 @TableName("order_info")
+@Schema(name = "OrderInfo", description = "")
 public class OrderInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -35,14 +37,10 @@ public class OrderInfo implements Serializable {
 
     private BigDecimal payAmount;
 
-    /**
-     * 0-待支付, 1-已支付, 2-已取消
-     */
+    @Schema(description = "0-待支付, 1-已支付, 2-已取消")
     private Integer payStatus;
 
-    /**
-     * alipay, wechat
-     */
+    @Schema(description = "alipay, wechat")
     private String payChannel;
 
     private LocalDateTime payTime;

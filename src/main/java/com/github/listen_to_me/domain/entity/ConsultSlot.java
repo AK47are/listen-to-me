@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,12 +14,13 @@ import lombok.Setter;
  * 
  * </p>
  *
- * @author kun
- * @since 2026-03-24
+ * @author baomidou
+ * @since 2026-03-25
  */
 @Getter
 @Setter
 @TableName("consult_slot")
+@Schema(name = "ConsultSlot", description = "")
 public class ConsultSlot implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -32,8 +34,6 @@ public class ConsultSlot implements Serializable {
 
     private LocalDateTime endTime;
 
-    /**
-     * 0-可选, 1-锁定(下单中), 2-已约, 3-完成
-     */
+    @Schema(description = "0-可选, 1-锁定(下单中), 2-已约, 3-完成")
     private Integer status;
 }

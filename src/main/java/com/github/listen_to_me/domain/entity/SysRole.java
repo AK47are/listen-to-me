@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,12 +13,13 @@ import lombok.Setter;
  * 
  * </p>
  *
- * @author kun
- * @since 2026-03-24
+ * @author baomidou
+ * @since 2026-03-25
  */
 @Getter
 @Setter
 @TableName("sys_role")
+@Schema(name = "SysRole", description = "")
 public class SysRole implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,8 +29,6 @@ public class SysRole implements Serializable {
 
     private String roleName;
 
-    /**
-     * ROLE_ADMIN, ROLE_CREATOR
-     */
+    @Schema(description = "ROLE_ADMIN, ROLE_CREATOR")
     private String roleCode;
 }

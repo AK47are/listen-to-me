@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,12 +14,13 @@ import lombok.Setter;
  * 
  * </p>
  *
- * @author kun
- * @since 2026-03-24
+ * @author baomidou
+ * @since 2026-03-25
  */
 @Getter
 @Setter
 @TableName("play_history")
+@Schema(name = "PlayHistory", description = "")
 public class PlayHistory implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -30,9 +32,7 @@ public class PlayHistory implements Serializable {
 
     private Long audioId;
 
-    /**
-     * 秒数进度
-     */
+    @Schema(description = "秒数进度")
     private Integer lastPosition;
 
     private LocalDateTime updateTime;

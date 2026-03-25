@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,12 +15,13 @@ import lombok.Setter;
  * 
  * </p>
  *
- * @author kun
- * @since 2026-03-24
+ * @author baomidou
+ * @since 2026-03-25
  */
 @Getter
 @Setter
 @TableName("audio_info")
+@Schema(name = "AudioInfo", description = "")
 public class AudioInfo implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -27,46 +29,38 @@ public class AudioInfo implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
-    /**
-     * 对应 sys_user.id
-     */
+    @Schema(description = "对应 sys_user.id")
     private Long creatorId;
 
     private String title;
 
     private String coverUrl;
 
-    /**
-     * MinIO原始路径
-     */
+    @Schema(description = "MinIO原始路径")
     private String rawPath;
 
-    /**
-     * M3U8路径
-     */
+    @Schema(description = "M3U8路径")
     private String hlsPath;
 
     private BigDecimal price;
 
-    /**
-     * 试听秒数
-     */
+    @Schema(description = "试听秒数")
     private Integer trialDuration;
 
-    /**
-     * 0-待审, 1-通过, 2-违规
-     */
+    @Schema(description = "0-待审, 1-通过, 2-违规")
     private Integer auditStatus;
 
-    /**
-     * 0-草稿/下架, 1-转码中, 2-已发布
-     */
+    @Schema(description = "0-草稿/下架, 1-转码中, 2-已发布")
     private Integer status;
 
-    /**
-     * 点击量/热度基数
-     */
+    @Schema(description = "点击量/热度基数")
     private Integer viewCount;
 
     private LocalDateTime createTime;
+
+    @Schema(description = "逻辑删除：0-未删除 1-已删除")
+    private Byte isDeleted;
+
+    @Schema(description = "可见性：1-公开可见 0-仅自己/管理员可见")
+    private Byte visible;
 }
