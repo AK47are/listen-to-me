@@ -1,5 +1,7 @@
 package com.github.listen_to_me.domain.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import lombok.Getter;
@@ -19,7 +21,7 @@ import lombok.Setter;
 public class AudioTagRelation implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
+    @TableId(type = IdType.INPUT)
     private Long audioId;
 
     private Long tagId;
