@@ -12,11 +12,10 @@ public class CodeGenerator {
         String username = "root";
         String password = "root";
         FastAutoGenerator.create(url, username, password)
-                .globalConfig(builder -> {
-                    builder.author("kun")
-                            .fileOverride()
-                            .outputDir(System.getProperty("user.dir") + "/src/main/java");
-                })
+                .globalConfig(
+                        builder -> {
+                            builder.enableSpringdoc().outputDir(System.getProperty("user.dir") + "/src/main/java");
+                        })
                 .packageConfig(builder -> {
                     builder.parent("com.github.listen_to_me")
                             .entity("domain.entity")
@@ -26,8 +25,7 @@ public class CodeGenerator {
 
                     builder.pathInfo(Collections.singletonMap(
                             OutputFile.xml,
-                            System.getProperty("user.dir") + "/src/main/resources/mapper"
-                    ));
+                            System.getProperty("user.dir") + "/src/main/resources/mapper"));
                 })
 
                 .strategyConfig(builder -> {
@@ -43,10 +41,10 @@ public class CodeGenerator {
                             "sys_role_permission",
                             "sys_tag",
                             "sys_user",
-                            "sys_user_role"
-                    );
+                            "sys_user_role");
                     builder.entityBuilder().enableLombok();
                     builder.controllerBuilder().enableRestStyle();
+                    builder.entityBuilder().enableFileOverride();
                 })
 
                 .templateEngine(new VelocityTemplateEngine())
