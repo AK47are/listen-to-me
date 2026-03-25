@@ -22,8 +22,7 @@ public class CodeGenerator {
                             .entity("domain.entity")
                             .mapper("mapper")
                             .service("service")
-                            .serviceImpl("service.impl")
-                            .controller("controller");
+                            .serviceImpl("service.impl");
 
                     builder.pathInfo(Collections.singletonMap(
                             OutputFile.xml,
