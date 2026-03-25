@@ -4,13 +4,19 @@ import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.engine.VelocityTemplateEngine;
 
+import cn.hutool.core.lang.Dict;
+import cn.hutool.setting.yaml.YamlUtil;
+
 import java.util.Collections;
 
 public class CodeGenerator {
     public static void main(String[] args) {
-        String url = "jdbc:mysql://localhost:3306/listen-to-me?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai";
-        String username = "root";
-        String password = "root";
+
+        Dict dict = YamlUtil.loadByPath("application.yaml");
+        String url = dict.getByPath("spring.datasource.url");
+        String username = dict.getByPath("spring.datasource.username");
+        String password = dict.getByPath("spring.datasource.password");
+
         FastAutoGenerator.create(url, username, password)
                 .globalConfig(
                         builder -> {
