@@ -8,11 +8,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.github.listen_to_me.common.enumeration.RedisKey;
+import com.github.listen_to_me.common.exception.AuthException;
 import com.github.listen_to_me.common.util.JwtUtils;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.domain.SysUserAdapter;
 import com.github.listen_to_me.domain.dto.LoginDTO;
+import com.github.listen_to_me.domain.dto.VerifyCodeDTO;
 import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.vo.ImageCaptchaVO;
 import com.github.listen_to_me.domain.vo.LoginVO;
@@ -107,6 +109,21 @@ public class AuthServiceImpl implements AuthService {
                 .uuid(uuid)
                 .img(lineCaptcha.getImageBase64Data())
                 .build();
+    }
+
+    @Override
+    public void sendVerifyCode(VerifyCodeDTO verifyCodeDTO) {
+        String cachedCode = RedisUtils.get(RedisKey.IMAGE_CAPTCHA, verifyCodeDTO.getUuid());
+        if (cachedCode == null || !cachedCode.equalsIgnoreCase(verifyCodeDTO.getImageCode())) {
+            throw new AuthException("图形验证码错误或已过期");
+        }
+        RedisUtils.delete(RedisKey.IMAGE_CAPTCHA, verifyCodeDTO.getUuid());
+
+        String verifyCode = cn.hutool.core.util.RandomUtil.randomNumbers(6);
+
+        RedisUtils.set(RedisKey.VERIFY_CODE, verifyCodeDTO.getTarget(), verifyCode);
+        // TODO: 接入真实的手机号/邮箱发送平台
+        log.debug("校验码发送 - 目标: {}, 验证码: {}", verifyCodeDTO.getTarget(), verifyCode);
     }
 
 }

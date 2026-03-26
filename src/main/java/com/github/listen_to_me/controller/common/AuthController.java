@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.LoginDTO;
+import com.github.listen_to_me.domain.dto.VerifyCodeDTO;
 import com.github.listen_to_me.domain.vo.ImageCaptchaVO;
 import com.github.listen_to_me.domain.vo.LoginVO;
 import com.github.listen_to_me.service.AuthService;
@@ -43,5 +44,12 @@ public class AuthController {
     @Operation(summary = "获取图形验证码")
     public Result<ImageCaptchaVO> getImageCaptcha() {
         return Result.success(authService.createImageCaptcha());
+    }
+
+    @PostMapping("/verify-code")
+    @Operation(summary = "发送校验码")
+    public Result<Void> sendVerifyCode(@RequestBody VerifyCodeDTO verifyCodeDTO) {
+        authService.sendVerifyCode(verifyCodeDTO);
+        return Result.success();
     }
 }
