@@ -64,12 +64,12 @@ public class MinioUtils {
                         .object(getPath(module, objectName))
                         .expiry(EXPIRATION, TimeUnit.MINUTES)
                         .build());
-        log.info("生成临时链接 - 模块: {}, 文件名: {}, URL: ", module, objectName, url);
+        log.info("生成临时链接 - 模块: {}, 文件名: {}, URL: {}", module, objectName, url);
         return url;
     }
 
     public static String getPresignedUrl(String fullPath) throws Exception {
-        log.info("生成临时链接 - 完整路径: ", fullPath);
+        log.info("生成临时链接 - 完整路径: {}", fullPath);
         return CLIENT.getPresignedObjectUrl(
                 GetPresignedObjectUrlArgs.builder()
                         .method(Method.GET)
@@ -112,7 +112,7 @@ public class MinioUtils {
      * 删除文件
      */
     public static void removeFile(String fullPath) throws Exception {
-        log.info("删除文件 - 完整路径: ", fullPath);
+        log.info("删除文件 - 完整路径: {}", fullPath);
         CLIENT.removeObject(RemoveObjectArgs.builder()
                 .bucket(BUCKET)
                 .object(fullPath)
