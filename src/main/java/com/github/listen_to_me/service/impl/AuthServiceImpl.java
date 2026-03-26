@@ -101,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
         LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100, 4, 20);
         String uuid = IdUtil.simpleUUID();
 
-        RedisUtils.set(RedisKey.CAPTCHA, uuid, lineCaptcha.getCode());
+        RedisUtils.set(RedisKey.IMAGE_CAPTCHA, uuid, lineCaptcha.getCode());
 
         return ImageCaptchaVO.builder()
                 .uuid(uuid)
