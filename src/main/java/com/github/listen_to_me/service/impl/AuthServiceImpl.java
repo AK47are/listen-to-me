@@ -7,16 +7,22 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.util.JwtUtils;
 import com.github.listen_to_me.common.util.MinioUtils;
+import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.domain.SysUserAdapter;
 import com.github.listen_to_me.domain.dto.LoginDTO;
 import com.github.listen_to_me.domain.entity.SysUser;
+import com.github.listen_to_me.domain.vo.ImageCaptchaVO;
 import com.github.listen_to_me.domain.vo.LoginVO;
 import com.github.listen_to_me.domain.vo.UserVO;
 import com.github.listen_to_me.service.AuthService;
 import com.github.listen_to_me.service.ISysUserService;
 
+import cn.hutool.captcha.CaptchaUtil;
+import cn.hutool.captcha.LineCaptcha;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -89,4 +95,18 @@ public class AuthServiceImpl implements AuthService {
         log.info("刷新令牌 - 用户: {}", user.getUsername());
         return vo;
     }
+
+    @Override
+    public ImageCaptchaVO createImageCaptcha() {
+        LineCaptcha lineCaptcha = CaptchaUtil.createLineCaptcha(200, 100, 4, 20);
+        String uuid = IdUtil.simpleUUID();
+
+        RedisUtils.set(RedisKey.CAPTCHA, uuid, lineCaptcha.getCode());
+
+        return ImageCaptchaVO.builder()
+                .uuid(uuid)
+                .img(lineCaptcha.getImageBase64Data())
+                .build();
+    }
+
 }

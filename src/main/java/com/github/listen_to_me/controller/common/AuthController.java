@@ -1,5 +1,6 @@
 package com.github.listen_to_me.controller.common;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.LoginDTO;
+import com.github.listen_to_me.domain.vo.ImageCaptchaVO;
 import com.github.listen_to_me.domain.vo.LoginVO;
 import com.github.listen_to_me.service.AuthService;
 
@@ -37,4 +39,9 @@ public class AuthController {
         return Result.success(authService.refreshToken());
     }
 
+    @GetMapping("/image-captcha")
+    @Operation(summary = "获取图形验证码")
+    public Result<ImageCaptchaVO> getImageCaptcha() {
+        return Result.success(authService.createImageCaptcha());
+    }
 }

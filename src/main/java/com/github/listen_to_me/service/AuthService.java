@@ -1,6 +1,7 @@
 package com.github.listen_to_me.service;
 
 import com.github.listen_to_me.domain.dto.LoginDTO;
+import com.github.listen_to_me.domain.vo.ImageCaptchaVO;
 import com.github.listen_to_me.domain.vo.LoginVO;
 
 public interface AuthService {
@@ -8,4 +9,6 @@ public interface AuthService {
     LoginVO loginUser(LoginDTO loginDTO);
 
     LoginVO refreshToken();
+
+    ImageCaptchaVO createImageCaptcha();
 }
