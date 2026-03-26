@@ -1,20 +1,14 @@
 package com.github.listen_to_me.service;
 
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.dto.LoginDTO;
 import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.vo.LoginVO;
-import com.baomidou.mybatisplus.extension.service.IService;
 
-/**
- * <p>
- * 服务类
- * </p>
- *
- * @author kun
- * @since 2026-03-24
- */
 public interface ISysUserService extends IService<SysUser> {
 
     LoginVO loginUser(LoginDTO loginDTO);
+
+    LoginVO refreshToken();
 
 }
