@@ -1,5 +1,7 @@
 package com.github.listen_to_me.common.config;
 
+import java.io.IOException;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,8 +16,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.common.filter.JwtAuthenticationFilter;
 
+import cn.hutool.http.HttpStatus;
+import cn.hutool.json.JSONUtil;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -51,7 +57,20 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .exceptionHandling(conf -> conf
+                        .authenticationEntryPoint((req, res, ex) -> {
+                            renderJson(res, HttpStatus.HTTP_UNAUTHORIZED, Result.fail(401, "认证失败，请重新登录"));
+                        })
+                        .accessDeniedHandler((req, res, ex) -> {
+                            renderJson(res, HttpStatus.HTTP_FORBIDDEN, Result.fail(403, "权限不足，拒绝访问"));
+                        }))
                 .build();
+    }
+
+    private void renderJson(HttpServletResponse response, int status, Result<?> result) throws IOException {
+        response.setStatus(status);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(JSONUtil.toJsonStr(result));
     }
 
 }
