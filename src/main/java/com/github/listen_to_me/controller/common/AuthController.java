@@ -31,4 +31,10 @@ public class AuthController {
         return Result.success(iSysUserService.loginUser(loginDTO));
     }
 
+    @PostMapping("/refresh")
+    @Operation(summary = "刷新 Token", description = "返回新 Token 和用户信息")
+    public Result<LoginVO> refreshToken() {
+        return Result.success(iSysUserService.refreshToken());
+    }
+
 }
