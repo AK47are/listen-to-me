@@ -9,7 +9,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.util.JwtUtils;
+import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.mapper.SysUserMapper;
 
 import io.jsonwebtoken.Claims;
@@ -43,8 +45,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Claims claims = JwtUtils.parseToken(token);
             Long userId = Long.parseLong(claims.getSubject());
 
-            // HACK: 后续添加 Redis 后，在登录时将权限存到 Redis，而不是每次请求都调用一次
-            List<String> permCodeList = sysUserMapper.selectPermCodeListById(userId);
+            List<String> permCodeList = RedisUtils.get(RedisKey.USER_PERMS, userId.toString());
+
+            if (permCodeList == null) {
+                permCodeList = sysUserMapper.selectPermCodeListById(userId);
+                RedisUtils.set(RedisKey.USER_PERMS, userId.toString(), permCodeList);
+                log.debug("权限缓存未命中 - 用户ID: {}", userId);
+            }
+
             log.debug("识别用户 - ID: {}, 权限列表: {}", userId, permCodeList);
             List<SimpleGrantedAuthority> authorities = permCodeList.stream()
                     .map(SimpleGrantedAuthority::new)

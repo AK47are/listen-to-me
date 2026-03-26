@@ -9,6 +9,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.listen_to_me.common.enumeration.RedisKey;
+import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.domain.SysUserAdapter;
 import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.mapper.SysUserMapper;
@@ -39,6 +41,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         }
 
         List<String> permCodeList = sysUserMapper.selectPermCodeListById(user.getId());
+        RedisUtils.set(RedisKey.USER_PERMS, user.getId().toString(), permCodeList);
+
         log.debug("认证信息就绪 - 账号: {}, 权限: {}", username, permCodeList);
         return new SysUserAdapter(user, permCodeList);
     }
