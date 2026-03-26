@@ -60,6 +60,7 @@ public class JwtUtils {
      * 验证令牌是否有效
      */
     public static boolean validateToken(String token) {
+        // TODO: 验证用到了 parseToken, 如果成功需要再解析一遍令牌，非常多余，后续重构
         try {
             parseToken(token);
             return true;
