@@ -18,13 +18,13 @@ INSERT INTO `sys_permission` (`perm_name`, `perm_code`) VALUES
 ('订单管理', 'order:manage'),
 ('个人中心', 'user:info');
 
--- 系统用户（密码均为123456的BCrypt加密值：$10$gFUGfVORKKodIm65H.HEwu1637/tVrFhYgmMQVlYEX40EcUvAoFzi）
+-- 系统用户（密码均为 123456）
 INSERT INTO `sys_user` (`username`, `password`, `nickname`, `avatar`, `phone`, `openid`, `is_creator`, `balance`, `frozen_balance`, `version`) VALUES
-('admin', '$10$gFUGfVORKKodIm65H.HEwu1637/tVrFhYgmMQVlYEX40EcUvAoFzi', '系统管理员', 'https://avatar.com/admin.jpg', '13800138000', 'wx_admin_001', 0, 0.00, 0.00, 0),
-('creator_01', '$10$gFUGfVORKKodIm65H.HEwu1637/tVrFhYgmMQVlYEX40EcUvAoFzi', '有声的小雅', 'https://avatar.com/creator01.jpg', '13800138001', 'wx_creator_001', 1, 1256.88, 320.50, 0),
-('listener_01', '$10$gFUGfVORKKodIm65H.HEwu1637/tVrFhYgmMQVlYEX40EcUvAoFzi', '听书小迷弟', 'https://avatar.com/listener01.jpg', '13800138002', 'wx_listener_001', 0, 89.60, 0.00, 0),
-('listener_02', '$10$gFUGfVORKKodIm65H.HEwu1637/tVrFhYgmMQVlYEX40EcUvAoFzi', '深夜听众', 'https://avatar.com/listener02.jpg', '13800138003', 'wx_listener_002', 0, 56.20, 0.00, 0),
-('creator_02', '$10$gFUGfVORKKodIm65H.HEwu1637/tVrFhYgmMQVlYEX40EcUvAoFzi', '老杨说故事', 'https://avatar.com/creator02.jpg', '13800138004', 'wx_creator_002', 1, 890.30, 156.20, 0);
+('admin', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '系统管理员', 'https://avatar.com/admin.jpg', '13800138000', 'wx_admin_001', 0, 0.00, 0.00, 0),
+('creator_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '有声的小雅', 'https://avatar.com/creator01.jpg', '13800138001', 'wx_creator_001', 1, 1256.88, 320.50, 0),
+('listener_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '听书小迷弟', 'https://avatar.com/listener01.jpg', '13800138002', 'wx_listener_001', 0, 89.60, 0.00, 0),
+('listener_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '深夜听众', 'https://avatar.com/listener02.jpg', '13800138003', 'wx_listener_002', 0, 56.20, 0.00, 0),
+('creator_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '老杨说故事', 'https://avatar.com/creator02.jpg', '13800138004', 'wx_creator_002', 1, 890.30, 156.20, 0);
 
 -- 用户-角色关联
 INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
