@@ -5,7 +5,8 @@ import java.util.concurrent.TimeUnit;
 
 @Getter
 public enum RedisKey {
-    CAPTCHA("captcha:codes:", 2L, TimeUnit.MINUTES);
+    CAPTCHA("captcha:codes:", 2L, TimeUnit.MINUTES),
+    USER_PERMS("user:perms:", 12L, TimeUnit.HOURS);
 
     private final String prefix;
     private final Long expire;
