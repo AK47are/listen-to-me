@@ -1,6 +1,10 @@
 spring:
   application:
     name: listen-to-me
+  servlet:
+    multipart:
+      max-file-size: 300MB
+      max-request-size: 300MB
 
   data:
     redis:
