@@ -2,4 +2,40 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.github.listen_to_me.mapper.AudioInfoMapper">
 
+    <select id="selectAudioPage" resultType="com.github.listen_to_me.domain.vo.AudioVO">
+        SELECT
+        a.id AS id,
+        a.title AS title,
+        a.cover_url AS coverUrl,
+        a.price AS price,
+        a.trial_duration AS trialDuration,
+        a.view_count AS viewCount,
+        a.create_time AS createTime,
+        u.id AS `creator.id`,
+        u.username AS `creator.username`,
+        u.nickname AS `creator.nickname`,
+        u.avatar AS `creator.avatar`
+        FROM audio_info a
+        LEFT JOIN sys_user u ON a.creator_id = u.id
+        WHERE a.is_deleted = 0
+        AND a.visible = 1
+        AND a.audit_status = 1
+        AND a.status = 2
+        <if test="query.title != null and query.title != ''">
+            AND a.title LIKE CONCAT('%', #{query.title}, '%')
+        </if>
+        <if test="query.tags != null and query.tags.size() > 0">
+            AND EXISTS (
+            SELECT 1
+            FROM audio_tag_relation atr
+            JOIN sys_tag t ON atr.tag_id = t.id
+            WHERE atr.audio_id = a.id
+            AND t.name IN
+            <foreach collection="query.tags" item="tag" open="(" separator="," close=")">
+                #{tag}
+            </foreach>
+            )
+        </if>
+        ORDER BY a.create_time DESC
+    </select>
 </mapper>
