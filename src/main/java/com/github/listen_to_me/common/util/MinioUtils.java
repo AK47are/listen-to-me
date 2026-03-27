@@ -82,15 +82,17 @@ public class MinioUtils {
     /**
      * 流式上传文件
      */
-    public static void uploadFile(MultipartFile file, String module, String objectName)
+    public static String uploadFile(MultipartFile file, String module, String objectName)
             throws Exception {
         log.info("上传文件 - 模块: {}, 文件名: {}", module, objectName);
+        String fullPath = getPath(module, objectName);
         CLIENT.putObject(PutObjectArgs.builder()
                 .bucket(BUCKET)
-                .object(getPath(module, objectName))
+                .object(fullPath)
                 .stream(file.getInputStream(), file.getSize(), -1)
                 .contentType(file.getContentType())
                 .build());
+        return fullPath;
     }
 
     /**
