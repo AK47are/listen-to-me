@@ -35,8 +35,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .eq(SysUser::getUsername, username));
         if (user == null) {
             log.debug("用户不存在 - 账号: {}", username);
-            // TODO: 待 SecurityConfig 完备后，通过 AuthenticationEntryPoint 统一将此异常映射为
-            // BaseException 格式。目前保持原生异常以确保 Spring Security 认证过滤器链能正常识别身份缺失信号
+            // NOTE: SecurityConfig 已配置 AuthenticationEntryPoint 统一处理认证异常
             throw new UsernameNotFoundException("用户账号不存在: " + username);
         }
 
