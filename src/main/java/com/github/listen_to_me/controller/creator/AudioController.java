@@ -23,5 +23,11 @@ public class AudioController {
         return Result.success("上传成功");
     }
 
-
+    @PostMapping("/upload")
+    public Result<String> uploadAudio(@RequestParam("file") MultipartFile file) throws Exception {
+        if (!file.getOriginalFilename().endsWith(".mp3")) {
+            return Result.fail("文件类型错误，仅支持 mp3 格式");
+        }
+        return Result.success(audioInfoService.uploadAudio(file));
+    }
 }

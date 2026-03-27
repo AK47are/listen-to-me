@@ -17,4 +17,5 @@ public interface IAudioInfoService extends IService<AudioInfo> {
 
     void addAudio(AudioDTO audioDTO);
 
+    String uploadAudio(MultipartFile file) throws Exception;
 }

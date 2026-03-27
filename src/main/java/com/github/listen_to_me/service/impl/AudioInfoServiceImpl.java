@@ -48,4 +48,10 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         }
     }
 
+    @Override
+    public String uploadAudio(MultipartFile file) throws Exception {
+        String objectName = UUID.randomUUID() + "_" + FilenameUtils.getBaseName(file.getOriginalFilename());
+        log.info("上传文件到 Minio，objectName: {}", objectName);
+        return MinioUtils.uploadFile(file, "temp", objectName);
+    }
 }
