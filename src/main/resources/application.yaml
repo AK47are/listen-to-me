@@ -26,7 +26,7 @@ logging:
     root: warn
     com.github.listen_to_me: debug
   pattern:
-    console: "-----------------%n%d{HH:mm:ss} | %highlight(%-4level) | %-15.15thread | %logger.%M |%n%msg%n-----------------%n"
+    console: "%d{HH:mm:ss} | %highlight(%-5level) | %-15.15thread | %logger.%M |%n%msg%n---------------------------------%n"
 
 springdoc:
   swagger-ui:
