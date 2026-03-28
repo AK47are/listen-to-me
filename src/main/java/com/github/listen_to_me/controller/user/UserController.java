@@ -2,7 +2,9 @@ package com.github.listen_to_me.controller.user;
 
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
+import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
 import com.github.listen_to_me.domain.vo.UserVO;
+import com.github.listen_to_me.service.AudioFolderRelationService;
 import com.github.listen_to_me.service.ISysUserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "用户接口", description = "用户相关接口包含用户信息查询、用户信息更新等操作")
 @RestController
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class UserController {
 
     private ISysUserService sysUserService;
+    private AudioFolderRelationService audioFolderRelationService;
 
     @Operation(summary = "获取当前登录用户资料")
     @GetMapping("/profile")
@@ -32,6 +36,13 @@ public class UserController {
     @PutMapping("/profile")
     public Result<Void> updateProfile(@RequestBody UserProfileUpdateDTO updateDTO){
         sysUserService.modifyProfile(updateDTO);
+        return Result.success();
+    }
+    
+    @PostMapping("/audio/action")
+    @Operation(summary = "收藏/取消收藏音频")
+    public Result<Void> saveAudioAction(@RequestBody FavoriteActionDTO favoriteActionDTO) {
+        audioFolderRelationService.saveAudioAction(favoriteActionDTO);
         return Result.success();
     }
 }
