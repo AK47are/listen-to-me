@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   `nickname` varchar(64) COMMENT '昵称',
   `avatar` varchar(500) COMMENT '头像地址',
   `phone` varchar(20) UNIQUE COMMENT '手机号',
+  `email` varchar(128) UNIQUE COMMENT '邮箱',
   `openid` varchar(128) COMMENT '三方平台唯一标识',
   `is_creator` tinyint(1) DEFAULT 0 COMMENT '0-听众, 1-创作者',
   `balance` decimal(12, 2) DEFAULT 0.00 COMMENT '可提现余额',
@@ -15,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   `version` int DEFAULT 0 COMMENT '乐观锁版本号',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
+  INDEX idx_email (email),
   INDEX idx_phone (phone),
   INDEX idx_openid (openid),
   INDEX idx_is_creator (is_creator)
