@@ -1,10 +1,10 @@
 package com.github.listen_to_me.controller.user;
-
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
 import com.github.listen_to_me.domain.dto.FolderDTO;
 import com.github.listen_to_me.domain.vo.UserVO;
+import com.github.listen_to_me.domain.vo.FolderVO;
 import com.github.listen_to_me.service.AudioFolderRelationService;
 import com.github.listen_to_me.service.IAudioInfoService;
 import com.github.listen_to_me.service.ISysUserService;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -57,5 +57,11 @@ public class UserController {
     public Result<String> saveFavoriteFolder(@RequestBody FolderDTO folderDTO) {
         sysUserFolderService.createFolder(folderDTO);
         return Result.success("创建收藏夹成功");
+    }
+
+    @GetMapping("/favorite/folder/list")
+    @Operation(summary = "获取收藏夹列表")
+    public Result<List<FolderVO>> getFolderList() {
+        return Result.success(sysUserFolderService.getFolderList());
     }
 }
