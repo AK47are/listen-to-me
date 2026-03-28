@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.url.UrlPath;
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import io.minio.CopyObjectArgs;
 import io.minio.CopySource;
@@ -72,6 +73,7 @@ public class MinioUtils {
      */
     public static String uploadFile(MultipartFile file, String module, String objectName)
             throws Exception {
+        objectName = IdUtil.randomUUID() + "_" + objectName;
         log.info("上传文件 - 模块: {}, 文件名: {}", module, objectName);
         String fullPath = getPath(module, objectName);
         CLIENT.putObject(PutObjectArgs.builder()
