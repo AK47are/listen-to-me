@@ -3,6 +3,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
+import com.github.listen_to_me.domain.dto.FavoriteDeleteDTO;
 import com.github.listen_to_me.domain.dto.FolderDTO;
 import com.github.listen_to_me.domain.vo.UserVO;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
@@ -74,5 +75,11 @@ public class UserController {
     public IPage<AudioVO> getFavoritePage(@ParameterObject FavoriteQuery favoriteQuery) {
         //转换改到service层
         return audioInfoService.getFavoriteAudioPage(favoriteQuery);
+    }
+    @DeleteMapping("/favorite")
+    @Operation(summary = "删除收藏音频")
+    public Result<String> deleteFavorite(@RequestBody FavoriteDeleteDTO favoriteDeleteDTO) {
+        audioFolderRelationService.deleteFavorite(favoriteDeleteDTO);
+        return Result.success("删除收藏音频成功");
     }
 }

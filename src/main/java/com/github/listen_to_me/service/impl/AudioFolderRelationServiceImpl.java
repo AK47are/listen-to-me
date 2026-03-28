@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
+import com.github.listen_to_me.domain.dto.FavoriteDeleteDTO;
 import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
 import com.github.listen_to_me.service.AudioFolderRelationService;
@@ -38,5 +39,16 @@ public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelat
         }else{
             throw new BaseException("前端操作错误");
         }
+    }
+
+    @Override
+    public void deleteFavorite(FavoriteDeleteDTO favoriteDeleteDTO) {
+        Wrapper<AudioFolderRelation> wrapper = Wrappers.lambdaQuery(AudioFolderRelation.class)
+                .eq(AudioFolderRelation::getAudioId, favoriteDeleteDTO.getAudioId())
+                .eq(AudioFolderRelation::getFolderId, favoriteDeleteDTO.getFolderId());
+        if(audioFolderRelationMapper.selectOne(wrapper) == null){
+            throw new BaseException(404,"音频不存在收藏");
+        }
+        audioFolderRelationMapper.delete(wrapper);
     }
 }
