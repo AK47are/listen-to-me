@@ -56,18 +56,6 @@ public class MinioUtils {
     /**
      * 生成临时访问链接
      */
-    public static String getPresignedUrl(String module, String objectName) throws Exception {
-        String url = CLIENT.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                        .method(Method.GET)
-                        .bucket(BUCKET)
-                        .object(getPath(module, objectName))
-                        .expiry(EXPIRATION, TimeUnit.MINUTES)
-                        .build());
-        log.info("生成临时链接 - 模块: {}, 文件名: {}, URL: {}", module, objectName, url);
-        return url;
-    }
-
     public static String getPresignedUrl(String fullPath) throws Exception {
         log.info("生成临时链接 - 完整路径: {}", fullPath);
         return CLIENT.getPresignedObjectUrl(
