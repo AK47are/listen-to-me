@@ -82,4 +82,10 @@ public class UserController {
         audioFolderRelationService.deleteFavorite(favoriteDeleteDTO);
         return Result.success("删除收藏音频成功");
     }
+    @DeleteMapping("/favorite/folder/{folderId}")
+    @Operation(summary = "删除收藏夹")
+    public Result<String> deleteFavoriteFolder(@PathVariable Long folderId) {
+        sysUserFolderService.deleteFolder(folderId);
+        return Result.success("删除收藏夹成功");
+    }
 }

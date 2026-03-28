@@ -54,4 +54,17 @@ public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, S
                 .map(folder -> BeanUtil.copyProperties(folder, FolderVO.class))
                 .collect(Collectors.toList());
     }
+
+    @Override
+    @Transactional
+    public void deleteFolder(Long folderId) {
+        LambdaQueryWrapper<SysUserFolder> wrapper = Wrappers.lambdaQuery(SysUserFolder.class)
+                .eq(SysUserFolder::getFolderId, folderId)
+                .eq(SysUserFolder::getUserId, SecurityUtils.getCurrentUserId());
+        if(!sysUserFolderMapper.exists(wrapper)){
+            throw new BaseException(404, "收藏夹不存在");
+        }
+        sysUserFolderMapper.delete(wrapper);
+        folderMapper.deleteById(folderId);
+    }
 }

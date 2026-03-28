@@ -11,4 +11,6 @@ public interface SysUserFolderService extends IService<SysUserFolder> {
     void createFolder(FolderDTO folderDTO);
 
     List<FolderVO> getFolderList();
+
+    void deleteFolder(Long folderId);
 }
