@@ -8,6 +8,10 @@ public class UserVO {
     private String username;
     private String nickname;
     private String avatar;
+    private String phone;
+    private String email;
+    private String balance;
+    private String frozenBalance;
 
     /**
      * 创作者标识：0-听众, 1-创作者
