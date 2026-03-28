@@ -53,7 +53,8 @@ public class SecurityConfig {
                 // 不通过 Session 记忆用户
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/common/auth/login", "/api/common/auth/register").permitAll()
+                        .requestMatchers("/api/common/auth/refresh").authenticated()
+                        .requestMatchers("/api/common/auth/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
