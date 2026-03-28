@@ -44,6 +44,9 @@ public class SysUser implements Serializable {
     @Schema(description = "手机号")
     private String phone;
 
+    @Schema(description = "邮箱地址")
+    private String email;
+
     @Schema(description = "三方平台唯一标识")
     private String openid;
 
