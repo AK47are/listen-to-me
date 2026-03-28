@@ -41,15 +41,15 @@ CREATE TABLE IF NOT EXISTS `sys_permission` (
 -- 中间表：用户-角色, 角色-权限 (略，仅展示核心)
 CREATE TABLE IF NOT EXISTS `sys_user_role` (
   `user_id` bigint, `role_id` bigint, PRIMARY KEY (`user_id`, `role_id`),
-  CONSTRAINT fk_user_role_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE,
-  CONSTRAINT fk_user_role_role FOREIGN KEY (`role_id`) REFERENCES `sys_role` (`id`) ON DELETE CASCADE
+  CONSTRAINT fk_user_role_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`),
+  CONSTRAINT fk_user_role_role FOREIGN KEY (`role_id`) REFERENCES `sys_role` (`id`)
 
 );
 CREATE TABLE IF NOT EXISTS `sys_role_permission` (
   `role_id` bigint, `perm_id` bigint, PRIMARY KEY (`role_id`, `perm_id`),
   INDEX idx_perm_id (perm_id),
-  CONSTRAINT fk_role_perm_role FOREIGN KEY (`role_id`) REFERENCES `sys_role` (`id`) ON DELETE CASCADE,
-  CONSTRAINT fk_role_perm_perm FOREIGN KEY (`perm_id`) REFERENCES `sys_permission` (`id`) ON DELETE CASCADE
+  CONSTRAINT fk_role_perm_role FOREIGN KEY (`role_id`) REFERENCES `sys_role` (`id`),
+  CONSTRAINT fk_role_perm_perm FOREIGN KEY (`perm_id`) REFERENCES `sys_permission` (`id`)
 );
 
 -- ----------------------------
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `audio_info` (
   INDEX idx_audit_status (audit_status),
   INDEX idx_status (status),
   INDEX idx_price (price),
-  CONSTRAINT fk_audio_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE
+  CONSTRAINT fk_audio_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `audio_transcript` (
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `audio_transcript` (
   `segment_json` json COMMENT 'AI分段标题与时间戳 [{time: 0, title: "..."}]',
 
   UNIQUE INDEX uk_audio_id (audio_id),
-  CONSTRAINT fk_transcript_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE CASCADE
+  CONSTRAINT fk_transcript_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
@@ -107,8 +107,8 @@ CREATE TABLE IF NOT EXISTS `order_info` (
   INDEX idx_audio_id (audio_id),
   INDEX idx_order_sn (order_sn),
   INDEX idx_pay_status (pay_status),
-  CONSTRAINT fk_order_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE RESTRICT,
-  CONSTRAINT fk_order_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE RESTRICT
+  CONSTRAINT fk_order_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`),
+  CONSTRAINT fk_order_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
@@ -122,8 +122,8 @@ CREATE TABLE IF NOT EXISTS `sys_tag` (
 CREATE TABLE IF NOT EXISTS `audio_tag_relation` (
   `audio_id` bigint, `tag_id` bigint, PRIMARY KEY (`audio_id`, `tag_id`),
   INDEX idx_tag_id (tag_id),
-  CONSTRAINT fk_tag_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE CASCADE,
-  CONSTRAINT fk_tag_relation FOREIGN KEY (`tag_id`) REFERENCES `sys_tag` (`id`) ON DELETE CASCADE
+  CONSTRAINT fk_tag_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`),
+  CONSTRAINT fk_tag_relation FOREIGN KEY (`tag_id`) REFERENCES `sys_tag` (`id`)
 );
 
 CREATE TABLE IF NOT EXISTS `play_history` (
@@ -134,8 +134,8 @@ CREATE TABLE IF NOT EXISTS `play_history` (
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE INDEX uk_user_audio (user_id, audio_id),
   INDEX idx_audio_id (audio_id),
-  CONSTRAINT fk_play_history_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE,
-  CONSTRAINT fk_play_history_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE CASCADE
+  CONSTRAINT fk_play_history_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`),
+  CONSTRAINT fk_play_history_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 );
 
 -- ----------------------------
@@ -149,7 +149,7 @@ CREATE TABLE IF NOT EXISTS `consult_slot` (
   `status` int DEFAULT 0 COMMENT '0-可选, 1-锁定(下单中), 2-已约, 3-完成',
   INDEX idx_creator_id (creator_id),
   INDEX idx_status (status),
-  CONSTRAINT fk_consult_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE
+  CONSTRAINT fk_consult_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`)
 );
 -- 收藏夹表
 CREATE TABLE IF NOT EXISTS `folder` (
@@ -166,8 +166,8 @@ CREATE TABLE IF NOT EXISTS `audio_folder_relation` (
   `folder_id` bigint NOT NULL COMMENT '收藏夹ID',
   PRIMARY KEY (`audio_id`,`folder_id`) USING BTREE COMMENT '联合主键',
    INDEX `idx_folder_id` (`folder_id`),
-   CONSTRAINT `fk_relation_folder` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-   CONSTRAINT `fk_relation_audio` FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+   CONSTRAINT `fk_relation_folder` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`),
+   CONSTRAINT `fk_relation_audio` FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='音频-收藏夹关联表';
 
@@ -179,6 +179,6 @@ CREATE TABLE IF NOT EXISTS `sys_user_folder` (
   `folder_id` bigint NOT NULL COMMENT '收藏夹ID',
   PRIMARY KEY (`user_id`,`folder_id`) USING BTREE COMMENT '联合主键',
   INDEX `idx_folder_id` (`folder_id`),
-  CONSTRAINT `fk_user_folder_folder` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_user_folder_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `fk_user_folder_folder` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`),
+  CONSTRAINT `fk_user_folder_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户-收藏夹关联表';
