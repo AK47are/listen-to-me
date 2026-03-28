@@ -1,5 +1,6 @@
 package com.github.listen_to_me.controller.common;
 
+import com.github.listen_to_me.domain.dto.UserRegisterDTO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +51,13 @@ public class AuthController {
     @Operation(summary = "发送校验码")
     public Result<Void> sendVerifyCode(@RequestBody VerifyCodeDTO verifyCodeDTO) {
         authService.sendVerifyCode(verifyCodeDTO);
+        return Result.success();
+    }
+
+    @PostMapping("/register")
+    @Operation(summary = "用户注册")
+    public Result<Void> register(@RequestBody UserRegisterDTO userRegisterDTO) {
+        authService.addSysUser(userRegisterDTO);
         return Result.success();
     }
 }

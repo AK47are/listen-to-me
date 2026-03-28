@@ -1,10 +1,15 @@
 package com.github.listen_to_me.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.crypto.digest.BCrypt;
+import com.github.listen_to_me.common.exception.RegisterException;
+import com.github.listen_to_me.domain.dto.UserRegisterDTO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.github.listen_to_me.common.enumeration.RedisKey;
@@ -36,6 +41,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final ISysUserService iSysUserService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public LoginVO loginUser(LoginDTO loginDTO) {
@@ -126,4 +132,33 @@ public class AuthServiceImpl implements AuthService {
         log.debug("校验码发送 - 目标: {}, 验证码: {}", verifyCodeDTO.getTarget(), verifyCode);
     }
 
+    @Override
+    public void addSysUser(UserRegisterDTO userRegisterDTO) {
+        if (StrUtil.isBlank(userRegisterDTO.getUsername())) {
+            throw new RegisterException(400, "用户名不能为空");
+        }
+        String target = StrUtil.isBlank(userRegisterDTO.getPhone())
+                ? userRegisterDTO.getEmail()
+                : userRegisterDTO.getPhone();
+        if (StrUtil.isBlank(target)) {
+            throw new RegisterException(400, "手机号或邮箱不能为空");
+        }
+        if (StrUtil.isBlank(userRegisterDTO.getPassword())) {
+            throw new RegisterException(400, "密码不能为空");
+        }
+        if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
+            throw new RegisterException(400, "两次密码不一致");
+        }
+
+        String cachedVerifyCode = RedisUtils.get(RedisKey.VERIFY_CODE, target);
+        if (StrUtil.isBlank(cachedVerifyCode) || !cachedVerifyCode.equalsIgnoreCase(userRegisterDTO.getVerifyCode())) {
+            throw new RegisterException(400, "校验码错误或已过期");
+        }
+        RedisUtils.delete(RedisKey.VERIFY_CODE, target);
+        userRegisterDTO.setPassword(passwordEncoder.encode(userRegisterDTO.getPassword()));
+        iSysUserService.save(BeanUtil.copyProperties(userRegisterDTO, SysUser.class));
+        log.debug("新用户注册 - 用户信息: {}", userRegisterDTO);
+
+        // FIX: 需要初始化其它关联表
+    }
 }
