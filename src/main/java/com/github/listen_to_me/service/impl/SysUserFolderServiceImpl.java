@@ -9,12 +9,16 @@ import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.FolderDTO;
 import com.github.listen_to_me.domain.entity.Folder;
 import com.github.listen_to_me.domain.entity.SysUserFolder;
+import com.github.listen_to_me.domain.vo.FolderVO;
 import com.github.listen_to_me.mapper.FolderMapper;
 import com.github.listen_to_me.mapper.SysUserFolderMapper;
 import com.github.listen_to_me.service.SysUserFolderService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, SysUserFolder> implements SysUserFolderService {
@@ -34,5 +38,20 @@ public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, S
         sysUserFolder.setFolderId(folder.getId());
         sysUserFolder.setUserId(SecurityUtils.getCurrentUserId());
         sysUserFolderMapper.insert(sysUserFolder);
+    }
+
+    @Override
+    public List<FolderVO> getFolderList() {
+        Long userId = SecurityUtils.getCurrentUserId();
+        LambdaQueryWrapper<SysUserFolder> wrapper = Wrappers.lambdaQuery(SysUserFolder.class)
+                .eq(SysUserFolder::getUserId, userId);
+        List<SysUserFolder> sysUserFolderList = sysUserFolderMapper.selectList(wrapper);
+        if(sysUserFolderList.isEmpty()){
+            return List.of();
+        }
+        List<Folder> folderList = folderMapper.getFolderListOfUsers(sysUserFolderList);
+        return folderList.stream()
+                .map(folder -> BeanUtil.copyProperties(folder, FolderVO.class))
+                .collect(Collectors.toList());
     }
 }
