@@ -151,3 +151,34 @@ CREATE TABLE IF NOT EXISTS `consult_slot` (
   INDEX idx_status (status),
   CONSTRAINT fk_consult_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE
 );
+-- 收藏夹表
+CREATE TABLE IF NOT EXISTS `folder` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '收藏夹ID',
+  `name` varchar(50) NOT NULL COMMENT '收藏夹名称',
+  `description` varchar(255) DEFAULT NULL COMMENT '收藏夹描述',
+  `audio_count` bigint DEFAULT '0' COMMENT '音频数量',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='收藏夹表';
+-- 音频收藏夹关联表
+CREATE TABLE IF NOT EXISTS `audio_folder_relation` (
+  `audio_id` bigint NOT NULL COMMENT '音频ID',
+  `folder_id` bigint NOT NULL COMMENT '收藏夹ID',
+  PRIMARY KEY (`audio_id`,`folder_id`) USING BTREE COMMENT '联合主键',
+   INDEX `idx_folder_id` (`folder_id`),
+   CONSTRAINT `fk_relation_folder` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+   CONSTRAINT `fk_relation_audio` FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='音频-收藏夹关联表';
+
+
+-- 用户 - 收藏夹关联表
+
+CREATE TABLE IF NOT EXISTS `sys_user_folder` (
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `folder_id` bigint NOT NULL COMMENT '收藏夹ID',
+  PRIMARY KEY (`user_id`,`folder_id`) USING BTREE COMMENT '联合主键',
+  INDEX `idx_folder_id` (`folder_id`),
+  CONSTRAINT `fk_user_folder_folder` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_folder_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户-收藏夹关联表';
