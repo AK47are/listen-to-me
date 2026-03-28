@@ -47,7 +47,7 @@ public class MinioUtils {
      * 生成规范化的存储路径
      * 模块名/日期/子模块/文件名
      */
-    public static String getPath(String module, String objectName) {
+    private static String getPath(String module, String objectName) {
         return StrUtil.removePrefix(UrlPath.of(module, null)
                 .add(DateTime.now().toString("yyyyMMdd"))
                 .add(objectName).build(null), "/");
@@ -70,15 +70,17 @@ public class MinioUtils {
     /**
      * 流式上传文件
      */
-    public static void uploadFile(MultipartFile file, String module, String objectName)
+    public static String uploadFile(MultipartFile file, String module, String objectName)
             throws Exception {
         log.info("上传文件 - 模块: {}, 文件名: {}", module, objectName);
+        String fullPath = getPath(module, objectName);
         CLIENT.putObject(PutObjectArgs.builder()
                 .bucket(BUCKET)
-                .object(getPath(module, objectName))
+                .object(fullPath)
                 .stream(file.getInputStream(), file.getSize(), -1)
                 .contentType(file.getContentType())
                 .build());
+        return fullPath;
     }
 
     /**
