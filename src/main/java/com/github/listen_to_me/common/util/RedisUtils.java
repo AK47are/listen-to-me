@@ -1,5 +1,7 @@
 package com.github.listen_to_me.common.util;
 
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -7,6 +9,7 @@ import com.github.listen_to_me.common.enumeration.RedisKey;
 
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -37,5 +40,16 @@ public class RedisUtils {
         String key = redisKey.join(suffix);
         log.debug("删除缓存 - Key: {}", key);
         return redisTemplate.delete(key);
+    }
+
+    public static void setJson(RedisKey redisKey, String suffix, Map<String, Object> map) {
+        String json = JSONUtil.toJsonStr(map);
+        set(redisKey, suffix, json);
+    }
+
+    public static Map<String, Object> getJson(RedisKey redisKey, String suffix) {
+        String json = get(redisKey, suffix);
+        JSONObject jsonObj = JSONUtil.parseObj(json);
+        return jsonObj.getRaw();
     }
 }
