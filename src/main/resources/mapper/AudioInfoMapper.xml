@@ -2,4 +2,13 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.github.listen_to_me.mapper.AudioInfoMapper">
 
+    <select id="selectAudioByFolderId" resultType="com.github.listen_to_me.domain.entity.AudioInfo">
+        SELECT a.*
+        FROM audio_info a
+        INNER JOIN audio_folder_relation as r ON a.id = r.audio_id
+        WHERE 1=1
+        <if test="folderId != null">
+            AND r.folder_id = #{folderId}
+        </if>
+    </select>
 </mapper>
