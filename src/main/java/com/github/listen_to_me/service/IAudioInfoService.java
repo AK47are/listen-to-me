@@ -1,7 +1,10 @@
 package com.github.listen_to_me.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.listen_to_me.domain.query.FavoriteQuery;
+import com.github.listen_to_me.domain.vo.AudioVO;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IAudioInfoService extends IService<AudioInfo> {
 
+    IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery);
 }

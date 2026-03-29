@@ -1,9 +1,12 @@
 package com.github.listen_to_me.controller.user;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
 import com.github.listen_to_me.domain.dto.FolderDTO;
 import com.github.listen_to_me.domain.vo.UserVO;
+import com.github.listen_to_me.domain.query.FavoriteQuery;
+import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.FolderVO;
 import com.github.listen_to_me.service.AudioFolderRelationService;
 import com.github.listen_to_me.service.IAudioInfoService;
@@ -18,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestBody;
 import lombok.extern.slf4j.Slf4j;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -63,5 +67,12 @@ public class UserController {
     @Operation(summary = "获取收藏夹列表")
     public Result<List<FolderVO>> getFolderList() {
         return Result.success(sysUserFolderService.getFolderList());
+    }
+
+    @GetMapping("/favorite/page")
+    @Operation(summary = "获取收藏音频列表")
+    public IPage<AudioVO> getFavoritePage(@ParameterObject FavoriteQuery favoriteQuery) {
+        //转换改到service层
+        return audioInfoService.getFavoriteAudioPage(favoriteQuery);
     }
 }
