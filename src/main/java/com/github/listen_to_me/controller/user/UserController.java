@@ -9,10 +9,10 @@ import com.github.listen_to_me.domain.vo.UserVO;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.FolderVO;
-import com.github.listen_to_me.service.AudioFolderRelationService;
+import com.github.listen_to_me.service.IAudioFolderRelationService;
 import com.github.listen_to_me.service.IAudioInfoService;
 import com.github.listen_to_me.service.ISysUserService;
-import com.github.listen_to_me.service.SysUserFolderService;
+import com.github.listen_to_me.service.ISysUserFolderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -32,8 +32,8 @@ import java.util.List;
 @Slf4j
 @Tag(name = "用户管理", description = "包含登录、注册、用户信息管理等接口")
 public class UserController {
-    private final AudioFolderRelationService audioFolderRelationService;
-    private final SysUserFolderService sysUserFolderService;
+    private final IAudioFolderRelationService audioFolderRelationService;
+    private final ISysUserFolderService sysUserFolderService;
     private final IAudioInfoService audioInfoService;
     private ISysUserService sysUserService;
 

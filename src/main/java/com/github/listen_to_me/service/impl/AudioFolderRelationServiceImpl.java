@@ -8,13 +8,13 @@ import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
 import com.github.listen_to_me.domain.dto.FavoriteDeleteDTO;
 import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
-import com.github.listen_to_me.service.AudioFolderRelationService;
+import com.github.listen_to_me.service.IAudioFolderRelationService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
-public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelationMapper, AudioFolderRelation> implements AudioFolderRelationService {
+public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelationMapper, AudioFolderRelation> implements IAudioFolderRelationService {
     private final AudioFolderRelationMapper audioFolderRelationMapper;
     @Override
     public void saveAudioAction(FavoriteActionDTO favoriteActionDTO) {
