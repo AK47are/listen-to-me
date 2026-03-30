@@ -1,18 +1,12 @@
 package com.github.listen_to_me.controller.user;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
-import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
-import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
-import com.github.listen_to_me.domain.dto.FavoriteDeleteDTO;
-import com.github.listen_to_me.domain.dto.FolderDTO;
+import com.github.listen_to_me.domain.dto.*;
 import com.github.listen_to_me.domain.vo.UserVO;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.FolderVO;
-import com.github.listen_to_me.service.IAudioFolderRelationService;
-import com.github.listen_to_me.service.IAudioInfoService;
-import com.github.listen_to_me.service.ISysUserService;
-import com.github.listen_to_me.service.ISysUserFolderService;
+import com.github.listen_to_me.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -35,7 +29,8 @@ public class UserController {
     private final IAudioFolderRelationService audioFolderRelationService;
     private final ISysUserFolderService sysUserFolderService;
     private final IAudioInfoService audioInfoService;
-    private ISysUserService sysUserService;
+    private final IAudioLikeService audioLikeService;
+    private final ISysUserService sysUserService;
 
     @Operation(summary = "获取当前登录用户资料")
     @GetMapping("/profile")
@@ -87,5 +82,12 @@ public class UserController {
     public Result<String> deleteFavoriteFolder(@PathVariable Long folderId) {
         sysUserFolderService.deleteFolder(folderId);
         return Result.success("删除收藏夹成功");
+    }
+
+    @PostMapping("/audio/like")
+    @Operation(summary = "喜欢/取消喜欢音频")
+    public Result<Void> saveAudioLike(@RequestBody LikeActionDTO likeActionDTO) {
+        audioLikeService.modifyAudioLike(likeActionDTO);
+        return Result.success();
     }
 }
