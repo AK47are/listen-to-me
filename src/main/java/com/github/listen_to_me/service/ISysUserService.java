@@ -1,5 +1,7 @@
 package com.github.listen_to_me.service;
 
+import java.math.BigDecimal;
+
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.entity.SysUser;
@@ -19,4 +21,24 @@ public interface ISysUserService extends IService<SysUser> {
      * @return 余额统计VO
      */
     BalanceVO getBalanceStats(Long userId);
+
+    /**
+     * 扣减当前用户余额
+     * 
+     * 使用场景：
+     * - 购买音频
+     * - 发起咨询预约
+     * - 管理员审核提现通过
+     *
+     * 流程：
+     * 1. 校验数据有效性
+     * 2. 记录到虚拟币流水
+     * 
+     * @param userId  用户ID
+     * @param amount  扣减金额
+     * @param bizType 业务类型
+     * @param bizId   业务ID
+     * @return 是否扣减成功
+     */
+    boolean deductBalance(Long userId, BigDecimal amount, String bizType, String bizId);
 }
