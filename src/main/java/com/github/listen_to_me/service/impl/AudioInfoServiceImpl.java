@@ -82,4 +82,17 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         RedisUtils.setJson(RedisKey.TEMP_AUDIO_URL, tempUrlBase64, map);
         return tempUrl;
     }
+
+    @Override
+    public String uploadCover(MultipartFile coverFile) throws Exception {
+        String fileType = FileTypeUtil.getType(coverFile.getInputStream());
+        if (fileType == null || !"jpg".equals(fileType) && !"jpeg".equals(fileType) && !"png".equals(fileType)) {
+            throw new BaseException(400, "仅支持上传 JPG、JPEG、PNG 格式封面");
+        }
+        String objectName = MinioUtils.uploadFile(coverFile,"temp",coverFile.getOriginalFilename());
+        String tempUrl = MinioUtils.getPresignedUrl(objectName);
+        String tempUrlBase64 = Base64.encode(tempUrl);
+        RedisUtils.set(RedisKey.TEMP_COVER_URL, tempUrlBase64, objectName);
+        return tempUrl;
+    }
 }
