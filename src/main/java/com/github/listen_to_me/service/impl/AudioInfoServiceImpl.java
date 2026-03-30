@@ -34,4 +34,5 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         IPage<AudioInfo> audioPage = audioInfoMapper.selectAudioByFolderId(page, favoriteQuery.getFolderId());
         return audioPage.convert(audio -> BeanUtil.copyProperties(audio, AudioVO.class));
     }
+
 }
