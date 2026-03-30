@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
+import com.github.listen_to_me.common.exception.ConflictException;
 import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.FolderDTO;
 import com.github.listen_to_me.domain.entity.Folder;
@@ -19,11 +20,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 @Service
 @AllArgsConstructor
-public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, SysUserFolder> implements ISysUserFolderService {
+public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, SysUserFolder>
+        implements ISysUserFolderService {
     private final FolderMapper folderMapper;
     private final SysUserFolderMapper sysUserFolderMapper;
+
     @Override
     @Transactional
     public void createFolder(FolderDTO folderDTO) {
@@ -31,7 +35,7 @@ public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, S
         LambdaQueryWrapper<Folder> wrapper = Wrappers.lambdaQuery(Folder.class)
                 .eq(Folder::getName, folder.getName());
         if (folderMapper.selectOne(wrapper) != null) {
-            throw new BaseException(409, "收藏夹名称已存在");
+            throw new ConflictException("收藏夹名称已存在");
         }
         folderMapper.insert(folder);
         SysUserFolder sysUserFolder = new SysUserFolder();
@@ -46,7 +50,7 @@ public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, S
         LambdaQueryWrapper<SysUserFolder> wrapper = Wrappers.lambdaQuery(SysUserFolder.class)
                 .eq(SysUserFolder::getUserId, userId);
         List<SysUserFolder> sysUserFolderList = sysUserFolderMapper.selectList(wrapper);
-        if(sysUserFolderList.isEmpty()){
+        if (sysUserFolderList.isEmpty()) {
             return List.of();
         }
         List<Folder> folderList = folderMapper.getFolderListOfUsers(sysUserFolderList);
@@ -61,7 +65,7 @@ public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, S
         LambdaQueryWrapper<SysUserFolder> wrapper = Wrappers.lambdaQuery(SysUserFolder.class)
                 .eq(SysUserFolder::getFolderId, folderId)
                 .eq(SysUserFolder::getUserId, SecurityUtils.getCurrentUserId());
-        if(!sysUserFolderMapper.exists(wrapper)){
+        if (!sysUserFolderMapper.exists(wrapper)) {
             throw new BaseException(404, "收藏夹不存在");
         }
         sysUserFolderMapper.delete(wrapper);

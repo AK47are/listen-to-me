@@ -2,6 +2,9 @@ package com.github.listen_to_me.common.exception;
 
 import com.github.listen_to_me.common.enumeration.UniqueIndexEnum;
 import com.github.listen_to_me.common.util.ExceptionUtils;
+
+import cn.hutool.http.HttpStatus;
+
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -27,6 +30,6 @@ public class GlobalExceptionHandler {
         log.error("数据库唯一约束冲突", e);
         String indexName = ExceptionUtils.getDuplicateIndexName(e);
         String fieldDesc = UniqueIndexEnum.getFieldDescByIndex(indexName);
-        return Result.fail(409, fieldDesc + "已存在，请更换后重试");
+        return Result.fail(HttpStatus.HTTP_CONFLICT, fieldDesc + "已存在，请更换后重试");
     }
 }
