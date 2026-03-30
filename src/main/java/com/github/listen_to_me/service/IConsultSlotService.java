@@ -41,4 +41,11 @@ public interface IConsultSlotService extends IService<ConsultSlot> {
      * @param status 目标状态 (AVAILABLE / CANCELLED)
      */
     void updateSlotStatus(Long slotId, String status);
+
+    /**
+     * 删除时间槽
+     * 
+     * @param slotId 时间槽ID
+     */
+    void removeSlot(Long slotId);
 }

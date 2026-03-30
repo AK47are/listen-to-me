@@ -145,6 +145,38 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
         log.debug("修改时间槽状态成功 - ID: {}, 旧状态: {}, 新状态: {}", slotId, currentStatus, status);
     }
 
+    @Override
+    @Transactional
+    public void removeSlot(Long slotId) {
+        Long creatorId = SecurityUtils.getCurrentUserId();
+        log.debug("删除时间槽 - 时间槽ID: {}", slotId);
+
+        // 校验时间槽是否存在且属于当前用户
+        ConsultSlot slot = getById(slotId);
+        if (slot == null) {
+            log.debug("时间槽不存在 - ID: {}", slotId);
+            throw new BaseException(404, "时间槽不存在");
+        }
+        if (!slot.getCreatorId().equals(creatorId)) {
+            log.debug("无权限删除 - 时间槽ID: {}, 当前用户: {}", slotId, creatorId);
+            throw new BaseException(404, "时间槽不存在");
+        }
+
+        // 校验状态是否可删除
+        if (!"AVAILABLE".equals(slot.getStatus())) {
+            log.debug("时间槽状态不可删除 - 当前状态: {}, ID: {}", slot.getStatus(), slotId);
+            throw new BaseException(400, "只能删除可用的时间槽");
+        }
+
+        boolean success = removeById(slotId);
+        if (!success) {
+            log.error("删除时间槽失败 - ID: {}", slotId);
+            throw new BaseException("删除时间槽失败");
+        }
+
+        log.debug("删除时间槽成功 - ID: {}", slotId);
+    }
+
     /**
      * 批量检查时间槽是否与已有槽位冲突
      */

@@ -3,6 +3,7 @@ package com.github.listen_to_me.controller.creator;
 import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,6 +54,14 @@ public class CreatorSlotController {
     public Result<Void> updateSlotStatus(@PathVariable Long id, @RequestParam String status) {
         log.debug("修改时间槽状态 - ID: {}, 状态: {}", id, status);
         slotService.updateSlotStatus(id, status);
+        return Result.success();
+    }
+
+    @DeleteMapping("/slots/{id}")
+    @Operation(summary = "删除时间槽")
+    public Result<Void> removeSlot(@PathVariable Long id) {
+        log.debug("删除时间槽 - ID: {}", id);
+        slotService.removeSlot(id);
         return Result.success();
     }
 }
