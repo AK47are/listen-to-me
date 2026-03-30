@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.enumeration.RedisKey;
@@ -34,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> implements ISysUserService {
 
     private final PasswordEncoder passwordEncoder;
+    private final SysUserMapper sysUserMapper;
     private final ICoinTransactionService iCoinTransactionService;
 
     @Override
@@ -130,5 +133,56 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         vo.setTotalSpent(totalSpent);
 
         return vo;
+    }
+
+    @Override
+    @Transactional
+    public boolean deductBalance(Long userId, BigDecimal amount, String bizType, String bizId) {
+        log.debug("扣减余额 - 用户ID: {}, 金额: {}, 业务类型: {}, 业务ID: {}", userId, amount, bizType, bizId);
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BaseException(400, "扣减金额必须大于0");
+        }
+
+        // 查询扣减前余额
+        SysUser user = getById(userId);
+        if (user == null) {
+            throw new BaseException(404, "用户不存在");
+        }
+
+        BigDecimal balanceBefore = user.getBalance();
+
+        if (balanceBefore.compareTo(amount) < 0) {
+            log.debug("扣减余额失败 - 用户ID: {}, 余额不足: {}, 需要: {}", userId, balanceBefore, amount);
+            return false;
+        }
+
+        // 扣减余额
+        LambdaUpdateWrapper<SysUser> wrapper = Wrappers.<SysUser>lambdaUpdate()
+                .eq(SysUser::getId, userId)
+                .ge(SysUser::getBalance, amount)
+                .setSql("balance = balance - " + amount);
+
+        int updated = sysUserMapper.update(wrapper);
+        if (updated == 0) {
+            log.debug("扣减余额失败 - 用户ID: {}, 金额: {}", userId, amount);
+            return false;
+        }
+
+        BigDecimal balanceAfter = balanceBefore.subtract(amount);
+
+        // 记录流水
+        CoinTransaction transaction = new CoinTransaction();
+        transaction.setUserId(userId);
+        transaction.setType("EXPENSE");
+        transaction.setBizType(bizType);
+        transaction.setAmount(amount);
+        transaction.setBalanceBefore(balanceBefore);
+        transaction.setBalanceAfter(balanceAfter);
+        transaction.setBizId(bizId);
+        iCoinTransactionService.save(transaction);
+
+        log.debug("扣减余额成功 - 用户ID: {}, 金额: {}, 变动后余额: {}", userId, amount, balanceAfter);
+        return true;
     }
 }
