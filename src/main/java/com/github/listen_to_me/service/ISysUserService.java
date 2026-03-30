@@ -41,4 +41,21 @@ public interface ISysUserService extends IService<SysUser> {
      * @return 是否扣减成功
      */
     boolean deductBalance(Long userId, BigDecimal amount, String bizType, String bizId);
+
+    /**
+     * 增加用户余额
+     * 
+     * 使用场景：
+     * - 充值回调
+     * - 取消预约退还余额
+     * - 创作者拒绝预约退还余额
+     * - 管理员审核退款通过
+     * 
+     * @param userId  用户ID
+     * @param amount  增加金额（必须大于0）
+     * @param bizType 业务类型：RECHARGE(充值) / REFUND(退款)
+     * @param bizId   业务ID（充值订单号/退款单号）
+     * @return true-增加成功
+     */
+    boolean addBalance(Long userId, BigDecimal amount, String bizType, String bizId);
 }

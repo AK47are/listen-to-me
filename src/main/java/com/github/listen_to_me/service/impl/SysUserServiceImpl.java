@@ -185,4 +185,49 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         log.debug("扣减余额成功 - 用户ID: {}, 金额: {}, 变动后余额: {}", userId, amount, balanceAfter);
         return true;
     }
+
+    @Override
+    @Transactional
+    public boolean addBalance(Long userId, BigDecimal amount, String bizType, String bizId) {
+        log.debug("增加余额 - 用户ID: {}, 金额: {}, 业务类型: {}, 业务ID: {}", userId, amount, bizType, bizId);
+
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BaseException(400, "增加金额必须大于0");
+        }
+
+        // 查询增加前余额
+        SysUser user = sysUserMapper.selectById(userId);
+        if (user == null) {
+            throw new BaseException(404, "用户不存在");
+        }
+        BigDecimal balanceBefore = user.getBalance();
+
+        // 增加余额
+        LambdaUpdateWrapper<SysUser> wrapper = Wrappers.<SysUser>lambdaUpdate()
+                .eq(SysUser::getId, userId)
+                .setSql("balance = balance + " + amount);
+
+        boolean updated = update(wrapper);
+        if (!updated) {
+            log.error("增加余额失败 - 用户ID: {}", userId);
+            throw new BaseException("增加余额失败");
+        }
+
+        BigDecimal balanceAfter = balanceBefore.add(amount);
+
+        // 记录流水
+        CoinTransaction transaction = new CoinTransaction();
+        transaction.setUserId(userId);
+        transaction.setType("INCOME");
+        transaction.setBizType(bizType);
+        transaction.setAmount(amount);
+        transaction.setBalanceBefore(balanceBefore);
+        transaction.setBalanceAfter(balanceAfter);
+        transaction.setBizId(bizId);
+        iCoinTransactionService.save(transaction);
+
+        log.debug("增加余额成功 - 用户ID: {}, 金额: {}, 变动后余额: {}", userId, amount, balanceAfter);
+        return true;
+    }
+
 }
