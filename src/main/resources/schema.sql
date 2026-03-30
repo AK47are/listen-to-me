@@ -173,7 +173,6 @@ CREATE TABLE IF NOT EXISTS `audio_folder_relation` (
 
 
 -- 用户 - 收藏夹关联表
-
 CREATE TABLE IF NOT EXISTS `sys_user_folder` (
   `user_id` bigint NOT NULL COMMENT '用户ID',
   `folder_id` bigint NOT NULL COMMENT '收藏夹ID',
@@ -182,3 +181,16 @@ CREATE TABLE IF NOT EXISTS `sys_user_folder` (
   CONSTRAINT `fk_user_folder_folder` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`),
   CONSTRAINT `fk_user_folder_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户-收藏夹关联表';
+
+
+-- 用户喜欢表
+
+CREATE TABLE  IF NOT EXISTS `audio_like` (
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `audio_id` bigint NOT NULL COMMENT '音频ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`user_id`,`audio_id`) COMMENT '联合主键',
+  KEY `fk_audio_like_audio` (`audio_id`),
+  CONSTRAINT `fk_audio_like_audio` FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`),
+  CONSTRAINT `fk_audio_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='音频点赞表';
