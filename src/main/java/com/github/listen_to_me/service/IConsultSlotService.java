@@ -1,11 +1,14 @@
 package com.github.listen_to_me.service;
 
-import com.github.listen_to_me.domain.entity.ConsultSlot;
+import java.util.List;
+
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.listen_to_me.domain.dto.SlotDTO;
+import com.github.listen_to_me.domain.entity.ConsultSlot;
 
 /**
  * <p>
- *  服务类
+ * 服务接口
  * </p>
  *
  * @author kun
@@ -13,4 +16,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface IConsultSlotService extends IService<ConsultSlot> {
 
+    /**
+     * 批量生成时间槽
+     * 
+     * @param slotDTOList 时间槽列表
+     */
+    void saveSlotBatch(List<SlotDTO> slotDTOList);
 }
