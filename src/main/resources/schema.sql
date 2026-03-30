@@ -143,14 +143,20 @@ CREATE TABLE IF NOT EXISTS `play_history` (
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS `consult_slot` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
-  `creator_id` bigint NOT NULL,
-  `start_time` datetime,
-  `end_time` datetime,
-  `status` int DEFAULT 0 COMMENT '0-可选, 1-锁定(下单中), 2-已约, 3-完成',
+  `creator_id` bigint NOT NULL COMMENT '创作者ID, 关联 sys_user.id',
+  `start_time` datetime NOT NULL COMMENT '开始时间',
+  `end_time` datetime NOT NULL COMMENT '结束时间',
+  `price` decimal(10, 2) NOT NULL COMMENT '预约价格（虚拟币）',
+  `address` varchar(500) NOT NULL COMMENT '预约地址（如腾讯会议链接）',
+  `status` varchar(20) DEFAULT 'AVAILABLE' COMMENT '状态: AVAILABLE, BOOKED, EXPIRED, CANCELLED',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   INDEX idx_creator_id (creator_id),
   INDEX idx_status (status),
+  INDEX idx_start_time (start_time),
   CONSTRAINT fk_consult_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='时间槽表';
+
 -- 收藏夹表
 CREATE TABLE IF NOT EXISTS `folder` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '收藏夹ID',
@@ -182,9 +188,7 @@ CREATE TABLE IF NOT EXISTS `sys_user_folder` (
   CONSTRAINT `fk_user_folder_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户-收藏夹关联表';
 
-
 -- 用户喜欢表
-
 CREATE TABLE  IF NOT EXISTS `audio_like` (
   `user_id` bigint NOT NULL COMMENT '用户ID',
   `audio_id` bigint NOT NULL COMMENT '音频ID',
