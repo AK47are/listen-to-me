@@ -1,4 +1,5 @@
 package com.github.listen_to_me.controller.user;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.*;
@@ -21,10 +22,10 @@ import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
-@RestController
-@RequestMapping("/user")
-@AllArgsConstructor
 @Slf4j
+@RestController
+@AllArgsConstructor
+@RequestMapping("/user")
 @Tag(name = "用户管理", description = "包含登录、注册、用户信息管理等接口")
 public class UserController {
     private final IAudioFolderRelationService audioFolderRelationService;
@@ -35,17 +36,17 @@ public class UserController {
 
     @Operation(summary = "获取当前登录用户资料")
     @GetMapping("/profile")
-    public Result<UserVO> getProfile(){
+    public Result<UserVO> getProfile() {
         return Result.success(sysUserService.findProfile());
     }
 
     @Operation(summary = "修改个人资料")
     @PutMapping("/profile")
-    public Result<Void> updateProfile(@RequestBody UserProfileUpdateDTO updateDTO){
+    public Result<Void> updateProfile(@RequestBody UserProfileUpdateDTO updateDTO) {
         sysUserService.modifyProfile(updateDTO);
         return Result.success();
     }
-    
+
     @PostMapping("/audio/action")
     @Operation(summary = "收藏/取消收藏音频")
     public Result<Void> saveAudioAction(@RequestBody FavoriteActionDTO favoriteActionDTO) {
@@ -69,15 +70,17 @@ public class UserController {
     @GetMapping("/favorite/page")
     @Operation(summary = "获取收藏音频列表")
     public IPage<AudioVO> getFavoritePage(@ParameterObject FavoriteQuery favoriteQuery) {
-        //转换改到service层
+        // 转换改到service层
         return audioInfoService.getFavoriteAudioPage(favoriteQuery);
     }
+
     @DeleteMapping("/favorite")
     @Operation(summary = "删除收藏音频")
     public Result<String> deleteFavorite(@RequestBody FavoriteDeleteDTO favoriteDeleteDTO) {
         audioFolderRelationService.deleteFavorite(favoriteDeleteDTO);
         return Result.success("删除收藏音频成功");
     }
+
     @DeleteMapping("/favorite/folder/{folderId}")
     @Operation(summary = "删除收藏夹")
     public Result<String> deleteFavoriteFolder(@PathVariable Long folderId) {

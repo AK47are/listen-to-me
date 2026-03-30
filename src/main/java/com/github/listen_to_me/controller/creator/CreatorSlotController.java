@@ -2,13 +2,18 @@ package com.github.listen_to_me.controller.creator;
 
 import java.util.List;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.SlotDTO;
+import com.github.listen_to_me.domain.query.SlotPageQuery;
+import com.github.listen_to_me.domain.vo.SlotVO;
 import com.github.listen_to_me.service.IConsultSlotService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,5 +37,11 @@ public class CreatorSlotController {
         log.debug("批量生成时间槽 - 请求数量: {}", slotDTOList.size());
         slotService.saveSlotBatch(slotDTOList);
         return Result.success();
+    }
+
+    @GetMapping("/slots/page")
+    @Operation(summary = "分页查询时间槽")
+    public Result<IPage<SlotVO>> getSlotPage(@ParameterObject SlotPageQuery query) {
+        return Result.success(slotService.getCreatorSlotPage(query));
     }
 }

@@ -8,13 +8,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.ConflictException;
 import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.SlotDTO;
 import com.github.listen_to_me.domain.entity.ConsultSlot;
+import com.github.listen_to_me.domain.query.SlotPageQuery;
+import com.github.listen_to_me.domain.vo.SlotVO;
 import com.github.listen_to_me.mapper.ConsultSlotMapper;
 import com.github.listen_to_me.service.IConsultSlotService;
 
@@ -68,6 +72,37 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
         }
 
         log.debug("批量生成时间槽成功 - 创作者ID: {}, 数量: {}", creatorId, newSlotList.size());
+    }
+
+    @Override
+    public IPage<SlotVO> getCreatorSlotPage(SlotPageQuery query) {
+        Long creatorId = SecurityUtils.getCurrentUserId();
+        log.debug("创作者端分页查询时间槽 - 创作者ID: {}, 开始时间: {}, 结束时间: {}",
+                creatorId, query.getStartTime(), query.getEndTime());
+
+        LambdaQueryWrapper<ConsultSlot> wrapper = Wrappers.<ConsultSlot>lambdaQuery()
+                .eq(ConsultSlot::getCreatorId, creatorId);
+
+        if (query.getStartTime() != null) {
+            wrapper.ge(ConsultSlot::getStartTime, query.getStartTime());
+        }
+        if (query.getEndTime() != null) {
+            wrapper.le(ConsultSlot::getEndTime, query.getEndTime());
+        }
+        wrapper.orderByDesc(ConsultSlot::getStartTime);
+
+        Page<ConsultSlot> slotPage = page(new Page<>(query.getPageNum(), query.getPageSize()), wrapper);
+
+        return slotPage.convert(slot -> {
+            SlotVO vo = new SlotVO();
+            vo.setId(slot.getId());
+            vo.setStartTime(slot.getStartTime());
+            vo.setEndTime(slot.getEndTime());
+            vo.setPrice(slot.getPrice());
+            vo.setAddress(slot.getAddress());
+            vo.setStatus(slot.getStatus());
+            return vo;
+        });
     }
 
     /**
