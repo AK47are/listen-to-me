@@ -20,4 +20,6 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery);
 
     String uploadAudio(MultipartFile audioFile) throws Exception;
+
+    String uploadCover(MultipartFile coverFile) throws Exception;
 }

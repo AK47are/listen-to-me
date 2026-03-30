@@ -20,4 +20,10 @@ public class AudioController {
 
         return Result.success(audioInfoService.uploadAudio(audioFile));
     }
+
+    @PostMapping("/audio/cover/upload")
+    @PreAuthorize("hasAuthority('cover:upload')")
+    public Result<String> uploadCover(MultipartFile coverFile) throws Exception {
+        return Result.success(audioInfoService.uploadCover(coverFile));
+    }
 }
