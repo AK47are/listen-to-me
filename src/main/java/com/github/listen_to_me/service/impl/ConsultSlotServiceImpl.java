@@ -1,6 +1,5 @@
 package com.github.listen_to_me.service.impl;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -103,6 +102,47 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
             vo.setStatus(slot.getStatus());
             return vo;
         });
+    }
+
+    @Override
+    @Transactional
+    public void updateSlotStatus(Long slotId, String status) {
+        Long creatorId = SecurityUtils.getCurrentUserId();
+        log.debug("修改时间槽状态 - 时间槽ID: {}, 目标状态: {}", slotId, status);
+
+        // 校验目标状态是否合法
+        if (!"AVAILABLE".equals(status) && !"CANCELLED".equals(status)) {
+            log.debug("非法状态 - 状态: {}", status);
+            throw new BaseException(400, "状态值无效，仅支持 AVAILABLE 或 CANCELLED");
+        }
+
+        // 校验时间槽是否存在且属于当前用户
+        ConsultSlot slot = getById(slotId);
+        if (slot == null) {
+            log.debug("时间槽不存在 - ID: {}", slotId);
+            throw new BaseException(404, "时间槽不存在");
+        }
+        if (!slot.getCreatorId().equals(creatorId)) {
+            log.debug("无权限修改 - 时间槽ID: {}, 当前用户: {}", slotId, creatorId);
+            throw new BaseException(404, "时间槽不存在");
+        }
+
+        // 校验状态是否可修改
+        String currentStatus = slot.getStatus();
+        if ("BOOKED".equals(currentStatus) || "EXPIRED".equals(currentStatus)) {
+            log.debug("时间槽状态不可修改 - 当前状态: {}, ID: {}", currentStatus, slotId);
+            throw new BaseException(400, "当前状态无法修改");
+        }
+
+        // 更新状态
+        slot.setStatus(status);
+        boolean success = updateById(slot);
+        if (!success) {
+            log.error("修改时间槽状态失败 - ID: {}", slotId);
+            throw new BaseException("修改时间槽状态失败");
+        }
+
+        log.debug("修改时间槽状态成功 - ID: {}, 旧状态: {}, 新状态: {}", slotId, currentStatus, status);
     }
 
     /**

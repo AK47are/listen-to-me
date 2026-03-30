@@ -33,4 +33,12 @@ public interface IConsultSlotService extends IService<ConsultSlot> {
      * @return 分页结果
      */
     IPage<SlotVO> getCreatorSlotPage(SlotPageQuery query);
+
+    /**
+     * 修改时间槽状态
+     * 
+     * @param slotId 时间槽ID
+     * @param status 目标状态 (AVAILABLE / CANCELLED)
+     */
+    void updateSlotStatus(Long slotId, String status);
 }

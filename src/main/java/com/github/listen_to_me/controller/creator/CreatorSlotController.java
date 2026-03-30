@@ -4,9 +4,12 @@ import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -43,5 +46,13 @@ public class CreatorSlotController {
     @Operation(summary = "分页查询时间槽")
     public Result<IPage<SlotVO>> getSlotPage(@ParameterObject SlotPageQuery query) {
         return Result.success(slotService.getCreatorSlotPage(query));
+    }
+
+    @PutMapping("/slots/{id}")
+    @Operation(summary = "修改时间槽状态")
+    public Result<Void> updateSlotStatus(@PathVariable Long id, @RequestParam String status) {
+        log.debug("修改时间槽状态 - ID: {}, 状态: {}", id, status);
+        slotService.updateSlotStatus(id, status);
+        return Result.success();
     }
 }
