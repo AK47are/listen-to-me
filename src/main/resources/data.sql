@@ -16,7 +16,8 @@ INSERT INTO `sys_permission` (`perm_name`, `perm_code`) VALUES
 ('音频删除', 'audio:delete'),
 ('音频审核', 'audio:audit'),
 ('订单管理', 'order:manage'),
-('个人中心', 'user:info');
+('个人中心', 'user:info'),
+('封面上传', 'cover:upload');
 
 -- 系统用户（密码均为 123456）
 INSERT INTO `sys_user` (`username`, `password`, `nickname`, `avatar`, `phone`, `email`, `openid`, `is_creator`, `balance`, `frozen_balance`, `version`) VALUES
@@ -36,8 +37,8 @@ INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 
 -- 角色-权限关联
 INSERT INTO `sys_role_permission` (`role_id`, `perm_id`) VALUES
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5),  -- 管理员拥有所有权限
-(2, 1), (2, 2), (2, 5),                  -- 创作者拥有上传、删除、个人中心权限
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6),  -- 管理员拥有所有权限
+(2, 1), (2, 2), (2, 5), (2, 6),                  -- 创作者拥有上传、删除、个人中心、封面上传权限
 (3, 5);                                  -- 普通听众仅拥有个人中心权限
 
 -- ----------------------------
