@@ -55,6 +55,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/common/auth/refresh").authenticated()
                         .requestMatchers("/api/common/auth/**").permitAll()
+                        .requestMatchers("/api/creator/**").hasAuthority("creator:basic")
+                        .requestMatchers("/api/user/**").hasAuthority("user:basic")
+                        .requestMatchers("/api/admin/**").hasAuthority("admin:basic")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
@@ -63,7 +66,16 @@ public class SecurityConfig {
                             renderJson(res, HttpStatus.HTTP_UNAUTHORIZED, Result.fail(401, "认证失败，请重新登录"));
                         })
                         .accessDeniedHandler((req, res, ex) -> {
-                            renderJson(res, HttpStatus.HTTP_FORBIDDEN, Result.fail(403, "权限不足，拒绝访问"));
+                            String msg = "权限不足，拒绝访问";
+                            String uri = req.getRequestURI();
+                            if (uri.contains("/creator/")) {
+                                msg = "您还不是创作者，无法执行此操作";
+                            } else if (uri.contains("/admin/")) {
+                                msg = "您还不是管理员，无法执行此操作";
+                            } else if (uri.contains("/user/")) {
+                                msg = "您还不是普通用户，无法执行此操作";
+                            }
+                            renderJson(res, HttpStatus.HTTP_FORBIDDEN, Result.fail(403, msg));
                         }))
                 .build();
     }
