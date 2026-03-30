@@ -2,6 +2,7 @@ package com.github.listen_to_me.controller.user;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.*;
+import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.UserVO;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.vo.AudioVO;
@@ -89,5 +90,11 @@ public class UserController {
     public Result<Void> saveAudioLike(@RequestBody LikeActionDTO likeActionDTO) {
         audioLikeService.modifyAudioLike(likeActionDTO);
         return Result.success();
+    }
+
+    @GetMapping("/like/page")
+    @Operation(summary = "获取喜欢音频列表")
+    public Result<IPage<AudioVO>> getLikePage(@ParameterObject PageQuery pageQuery) {
+        return Result.success(audioLikeService.getLikePage(pageQuery));
     }
 }
