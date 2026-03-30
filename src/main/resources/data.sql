@@ -21,10 +21,10 @@ INSERT INTO `sys_permission` (`perm_name`, `perm_code`) VALUES
 -- 系统用户（密码均为 123456）
 INSERT INTO `sys_user` (`username`, `password`, `nickname`, `avatar`, `phone`, `email`, `openid`, `is_creator`, `balance`, `frozen_balance`, `version`) VALUES
 ('admin', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '系统管理员', 'https://avatar.com/admin.jpg', '13800138000', 'admin@example.com', 'wx_admin_001', 0, 0.00, 0.00, 0),
-('creator_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '有声的小雅', 'https://avatar.com/creator01.jpg', '13800138001', 'wx_creator_001@example.com', 1, 1256.88, 320.50, 0),
-('listener_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '听书小迷弟', 'https://avatar.com/listener01.jpg', '13800138002', 'wx_listener_001@example.com', 0, 89.60, 0.00, 0),
-('listener_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '深夜听众', 'https://avatar.com/listener02.jpg', '13800138003', 'wx_listener_002@example.com', 0, 56.20, 0.00, 0),
-('creator_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '老杨说故事', 'https://avatar.com/creator02.jpg', '13800138004', 'wx_creator_002@example.com', 1, 890.30, 156.20, 0);
+('creator_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '有声的小雅', 'https://avatar.com/creator01.jpg', '13800138001', 'wx_creator_001@example.com','wx_creator_001', 1, 1256.88, 320.50, 0),
+('listener_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '听书小迷弟', 'https://avatar.com/listener01.jpg', '13800138002', 'wx_listener_001@example.com', 'wx_listener_001',0, 89.60, 0.00, 0),
+('listener_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '深夜听众', 'https://avatar.com/listener02.jpg', '13800138003', 'wx_listener_002@example.com', 'wx_listener_002',0, 56.20, 0.00, 0),
+('creator_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '老杨说故事', 'https://avatar.com/creator02.jpg', '13800138004', 'wx_creator_002@example.com', 'wx_creator_002@example',1, 890.30, 156.20, 0);
 
 -- 用户-角色关联
 INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
@@ -104,10 +104,10 @@ INSERT INTO `consult_slot` (`creator_id`, `start_time`, `end_time`, `status`) VA
 -- ----------------------------
 -- 6. 收藏夹域 - 测试数据
 -- ----------------------------
-INSERT INTO `folder` (`name`, `description`, `audio_count`, `create_time`) VALUES
-('我的最爱', '超级喜欢的音频合集', 3, 1747862400000),
-('心理学专区', '心理学相关学习音频', 2, 1747862500000),
-('睡前故事', '睡前听的放松故事', 1, 1747862600000);
+INSERT INTO `folder` (`name`, `description`, `audio_count`) VALUES
+('我的最爱', '超级喜欢的音频合集', 3),
+('心理学专区', '心理学相关学习音频', 2),
+('睡前故事', '睡前听的放松故事', 1);
 
 -- 用户 - 收藏夹关联
 INSERT INTO `sys_user_folder` (`user_id`, `folder_id`) VALUES
