@@ -99,12 +99,14 @@ INSERT INTO `play_history` (`user_id`, `audio_id`, `last_position`) VALUES
 -- 5. 咨询服务域 - 测试数据
 -- ----------------------------
 -- 咨询时段
-INSERT INTO `consult_slot` (`creator_id`, `start_time`, `end_time`, `status`) VALUES
-(2, '2025-05-25 10:00:00', '2025-05-25 11:00:00', 0),
-(2, '2025-05-25 14:00:00', '2025-05-25 15:00:00', 2),
-(5, '2025-05-26 09:00:00', '2025-05-26 10:00:00', 1),
-(5, '2025-05-26 19:00:00', '2025-05-26 20:00:00', 0),
-(2, '2025-05-27 16:00:00', '2025-05-27 17:00:00', 3);
+INSERT INTO `consult_slot` (`creator_id`, `start_time`, `end_time`, `price`, `address`, `status`) VALUES
+(2, '2025-05-25 10:00:00', '2025-05-25 11:00:00', 50.00, '腾讯会议链接：https://meeting.tencent.com/dm/abc123', 'BOOKED'),
+(2, '2025-05-25 14:00:00', '2025-05-25 15:00:00', 60.00, '腾讯会议链接：https://meeting.tencent.com/dm/def456', 'AVAILABLE'),
+(2, '2025-05-26 09:00:00', '2025-05-26 10:00:00', 50.00, '腾讯会议链接：https://meeting.tencent.com/dm/ghi789', 'AVAILABLE'),
+(5, '2025-05-26 14:00:00', '2025-05-26 15:30:00', 80.00, '腾讯会议链接：https://meeting.tencent.com/dm/jkl012', 'AVAILABLE'),
+(5, '2025-05-27 19:00:00', '2025-05-27 20:00:00', 70.00, '腾讯会议链接：https://meeting.tencent.com/dm/mno345', 'CANCELLED'),
+(2, '2025-05-28 16:00:00', '2025-05-28 17:00:00', 55.00, '腾讯会议链接：https://meeting.tencent.com/dm/pqr678', 'EXPIRED'),
+(5, '2025-05-29 20:00:00', '2025-05-29 21:30:00', 90.00, '腾讯会议链接：https://meeting.tencent.com/dm/stu901', 'AVAILABLE');
 -- ----------------------------
 -- 6. 收藏夹域 - 测试数据
 -- ----------------------------
