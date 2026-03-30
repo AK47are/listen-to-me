@@ -23,12 +23,12 @@ INSERT INTO `sys_permission` (`perm_name`, `perm_code`) VALUES
 ('管理员基本权限','admin:basic');
 
 -- 系统用户（密码均为 123456）
-INSERT INTO `sys_user` (`username`, `password`, `nickname`, `avatar`, `phone`, `email`, `openid`, `is_creator`, `balance`, `frozen_balance`, `version`) VALUES
-('admin', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '系统管理员', 'https://avatar.com/admin.jpg', '13800138000', 'admin@example.com', 'wx_admin_001', 0, 0.00, 0.00, 0),
-('creator_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '有声的小雅', 'https://avatar.com/creator01.jpg', '13800138001', 'wx_creator_001@example.com','wx_creator_001', 1, 1256.88, 320.50, 0),
-('listener_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '听书小迷弟', 'https://avatar.com/listener01.jpg', '13800138002', 'wx_listener_001@example.com', 'wx_listener_001',0, 89.60, 0.00, 0),
-('listener_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '深夜听众', 'https://avatar.com/listener02.jpg', '13800138003', 'wx_listener_002@example.com', 'wx_listener_002',0, 56.20, 0.00, 0),
-('creator_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '老杨说故事', 'https://avatar.com/creator02.jpg', '13800138004', 'wx_creator_002@example.com', 'wx_creator_002@example',1, 890.30, 156.20, 0);
+INSERT INTO `sys_user` (`username`, `password`, `nickname`, `avatar`, `phone`, `email`, `openid`, `is_creator`, `balance`, `frozen_balance`) VALUES
+('admin', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '系统管理员', 'https://avatar.com/admin.jpg', '13800138000', 'admin@example.com', 'wx_admin_001', 0, 9999999.00, 0.00),
+('creator_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '有声的小雅', 'https://avatar.com/creator01.jpg', '13800138001', 'wx_creator_001@example.com','wx_creator_001', 1, 936.38, 320.50),
+('listener_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '听书小迷弟', 'https://avatar.com/listener01.jpg', '13800138002', 'wx_listener_001@example.com', 'wx_listener_001', 0, 44.30, 0.00),
+('listener_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '深夜听众', 'https://avatar.com/listener02.jpg', '13800138003', 'wx_listener_002@example.com', 'wx_listener_002', 0, 67.20, 0.00),
+('creator_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '老杨说故事', 'https://avatar.com/creator02.jpg', '13800138004', 'wx_creator_002@example.com', 'wx_creator_002@example', 1, 734.10, 156.20);
 
 -- 用户-角色关联
 INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
@@ -130,5 +130,27 @@ INSERT INTO `audio_folder_relation` (`audio_id`, `folder_id`) VALUES
 (2, 2),  -- 职场沟通技巧 → 心理学专区
 (3, 1),  -- 民间故事大全 → 我的最爱
 (3, 3);  -- 民间故事大全 → 睡前故事
+
+-- ----------------------------
+-- 7. 虚拟币流水域 - 测试数据
+-- ----------------------------
+INSERT INTO `coin_transaction` (`user_id`, `type`, `biz_type`, `amount`, `balance_before`, `balance_after`, `biz_id`, `remark`) VALUES
+(1, 'INCOME', 'RECHARGE', 9999999.00, 0.00, 9999999.00, 'RC_ADMIN_001', '管理员初始充值'),
+-- 创作者 2 (有声的小雅)
+(2, 'INCOME', 'RECHARGE', 1256.88, 0.00, 1256.88, 'RC202503240001', '初始充值'),
+(2, 'EXPENSE', 'REFUND', 320.50, 1256.88, 936.38, 'REF202503240001', '退款'),
+-- 创作者 5 (老杨说故事)
+(5, 'INCOME', 'RECHARGE', 890.30, 0.00, 890.30, 'RC202503240002', '初始充值'),
+(5, 'EXPENSE', 'REFUND', 156.20, 890.30, 734.10, 'REF202503240002', '退款'),
+-- 用户 3 (听书小迷弟)
+(3, 'INCOME', 'RECHARGE', 100.00, 0.00, 100.00, 'RC202503240003', '初始充值'),
+(3, 'EXPENSE', 'AUDIO', 29.90, 100.00, 70.10, '20250520123456', '购买音频：心理学入门30讲'),
+(3, 'EXPENSE', 'AUDIO', 9.90, 70.10, 60.20, '20250521654321', '购买音频：民间故事大全'),
+(3, 'EXPENSE', 'AUDIO', 15.90, 60.20, 44.30, '20250524789456', '购买音频：悬疑短篇合集'),
+-- 用户 4 (深夜听众)
+(4, 'INCOME', 'RECHARGE', 100.00, 0.00, 100.00, 'RC202503240004', '初始充值'),
+(4, 'EXPENSE', 'AUDIO', 19.90, 100.00, 80.10, '20250522987654', '购买音频：职场沟通技巧'),
+(4, 'EXPENSE', 'AUDIO', 12.90, 80.10, 67.20, '20250523456789', '购买音频：负能量清理指南');
+
 -- 开启外键检查
 SET FOREIGN_KEY_CHECKS = 1;

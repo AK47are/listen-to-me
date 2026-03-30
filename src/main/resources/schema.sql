@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   `is_creator` tinyint(1) DEFAULT 0 COMMENT '0-听众, 1-创作者',
   `balance` decimal(12, 2) DEFAULT 0.00 COMMENT '可提现余额',
   `frozen_balance` decimal(12, 2) DEFAULT 0.00 COMMENT '账期内冻结金额',
-  `version` int DEFAULT 0 COMMENT '乐观锁版本号',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_email (email),
@@ -166,6 +165,7 @@ CREATE TABLE IF NOT EXISTS `folder` (
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='收藏夹表';
+
 -- 音频收藏夹关联表
 CREATE TABLE IF NOT EXISTS `audio_folder_relation` (
   `audio_id` bigint NOT NULL COMMENT '音频ID',
@@ -176,7 +176,6 @@ CREATE TABLE IF NOT EXISTS `audio_folder_relation` (
    CONSTRAINT `fk_relation_audio` FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='音频-收藏夹关联表';
-
 
 -- 用户 - 收藏夹关联表
 CREATE TABLE IF NOT EXISTS `sys_user_folder` (
@@ -198,3 +197,21 @@ CREATE TABLE  IF NOT EXISTS `audio_like` (
   CONSTRAINT `fk_audio_like_audio` FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`),
   CONSTRAINT `fk_audio_like_user` FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='音频点赞表';
+
+-- 虚拟币流水表
+CREATE TABLE IF NOT EXISTS `coin_transaction` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `user_id` bigint NOT NULL COMMENT '用户ID',
+  `type` varchar(20) NOT NULL COMMENT '交易类型: EXPENSE(支出), INCOME(收入)',
+  `amount` decimal(12, 2) NOT NULL COMMENT '变动金额（正数）',
+  `balance_before` decimal(12, 2) NOT NULL COMMENT '变动前余额',
+  `balance_after` decimal(12, 2) NOT NULL COMMENT '变动后余额',
+  `biz_id` varchar(64) NOT NULL COMMENT '业务ID（订单号/充值单号）',
+  `biz_type` varchar(20) NOT NULL COMMENT '业务类型: AUDIO(音频购买), CONSULT(咨询预约), RECHARGE(充值), REFUND(退款)',
+  `remark` varchar(255) DEFAULT NULL COMMENT '备注',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  INDEX idx_user_id (user_id),
+  INDEX idx_biz_id (biz_id),
+  INDEX idx_create_time (create_time),
+  CONSTRAINT fk_coin_transaction_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='虚拟币流水表';

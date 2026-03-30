@@ -59,9 +59,6 @@ public class SysUser implements Serializable {
     @Schema(description = "账期内冻结金额")
     private BigDecimal frozenBalance;
 
-    @Schema(description = "乐观锁版本号")
-    private Integer version;
-
     private LocalDateTime createTime;
 
     private LocalDateTime updateTime;
