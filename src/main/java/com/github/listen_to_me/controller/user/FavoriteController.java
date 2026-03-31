@@ -53,8 +53,8 @@ public class FavoriteController {
 
     @GetMapping("/page")
     @Operation(summary = "获取收藏音频列表")
-    public IPage<AudioVO> getFavoritePage(@ParameterObject FavoriteQuery favoriteQuery) {
-        return audioInfoService.getFavoriteAudioPage(favoriteQuery);
+    public Result<IPage<AudioVO>> getFavoritePage(@ParameterObject FavoriteQuery favoriteQuery) {
+        return Result.success(audioInfoService.getFavoriteAudioPage(favoriteQuery));
     }
 
     @DeleteMapping
