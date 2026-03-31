@@ -17,4 +17,8 @@ import org.apache.ibatis.annotations.Param;
 public interface AudioInfoMapper extends BaseMapper<AudioInfo> {
 
     IPage<AudioInfo> selectAudioByFolderId(Page<AudioInfo> page, @Param("folderId") Long folderId);
+
+    void updateStatusById(Long audioId, String status);
+
+    void updateStatusAndClipPathById(Long audioId, String status, String clipPath);
 }

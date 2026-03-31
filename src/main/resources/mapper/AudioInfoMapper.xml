@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.github.listen_to_me.mapper.AudioInfoMapper">
+    <update id="updateStatusById">
+        UPDATE audio_info
+        SET status = #{status}
+        WHERE id = #{audioId}
+    </update>
+    <update id="updateStatusAndClipPathById">
+        UPDATE audio_info
+        SET status = #{status}, clip_path = #{clipPath}
+        WHERE id = #{audioId}
+    </update>
 
     <select id="selectAudioByFolderId" resultType="com.github.listen_to_me.domain.entity.AudioInfo">
         SELECT a.*

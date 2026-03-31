@@ -2,13 +2,11 @@ package com.github.listen_to_me.common.consumer;
 
 import cn.hutool.json.JSONUtil;
 import com.github.listen_to_me.common.config.AudioTranscodeMqConfig;
-import com.github.listen_to_me.common.util.AudioClipUtil;
 import com.github.listen_to_me.common.util.AudioClipUtils;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.domain.dto.TranscodeTaskDTO;
 import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.service.IAudioInfoService;
-import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;

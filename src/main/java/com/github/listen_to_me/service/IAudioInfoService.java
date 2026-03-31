@@ -1,9 +1,11 @@
 package com.github.listen_to_me.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.github.listen_to_me.domain.dto.AudioDTO;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
+import com.github.listen_to_me.domain.vo.AudioPublishVO;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,4 +24,8 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     String uploadAudio(MultipartFile audioFile) throws Exception;
 
     String uploadCover(MultipartFile coverFile) throws Exception;
+
+    AudioPublishVO saveAudio(AudioDTO audioDTO);
+
+    void MoveAudioToOnline(Long audioId) throws Exception;
 }
