@@ -118,6 +118,12 @@ INSERT INTO `consult_order` (`slot_id`, `user_id`, `creator_id`, `message`, `sta
 (3, 4, 2, '想了解心理学入门课程', 'PENDING_CONFIRM', NULL, 50.00, '2025-05-22 09:15:00'),
 (4, 4, 5, '民间故事创作经验分享', 'CONFIRMED', '腾讯会议链接：https://meeting.tencent.com/dm/jkl012', 80.00, '2025-05-23 19:00:00'),
 (5, 3, 5, '悬疑故事创作技巧', 'CANCELLED', NULL, 70.00, '2025-05-24 11:00:00');
+
+-- 退款申请
+INSERT INTO `refund_apply` (`order_id`, `user_id`, `reason`, `status`, `reject_reason`, `create_time`) VALUES
+(1, 3, '咨询内容与预期不符', 'PROCESSED', NULL, '2025-05-25 10:00:00'),
+(4, 4, '创作者未按时回复', 'PENDING', NULL, '2025-05-26 14:00:00');
+
 -- ----------------------------
 -- 6. 收藏夹域 - 测试数据
 -- ----------------------------

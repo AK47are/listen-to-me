@@ -182,6 +182,25 @@ CREATE TABLE IF NOT EXISTS `consult_order` (
   CONSTRAINT fk_consult_order_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='预约订单表';
 
+-- ----------------------------
+-- 5. 咨询服务域 - 退款申请表
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS `refund_apply` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `order_id` bigint NOT NULL COMMENT '预约订单ID',
+  `user_id` bigint NOT NULL COMMENT '申请用户ID',
+  `reason` varchar(500) NOT NULL COMMENT '退款原因',
+  `status` varchar(20) NOT NULL DEFAULT 'PENDING' COMMENT '申请状态: PENDING, PROCESSED',
+  `reject_reason` varchar(500) COMMENT '拒绝原因',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '申请时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '处理时间',
+  INDEX idx_order_id (order_id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_status (status),
+  CONSTRAINT fk_refund_apply_order FOREIGN KEY (`order_id`) REFERENCES `consult_order` (`id`),
+  CONSTRAINT fk_refund_apply_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='退款申请表';
+
 -- 收藏夹表
 CREATE TABLE IF NOT EXISTS `folder` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '收藏夹ID',
