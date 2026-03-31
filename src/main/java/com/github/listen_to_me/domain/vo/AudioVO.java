@@ -9,10 +9,8 @@ public class AudioVO {
     private String title;
 
     private String coverUrl;
-
-    private String rawPath;
-
-    private String hlsPath;
+    //TODO 音频是否付费，返回不同的url
+    private String audioUrl;
 
     private BigDecimal price;
 
