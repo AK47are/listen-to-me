@@ -10,7 +10,19 @@ spring:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:123456}
-
+  amqp:
+    deserialization:
+      trust-all: true
+  rabbitmq:
+    host: localhost  # 你的MQ地址
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: /
+    simple:
+      acknowledge-mode: auto  # 自动确认消息
+      retry:
+        enabled: true         # 消费失败重试
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/listen-to-me?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root
