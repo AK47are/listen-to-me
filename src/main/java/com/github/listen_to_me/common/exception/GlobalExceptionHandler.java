@@ -6,6 +6,8 @@ import com.github.listen_to_me.common.util.ExceptionUtils;
 import cn.hutool.http.HttpStatus;
 
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -31,6 +33,19 @@ public class GlobalExceptionHandler {
         String indexName = ExceptionUtils.getDuplicateIndexName(e);
         String fieldDesc = UniqueIndexEnum.getFieldDescByIndex(indexName);
         return Result.fail(HttpStatus.HTTP_CONFLICT, fieldDesc + "已存在，请更换后重试");
+    }
+
+    /**
+     * 处理参数校验失败
+     */
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public Result<?> handleValidException(MethodArgumentNotValidException e) {
+        FieldError fieldError = e.getBindingResult().getFieldError();
+        if (fieldError != null) {
+            String message = fieldError.getDefaultMessage();
+            return Result.fail(HttpStatus.HTTP_BAD_REQUEST, message);
+        }
+        return Result.fail(HttpStatus.HTTP_BAD_REQUEST, "参数校验失败");
     }
 
     // 必须放最后，否则会提前捕获
