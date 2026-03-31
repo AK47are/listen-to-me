@@ -32,4 +32,11 @@ public class GlobalExceptionHandler {
         String fieldDesc = UniqueIndexEnum.getFieldDescByIndex(indexName);
         return Result.fail(HttpStatus.HTTP_CONFLICT, fieldDesc + "已存在，请更换后重试");
     }
+
+    // 必须放最后，否则会提前捕获
+    @ExceptionHandler(Exception.class)
+    public Result<?> handleException(Exception e) {
+        return Result.fail("发生未知错误");
+    }
+
 }
