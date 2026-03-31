@@ -28,39 +28,28 @@ public class AudioInfo implements Serializable {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
-
     @Schema(description = "对应 sys_user.id")
     private Long creatorId;
-
     private String title;
-
-    private String coverUrl;
-
+    private String description;
+    private String coverPath;
     @Schema(description = "MinIO原始路径")
     private String rawPath;
-
-    @Schema(description = "M3U8路径")
-    private String hlsPath;
-
+    private String clipPath;
+    private Boolean isPaid;
     private BigDecimal price;
-
     @Schema(description = "试听秒数")
     private Integer trialDuration;
-
+    private Integer duration;
     @Schema(description = "0-待审, 1-通过, 2-违规")
     private Integer auditStatus;
-
     @Schema(description = "0-草稿/下架, 1-转码中, 2-已发布")
-    private Integer status;
-
+    private String status;
     @Schema(description = "点击量/热度基数")
     private Integer viewCount;
-
     private LocalDateTime createTime;
-
     @Schema(description = "逻辑删除：0-未删除 1-已删除")
     private Byte isDeleted;
-
-    @Schema(description = "可见性：1-公开可见 0-仅自己/管理员可见")
-    private Byte visible;
+    @Schema(description = "可见性：PUBLIC-公开可见 PRIVATE-仅自己/管理员可见")
+    private String visibility;
 }
