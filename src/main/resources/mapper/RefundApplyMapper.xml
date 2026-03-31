@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.listen_to_me.mapper.RefundApplyMapper">
+
+<select id="selectRefundApplyPage" resultType="com.github.listen_to_me.domain.vo.RefundApplyVO">
+    SELECT
+        ra.id,
+        ra.order_id,
+        ra.reason,
+        ra.create_time AS apply_time,
+        co.slot_id,
+        co.status AS order_status,
+        co.user_id,
+        co.creator_id,
+        co.pay_amount AS price,
+        cs.start_time,
+        cs.end_time,
+        su.nickname AS user_nickname,
+        su.avatar AS user_avatar,
+        cr.nickname AS creator_name
+    FROM refund_apply ra
+    LEFT JOIN consult_order co ON ra.order_id = co.id
+    LEFT JOIN consult_slot cs ON co.slot_id = cs.id
+    LEFT JOIN sys_user su ON co.user_id = su.id
+    LEFT JOIN sys_user cr ON co.creator_id = cr.id
+    <where>
+        <if test="status != null and status != ''">
+            ra.status = #{status}
+        </if>
+    </where>
+    ORDER BY ra.create_time DESC
+</select>
+
+</mapper>
