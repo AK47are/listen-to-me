@@ -1,9 +1,5 @@
 package com.github.listen_to_me.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.crypto.digest.BCrypt;
-import com.github.listen_to_me.common.exception.RegisterException;
-import com.github.listen_to_me.domain.dto.UserRegisterDTO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -14,11 +10,13 @@ import org.springframework.stereotype.Service;
 
 import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.exception.AuthException;
+import com.github.listen_to_me.common.exception.RegisterException;
 import com.github.listen_to_me.common.util.JwtUtils;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.domain.SysUserAdapter;
 import com.github.listen_to_me.domain.dto.LoginDTO;
+import com.github.listen_to_me.domain.dto.UserRegisterDTO;
 import com.github.listen_to_me.domain.dto.VerifyCodeDTO;
 import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.vo.ImageCaptchaVO;
@@ -29,6 +27,7 @@ import com.github.listen_to_me.service.ISysUserService;
 
 import cn.hutool.captcha.CaptchaUtil;
 import cn.hutool.captcha.LineCaptcha;
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
