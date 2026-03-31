@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `audio_info` (
   `trial_duration` int DEFAULT 0 COMMENT '试听秒数',
   `audit_status` int DEFAULT 0 COMMENT '0-待审, 1-通过, 2-违规',
   `status` varchar(100) DEFAULT 'PENDING_TRANSCODE' COMMENT '发布状态',
-  `view_count` int DEFAULT 0 COMMENT '点击量/热度基数',
+  `view_count` int DEFAULT 0 COMMENT '播放量',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',
   `visibility` enum('PUBLIC', 'PRIVATE') DEFAULT 'PUBLIC' COMMENT '可见性：PUBLIC-公开可见 PRIVATE-仅自己/管理员可见',

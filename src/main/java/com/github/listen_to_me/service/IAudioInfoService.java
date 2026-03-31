@@ -2,11 +2,14 @@ package com.github.listen_to_me.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.domain.dto.AudioDTO;
+import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
+import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioPublishVO;
 import com.github.listen_to_me.domain.vo.AudioVO;
+import com.github.listen_to_me.domain.vo.CreatorAudioVO;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -28,4 +31,8 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     AudioPublishVO saveAudio(AudioDTO audioDTO);
 
     void MoveAudioToOnline(Long audioId) throws Exception;
+
+    IPage<CreatorAudioVO> getAudioPage(PageQuery pageQuery);
+
+    CreatorAudioDetailVO getAudioDetail(Long id);
 }
