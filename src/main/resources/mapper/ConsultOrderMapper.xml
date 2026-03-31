@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.listen_to_me.mapper.ConsultOrderMapper">
+
+    <select id="selectConsultPage" resultType="com.github.listen_to_me.domain.vo.ConsultOrderVO">
+        SELECT
+            co.id,
+            co.slot_id,
+            co.status,
+            CASE 
+                WHEN co.status IN ('CONFIRMED', 'COMPLETED') THEN cs.address
+                ELSE NULL
+            END AS address,
+            co.creator_id,
+            co.message,
+            co.create_time,
+            cs.start_time,
+            cs.end_time,
+            cs.price,
+            su.nickname AS creator_name,
+            su.avatar AS creator_avatar
+        FROM consult_order co
+        LEFT JOIN consult_slot cs ON co.slot_id = cs.id
+        LEFT JOIN sys_user su ON co.creator_id = su.id
+        WHERE co.user_id = #{userId}
+        <if test="status != null and status != ''">
+            AND co.status = #{status}
+        </if>
+        ORDER BY co.create_time DESC
+    </select>
+
+</mapper>

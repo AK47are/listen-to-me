@@ -5,6 +5,8 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
@@ -12,6 +14,7 @@ import com.github.listen_to_me.domain.dto.ConsultDTO;
 import com.github.listen_to_me.domain.entity.ConsultOrder;
 import com.github.listen_to_me.domain.entity.ConsultSlot;
 import com.github.listen_to_me.domain.entity.SysUser;
+import com.github.listen_to_me.domain.query.ConsultPageQuery;
 import com.github.listen_to_me.domain.vo.ConsultOrderVO;
 import com.github.listen_to_me.mapper.ConsultOrderMapper;
 import com.github.listen_to_me.service.IConsultOrderService;
@@ -101,5 +104,27 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         vo.setMessage(order.getMessage());
         vo.setCreateTime(order.getCreateTime());
         return vo;
+    }
+
+    @Override
+    public IPage<ConsultOrderVO> getConsultPage(Long userId, ConsultPageQuery query) {
+        log.debug("分页查询预约订单 - 用户ID: {}, 状态: {}", userId, query.getStatus());
+        Page<ConsultOrderVO> page = new Page<>(query.getPageNum(), query.getPageSize());
+        IPage<ConsultOrderVO> result = baseMapper.selectConsultPage(page, userId, query.getStatus());
+
+        // 处理头像临时 URL
+        result.getRecords().forEach(vo -> {
+            if (vo.getCreatorAvatar() != null && !vo.getCreatorAvatar().isBlank()) {
+                try {
+                    String avatarUrl = MinioUtils.getPresignedUrl(vo.getCreatorAvatar());
+                    vo.setCreatorAvatar(avatarUrl);
+                } catch (Exception e) {
+                    log.warn("生成头像临时链接失败 - 路径: {}", vo.getCreatorAvatar(), e);
+                    vo.setCreatorAvatar(null);
+                }
+            }
+        });
+
+        return result;
     }
 }

@@ -1,13 +1,17 @@
 package com.github.listen_to_me.controller.user;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.ConsultDTO;
+import com.github.listen_to_me.domain.query.ConsultPageQuery;
 import com.github.listen_to_me.domain.vo.ConsultOrderVO;
 import com.github.listen_to_me.service.IConsultOrderService;
 
@@ -33,5 +37,13 @@ public class ConsultController {
             @Valid @RequestBody ConsultDTO consultDTO) {
         ConsultOrderVO vo = consultOrderService.saveConsult(userId, consultDTO);
         return Result.success(vo);
+    }
+
+    @GetMapping("/page")
+    @Operation(summary = "查询我的预约")
+    public Result<IPage<ConsultOrderVO>> getMyConsultPage(
+            @AuthenticationPrincipal Long userId,
+            @ParameterObject ConsultPageQuery query) {
+        return Result.success(consultOrderService.getConsultPage(userId, query));
     }
 }
