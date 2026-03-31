@@ -18,10 +18,12 @@
             cs.end_time,
             cs.price,
             su.nickname AS creator_name,
-            su.avatar AS creator_avatar
+            su.avatar AS creator_avatar,
+            ra.reject_reason AS reject_reason
         FROM consult_order co
         LEFT JOIN consult_slot cs ON co.slot_id = cs.id
         LEFT JOIN sys_user su ON co.creator_id = su.id
+        LEFT JOIN refund_apply ra ON co.id = ra.order_id AND ra.status = 'PROCESSED'
         WHERE co.user_id = #{userId}
         <if test="status != null and status != ''">
             AND co.status = #{status}

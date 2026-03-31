@@ -5,20 +5,25 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.domain.dto.ConsultDTO;
+import com.github.listen_to_me.domain.dto.RefundApplyDTO;
 import com.github.listen_to_me.domain.entity.ConsultOrder;
 import com.github.listen_to_me.domain.entity.ConsultSlot;
+import com.github.listen_to_me.domain.entity.RefundApply;
 import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.query.ConsultPageQuery;
 import com.github.listen_to_me.domain.vo.ConsultOrderVO;
 import com.github.listen_to_me.mapper.ConsultOrderMapper;
 import com.github.listen_to_me.service.IConsultOrderService;
 import com.github.listen_to_me.service.IConsultSlotService;
+import com.github.listen_to_me.service.IRefundApplyService;
 import com.github.listen_to_me.service.ISysUserService;
 
 import lombok.RequiredArgsConstructor;
@@ -32,6 +37,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
 
     private final IConsultSlotService consultSlotService;
     private final ISysUserService sysUserService;
+    private final IRefundApplyService refundApplyService;
 
     @Override
     @Transactional
@@ -165,6 +171,50 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         }
 
         log.debug("取消预约成功 - 订单ID: {}", orderId);
+    }
+
+    @Override
+    @Transactional
+    public void applyRefund(Long userId, Long orderId, RefundApplyDTO refundApplyDTO) {
+        log.debug("申请退款 - 用户ID: {}, 订单ID: {}, 原因: {}", userId, orderId, refundApplyDTO);
+
+        // 校验订单存在且属于当前用户
+        ConsultOrder order = getById(orderId);
+        if (order == null) {
+            throw new BaseException(404, "订单不存在");
+        }
+        if (!order.getUserId().equals(userId)) {
+            throw new BaseException(404, "订单不存在");
+        }
+
+        // 校验订单状态
+        String status = order.getStatus();
+        if (!"CONFIRMED".equals(status) && !"COMPLETED".equals(status)) {
+            throw new BaseException(400, "当前状态无法申请退款");
+        }
+
+        // 检查是否已有进行中的退款申请
+        LambdaQueryWrapper<RefundApply> wrapper = Wrappers.<RefundApply>lambdaQuery()
+                .eq(RefundApply::getOrderId, orderId)
+                .eq(RefundApply::getStatus, "PENDING");
+        long count = refundApplyService.count(wrapper);
+        if (count > 0) {
+            throw new BaseException(400, "已有退款申请处理中");
+        }
+
+        // 创建退款申请记录
+        RefundApply apply = new RefundApply();
+        apply.setOrderId(orderId);
+        apply.setUserId(userId);
+        apply.setReason(refundApplyDTO.getReason());
+        apply.setStatus("PENDING");
+        refundApplyService.save(apply);
+
+        // 更新订单状态为 REFUND_PENDING
+        order.setStatus("REFUND_PENDING");
+        updateById(order);
+
+        log.debug("申请退款成功 - 订单ID: {}, 退款申请ID: {}", orderId, apply.getId());
     }
 
 }

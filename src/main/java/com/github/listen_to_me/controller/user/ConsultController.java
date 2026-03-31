@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.ConsultDTO;
+import com.github.listen_to_me.domain.dto.RefundApplyDTO;
 import com.github.listen_to_me.domain.query.ConsultPageQuery;
 import com.github.listen_to_me.domain.vo.ConsultOrderVO;
 import com.github.listen_to_me.service.IConsultOrderService;
@@ -55,6 +56,16 @@ public class ConsultController {
             @AuthenticationPrincipal Long userId,
             @PathVariable Long id) {
         consultOrderService.cancelConsult(userId, id);
+        return Result.success();
+    }
+
+    @PutMapping("/consult/{id}/refund")
+    @Operation(summary = "申请退款")
+    public Result<Void> applyRefund(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long id,
+            @Valid @RequestBody RefundApplyDTO refundApplyDTO) {
+        consultOrderService.applyRefund(userId, id, refundApplyDTO);
         return Result.success();
     }
 }
