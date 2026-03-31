@@ -65,7 +65,7 @@ INSERT INTO `audio_transcript` (`audio_id`, `full_text`, `segment_json`) VALUES
 -- 3. 交易业务域 - 测试数据
 -- ----------------------------
 -- 订单信息（订单编号格式：YYYYMMDD+6位随机数）
-INSERT INTO `order_info` (`order_sn`, `user_id`, `audio_id`, `pay_amount`, `pay_status`, `pay_channel`, `pay_time`) VALUES
+INSERT INTO `audio_order` (`order_sn`, `user_id`, `audio_id`, `pay_amount`, `pay_status`, `pay_channel`, `pay_time`) VALUES
 ('20250520123456', 3, 1, 29.90, 1, 'wechat', '2025-05-20 14:30:25'),
 ('20250521654321', 3, 3, 9.90, 1, 'alipay', '2025-05-21 09:15:40'),
 ('20250522987654', 4, 2, 19.90, 1, 'wechat', '2025-05-22 20:05:10'),
