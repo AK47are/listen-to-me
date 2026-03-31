@@ -17,9 +17,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RestController
 @AllArgsConstructor
 @RequestMapping("/user/audio")
+@RestController("userAudioController")
 @Tag(name = "音频稿件管理", description = "包含收藏、点赞音频等接口")
 public class AudioController {
 
