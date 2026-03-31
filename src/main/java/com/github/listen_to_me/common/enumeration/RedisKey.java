@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public enum RedisKey {
     USER_PERMS("user:perms:", 12L, TimeUnit.HOURS),
+    USER_HISTORY("user:history:", 30L, TimeUnit.MINUTES),
     IMAGE_CAPTCHA("captcha:codes:", 2L, TimeUnit.MINUTES),
     VERIFY_CODE("captcha:verify:", 5L, TimeUnit.MINUTES),
     TEMP_AUDIO_URL("temp:audio:", 10L, TimeUnit.MINUTES),
