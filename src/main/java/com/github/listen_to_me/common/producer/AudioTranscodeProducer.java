@@ -1,13 +1,14 @@
 package com.github.listen_to_me.common.producer;
 
-import cn.hutool.json.JSONUtil;
-import com.github.listen_to_me.common.config.AudioTranscodeMqConfig;
-import com.github.listen_to_me.domain.dto.TranscodeTaskDTO;
-import jakarta.annotation.Resource;
+import java.util.HashMap;
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
+import com.github.listen_to_me.common.config.AudioTranscodeMqConfig;
+
+import cn.hutool.json.JSONUtil;
+import jakarta.annotation.Resource;
 
 /**
  * 音频转码任务生产者
@@ -20,8 +21,9 @@ public class AudioTranscodeProducer {
 
     /**
      * 发送转码任务
-     * @param audioId 音频ID
-     * @param objectName MinIO存储的原始文件名/路径
+     * 
+     * @param audioId       音频ID
+     * @param objectName    MinIO存储的原始文件名/路径
      * @param trialDuration 截取前 trialDuration 秒
      */
     public void sendTranscodeTask(Long audioId, String objectName, Integer trialDuration) {
@@ -34,7 +36,6 @@ public class AudioTranscodeProducer {
         rabbitTemplate.convertAndSend(
                 AudioTranscodeMqConfig.EXCHANGE_NAME,
                 AudioTranscodeMqConfig.ROUTING_KEY,
-                json
-        );
+                json);
     }
 }
