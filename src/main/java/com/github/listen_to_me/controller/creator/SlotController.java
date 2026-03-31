@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequestMapping("/creator")
 @RequiredArgsConstructor
 @Tag(name = "时间槽管理")
-public class CreatorSlotController {
+public class SlotController {
 
     private final IConsultSlotService slotService;
 
