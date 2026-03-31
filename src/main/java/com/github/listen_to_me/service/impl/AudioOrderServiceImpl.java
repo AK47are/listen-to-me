@@ -1,0 +1,21 @@
+package com.github.listen_to_me.service.impl;
+
+import org.springframework.stereotype.Service;
+
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.domain.entity.AudioOrder;
+import com.github.listen_to_me.mapper.AudioOrderMapper;
+import com.github.listen_to_me.service.IAudioOrderService;
+
+/**
+ * <p>
+ * 服务实现类
+ * </p>
+ *
+ * @author kun
+ * @since 2026-03-24
+ */
+@Service
+public class AudioOrderServiceImpl extends ServiceImpl<AudioOrderMapper, AudioOrder> implements IAudioOrderService {
+
+}

@@ -20,9 +20,9 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-@TableName("order_info")
-@Schema(name = "OrderInfo", description = "")
-public class OrderInfo implements Serializable {
+@TableName("audio_order")
+@Schema(name = "AudioOrder", description = "")
+public class AudioOrder implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

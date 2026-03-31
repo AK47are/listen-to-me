@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS `audio_transcript` (
 -- ----------------------------
 -- 3. 交易业务域
 -- ----------------------------
-CREATE TABLE IF NOT EXISTS `order_info` (
+CREATE TABLE IF NOT EXISTS `audio_order` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `order_sn` varchar(64) UNIQUE NOT NULL,
   `user_id` bigint NOT NULL,

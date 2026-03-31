@@ -1,16 +1,16 @@
 package com.github.listen_to_me.mapper;
 
-import com.github.listen_to_me.domain.entity.OrderInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.github.listen_to_me.domain.entity.AudioOrder;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author kun
  * @since 2026-03-24
  */
-public interface OrderInfoMapper extends BaseMapper<OrderInfo> {
+public interface AudioOrderMapper extends BaseMapper<AudioOrder> {
 
 }
