@@ -107,6 +107,17 @@ INSERT INTO `consult_slot` (`creator_id`, `start_time`, `end_time`, `price`, `ad
 (5, '2025-05-27 19:00:00', '2025-05-27 20:00:00', 70.00, '腾讯会议链接：https://meeting.tencent.com/dm/mno345', 'CANCELLED'),
 (2, '2025-05-28 16:00:00', '2025-05-28 17:00:00', 55.00, '腾讯会议链接：https://meeting.tencent.com/dm/pqr678', 'EXPIRED'),
 (5, '2025-05-29 20:00:00', '2025-05-29 21:30:00', 90.00, '腾讯会议链接：https://meeting.tencent.com/dm/stu901', 'AVAILABLE');
+
+-- ----------------------------
+-- 5. 咨询服务域 - 测试数据（预约订单）
+-- ----------------------------
+-- 预约订单
+INSERT INTO `consult_order` (`slot_id`, `user_id`, `creator_id`, `message`, `status`, `address`, `pay_amount`, `create_time`) VALUES
+(1, 3, 2, '想咨询一下心理学入门相关的问题', 'CONFIRMED', '腾讯会议链接：https://meeting.tencent.com/dm/abc123', 50.00, '2025-05-20 10:00:00'),
+(2, 3, 2, '请问职场沟通技巧有哪些', 'PENDING_CONFIRM', NULL, 60.00, '2025-05-21 14:30:00'),
+(3, 4, 2, '想了解心理学入门课程', 'PENDING_CONFIRM', NULL, 50.00, '2025-05-22 09:15:00'),
+(4, 4, 5, '民间故事创作经验分享', 'CONFIRMED', '腾讯会议链接：https://meeting.tencent.com/dm/jkl012', 80.00, '2025-05-23 19:00:00'),
+(5, 3, 5, '悬疑故事创作技巧', 'CANCELLED', NULL, 70.00, '2025-05-24 11:00:00');
 -- ----------------------------
 -- 6. 收藏夹域 - 测试数据
 -- ----------------------------
