@@ -1,7 +1,11 @@
 package com.github.listen_to_me.common.util;
 
+import java.io.File;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
+import io.minio.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,12 +16,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.url.UrlPath;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
-import io.minio.CopyObjectArgs;
-import io.minio.CopySource;
-import io.minio.GetPresignedObjectUrlArgs;
-import io.minio.MinioClient;
-import io.minio.PutObjectArgs;
-import io.minio.RemoveObjectArgs;
 import io.minio.http.Method;
 import lombok.extern.slf4j.Slf4j;
 
@@ -88,7 +86,7 @@ public class MinioUtils {
     /**
      * 复制原文件到目标模块
      */
-    public static void copyFile(String sourceFile, String targetModule) throws Exception {
+    public static String copyFile(String sourceFile, String targetModule) throws Exception {
         log.info("复制文件 - 原文件: {}, 目标模块: {}", sourceFile, targetModule);
         String fileName = FileUtil.getName(sourceFile);
         String targetPath = getPath(targetModule, fileName);
@@ -98,6 +96,7 @@ public class MinioUtils {
                 .object(targetPath)
                 .source(CopySource.builder().bucket(BUCKET).object(sourceFile).build())
                 .build());
+        return targetPath;
     }
 
     /**
@@ -110,4 +109,52 @@ public class MinioUtils {
                 .object(fullPath)
                 .build());
     }
+    /**
+     * 下载文件到本地
+     */
+    public static String downloadToLocal(String objectName) {
+        String tempDir = System.getProperty("java.io.tmpdir");
+        String fileName = "minio_temp_" + IdUtil.randomUUID() + "_" + System.currentTimeMillis();
+        File localFile = new File(tempDir, fileName);
+
+        try (InputStream in = CLIENT.getObject(
+                GetObjectArgs.builder()
+                        .bucket(BUCKET)
+                        .object(objectName)
+                        .build()
+        )) {
+            Files.copy(in, localFile.toPath());
+            log.info("MinIO 下载文件到本地成功：{} → {}", objectName, localFile.getAbsolutePath());
+            return localFile.getAbsolutePath();
+        } catch (Exception e) {
+            log.error("MinIO 下载文件失败：{}", objectName, e);
+            throw new RuntimeException("下载文件失败：" + objectName, e);
+        }
+    }
+    /**
+     * 上传本地文件到 MinIO
+     */
+    public static String uploadLocalFile(String localFilePath, String module) {
+        File file = new File(localFilePath);
+        String fileName = file.getName();
+
+        try {
+            String fullPath = getPath(module, fileName);
+            log.info("MinIO 上传本地文件 - 文件路径：{} → 模块：{}，路径：{}", localFilePath, module, fullPath);
+
+            CLIENT.uploadObject(
+                    UploadObjectArgs.builder()
+                            .bucket(BUCKET)
+                            .object(fullPath)
+                            .filename(localFilePath)
+                            .contentType(Files.probeContentType(file.toPath()))
+                            .build()
+            );
+            return fullPath;
+        } catch (Exception e) {
+            log.error("MinIO 上传本地文件失败 - 文件路径：{}", localFilePath, e);
+            throw new RuntimeException("MinIO 上传本地文件失败 - 文件路径：" + localFilePath, e);
+        }
+    }
+
 }
