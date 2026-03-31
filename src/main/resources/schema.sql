@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   `username` varchar(64) UNIQUE NOT NULL COMMENT '账号',
   `password` varchar(128) NOT NULL COMMENT 'BCrypt加密',
   `nickname` varchar(64) COMMENT '昵称',
-  `avatar` varchar(500) COMMENT '头像地址',
+  `avatar` varchar(500) DEFAULT 'img/avatar/默认头像.png' COMMENT '头像地址',
   `phone` varchar(20) UNIQUE COMMENT '手机号',
   `email` varchar(128) UNIQUE COMMENT '邮箱',
   `openid` varchar(128) COMMENT '三方平台唯一标识',
