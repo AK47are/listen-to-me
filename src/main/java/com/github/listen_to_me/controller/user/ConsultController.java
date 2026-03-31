@@ -3,7 +3,9 @@ package com.github.listen_to_me.controller.user;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,5 +47,14 @@ public class ConsultController {
             @AuthenticationPrincipal Long userId,
             @ParameterObject ConsultPageQuery query) {
         return Result.success(consultOrderService.getConsultPage(userId, query));
+    }
+
+    @PutMapping("/{id}/cancel")
+    @Operation(summary = "取消预约")
+    public Result<Void> cancelConsult(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long id) {
+        consultOrderService.cancelConsult(userId, id);
+        return Result.success();
     }
 }

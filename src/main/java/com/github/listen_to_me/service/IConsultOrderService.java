@@ -26,4 +26,12 @@ public interface IConsultOrderService extends IService<ConsultOrder> {
      * @return 分页结果
      */
     IPage<ConsultOrderVO> getConsultPage(Long userId, ConsultPageQuery query);
+
+    /**
+     * 取消预约
+     * 
+     * @param userId  用户ID
+     * @param orderId 订单ID
+     */
+    void cancelConsult(Long userId, Long orderId);
 }
