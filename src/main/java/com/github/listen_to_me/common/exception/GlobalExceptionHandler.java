@@ -19,7 +19,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BaseException.class)
     public Result<?> handle(BaseException e) {
         log.warn("业务异常处理 - 状态码: {}, 错误信息: {}", e.getCode(), e.getMessage());
-        return Result.fail(e.getMessage());
+        return Result.fail(e.getCode(), e.getMessage());
     }
 
     /**
