@@ -6,6 +6,7 @@ import com.github.listen_to_me.domain.dto.AudioDTO;
 import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioPublishVO;
+import com.github.listen_to_me.domain.vo.AudioStatusVO;
 import com.github.listen_to_me.domain.vo.CreatorAudioVO;
 import com.github.listen_to_me.service.IAudioInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -52,5 +53,9 @@ public class AudioController {
     @GetMapping("/{id}")
     public Result<CreatorAudioDetailVO> getAudio(@PathVariable Long id){
         return Result.success(audioInfoService.getAudioDetail(id));
+    }
+    @GetMapping("/{id}/status")
+    public Result<AudioStatusVO> getAudioStatus(@PathVariable Long id){
+        return Result.success(audioInfoService.getAudioStatus(id));
     }
 }

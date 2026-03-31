@@ -25,6 +25,7 @@ import com.github.listen_to_me.domain.entity.PlayHistory;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioPublishVO;
+import com.github.listen_to_me.domain.vo.AudioStatusVO;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.CreatorAudioVO;
 import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
@@ -202,5 +203,21 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         creatorAudioDetailVO.setCollectCount(audioInfo.getCollectCount());
 
         return creatorAudioDetailVO;
+    }
+
+    @Override
+    public AudioStatusVO getAudioStatus(Long id) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        AudioInfo audioInfo = audioInfoMapper.selectById(id);
+        if(audioInfo == null || !audioInfo.getCreatorId().equals(userId)){
+            throw new BaseException(404, "稿件不存在");
+        }
+        AudioStatusVO audioStatusVO = new AudioStatusVO();
+        audioStatusVO.setAudioId(id);
+        audioStatusVO.setStatus(audioInfo.getStatus());
+        if("FAILED".equals(audioInfo.getStatus())){
+            audioStatusVO.setFailReason("转码失败");
+        }
+        return audioStatusVO;
     }
 }
