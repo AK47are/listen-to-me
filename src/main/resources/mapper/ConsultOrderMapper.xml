@@ -25,8 +25,14 @@
         LEFT JOIN sys_user su ON co.creator_id = su.id
         LEFT JOIN refund_apply ra ON co.id = ra.order_id AND ra.status = 'PROCESSED'
         WHERE co.user_id = #{userId}
-        <if test="status != null and status != ''">
-            AND co.status = #{status}
+        <if test="query.status != null and query.status != ''">
+            AND co.status = #{query.status}
+        </if>
+        <if test="query.startTime != null">
+            AND cs.start_time >= #{query.startTime}
+        </if>
+        <if test="query.endTime != null">
+            AND cs.start_time &lt;= #{query.endTime}
         </if>
         ORDER BY co.create_time DESC
     </select>

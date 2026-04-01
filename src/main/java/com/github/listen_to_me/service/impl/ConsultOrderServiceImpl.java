@@ -122,7 +122,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
     public IPage<ConsultOrderVO> getUserConsultPage(Long userId, ConsultPageQuery query) {
         log.debug("分页查询预约订单 - 用户ID: {}, 状态: {}", userId, query.getStatus());
         Page<ConsultOrderVO> page = new Page<>(query.getPageNum(), query.getPageSize());
-        IPage<ConsultOrderVO> result = baseMapper.selectUserConsultPage(page, userId, query.getStatus());
+        IPage<ConsultOrderVO> result = baseMapper.selectUserConsultPage(page, userId, query);
 
         // 处理头像临时 URL
         result.getRecords().forEach(vo -> {
