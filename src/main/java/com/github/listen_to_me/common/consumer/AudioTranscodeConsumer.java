@@ -5,6 +5,7 @@ import com.github.listen_to_me.common.config.AudioTranscodeMqConfig;
 import com.github.listen_to_me.common.util.AudioClipUtils;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.domain.dto.TranscodeTaskDTO;
+import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.service.IAudioInfoService;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,10 @@ public class AudioTranscodeConsumer {
         log.debug("收到转码任务 - audioId:{}，文件路径：{}", audioId, objectName);
 
         try {
+            AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
+            if(audioInfo.getClipPath() != null){
+                MinioUtils.removeFile(audioInfo.getClipPath());
+            }
             // 1. 更新数据库状态为 转码中 (TRANSCODING)
             audioInfoMapper.updateStatusById(audioId, "TRANSCODING");
             // 1. 从 MinIO 下载原音频到本地临时文件
