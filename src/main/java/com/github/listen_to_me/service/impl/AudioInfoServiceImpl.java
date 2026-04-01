@@ -247,4 +247,16 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         audioInfo.setVisibility(audioUpdateDTO.getVisibility());
         audioInfoMapper.updateById(audioInfo);
     }
+
+    @Override
+    public void removeAudioInfo(Long id) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        AudioInfo audioInfo = audioInfoMapper.selectById(id);
+        if(audioInfo == null || !audioInfo.getCreatorId().equals(userId)){
+            throw new BaseException(404, "稿件不存在");
+        }
+        //逻辑删除
+        audioInfo.setIsDeleted((byte) 1);
+        audioInfoMapper.updateById(audioInfo);
+    }
 }

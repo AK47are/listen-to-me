@@ -64,4 +64,11 @@ public class AudioController {
         audioInfoService.updateAudio(audioUpdateDTO);
         return Result.success();
     }
-   }
+
+    @DeleteMapping("/{id}")
+    public Result<Void> removeAudio(@PathVariable Long id) {
+        audioInfoService.removeAudioInfo(id);
+        return Result.success();
+    }
+
+}

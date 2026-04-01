@@ -41,4 +41,6 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     AudioStatusVO getAudioStatus(Long id);
 
     void updateAudio(AudioUpdateDTO audioUpdateDTO);
+
+    void removeAudioInfo(Long id);
 }
