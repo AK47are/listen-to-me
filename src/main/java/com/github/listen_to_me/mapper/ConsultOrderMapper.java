@@ -11,5 +11,5 @@ import com.github.listen_to_me.domain.vo.ConsultOrderVO;
 @Mapper
 public interface ConsultOrderMapper extends BaseMapper<ConsultOrder> {
 
-    IPage<ConsultOrderVO> selectConsultPage(Page<ConsultOrderVO> page, Long userId, String status);
+    IPage<ConsultOrderVO> selectUserConsultPage(Page<ConsultOrderVO> page, Long userId, String status);
 }
