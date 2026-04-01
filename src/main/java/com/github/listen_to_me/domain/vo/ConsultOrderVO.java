@@ -28,7 +28,7 @@ public class ConsultOrderVO {
     @Schema(description = "订单状态: PENDING_CONFIRM, CONFIRMED, COMPLETED, CANCELLED, REFUND_PENDING, REFUNDED")
     private String status;
 
-    @Schema(description = "预约地址（仅确认后返回）")
+    @Schema(description = "预约地址（用户端需要仅确认后返回）")
     private String address;
 
     @Schema(description = "创作者ID")
@@ -39,6 +39,15 @@ public class ConsultOrderVO {
 
     @Schema(description = "创作者头像")
     private String creatorAvatar;
+
+    @Schema(description = "用户ID")
+    private Long userId;
+
+    @Schema(description = "用户昵称")
+    private String userNickname;
+
+    @Schema(description = "用户头像")
+    private String userAvatar;
 
     @Schema(description = "用户留言")
     private String message;
