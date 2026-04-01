@@ -47,7 +47,7 @@ public class ConsultController {
     public Result<IPage<ConsultOrderVO>> getMyConsultPage(
             @AuthenticationPrincipal Long userId,
             @ParameterObject ConsultPageQuery query) {
-        return Result.success(consultOrderService.getConsultPage(userId, query));
+        return Result.success(consultOrderService.getUserConsultPage(userId, query));
     }
 
     @PutMapping("/{id}/cancel")

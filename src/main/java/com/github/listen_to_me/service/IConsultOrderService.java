@@ -11,7 +11,7 @@ import com.github.listen_to_me.domain.vo.ConsultOrderVO;
 public interface IConsultOrderService extends IService<ConsultOrder> {
 
     /**
-     * 发起预约
+     * 用户发起预约
      * 
      * @param userId     用户ID
      * @param consultDTO 预约请求
@@ -26,10 +26,10 @@ public interface IConsultOrderService extends IService<ConsultOrder> {
      * @param query  分页查询条件
      * @return 分页结果
      */
-    IPage<ConsultOrderVO> getConsultPage(Long userId, ConsultPageQuery query);
+    IPage<ConsultOrderVO> getUserConsultPage(Long userId, ConsultPageQuery query);
 
     /**
-     * 取消预约
+     * 用户取消预约
      * 
      * @param userId  用户ID
      * @param orderId 订单ID
@@ -37,7 +37,7 @@ public interface IConsultOrderService extends IService<ConsultOrder> {
     void cancelConsult(Long userId, Long orderId);
 
     /**
-     * 申请退款
+     * 用户申请退款
      * 
      * @param userId         用户ID
      * @param orderId        订单ID
