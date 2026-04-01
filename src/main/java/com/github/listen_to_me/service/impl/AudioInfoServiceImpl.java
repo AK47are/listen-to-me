@@ -17,6 +17,7 @@ import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.AudioDTO;
+import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
 import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.domain.entity.AudioInfo;
@@ -219,5 +220,31 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
             audioStatusVO.setFailReason("转码失败");
         }
         return audioStatusVO;
+    }
+
+    @Override
+    public void updateAudio(AudioUpdateDTO audioUpdateDTO) {
+        AudioInfo audioInfo = audioInfoMapper.selectById(audioUpdateDTO.getId());
+        if(audioInfo == null || !audioInfo.getCreatorId().equals(SecurityUtils.getCurrentUserId())) {
+            throw new BaseException(404, "稿件不存在");
+        }
+        if(audioUpdateDTO.getCoverUrl() != null && !audioUpdateDTO.getCoverUrl().equals(audioInfo.getCoverPath())){
+            String coverUrlBase64 = Base64.encode(audioUpdateDTO.getCoverUrl());
+            if(RedisUtils.get(RedisKey.TEMP_COVER_URL, coverUrlBase64) != null) {
+                String coverPath =  RedisUtils.get(RedisKey.TEMP_COVER_URL, coverUrlBase64);
+                audioInfo.setCoverPath(coverPath);
+            }
+        }
+
+        if(audioUpdateDTO.getTrialDuration() != null && !audioUpdateDTO.getTrialDuration().equals(audioInfo.getTrialDuration())){
+            audioInfo.setStatus("PENDING_TRANSCODE");
+            audioTranscodeProducer.sendTranscodeTask(audioUpdateDTO.getId(), audioInfo.getRawPath(), audioInfo.getTrialDuration());
+        }
+        audioInfo.setTitle(audioUpdateDTO.getTitle());
+        audioInfo.setDescription(audioUpdateDTO.getDescription());
+        audioInfo.setIsPaid(audioUpdateDTO.getIsPaid());
+        audioInfo.setPrice(new BigDecimal(audioUpdateDTO.getPrice()));
+        audioInfo.setVisibility(audioUpdateDTO.getVisibility());
+        audioInfoMapper.updateById(audioInfo);
     }
 }

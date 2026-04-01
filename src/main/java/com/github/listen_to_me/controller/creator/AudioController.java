@@ -3,6 +3,7 @@ package com.github.listen_to_me.controller.creator;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.AudioDTO;
+import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
 import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioPublishVO;
@@ -58,4 +59,9 @@ public class AudioController {
     public Result<AudioStatusVO> getAudioStatus(@PathVariable Long id){
         return Result.success(audioInfoService.getAudioStatus(id));
     }
-}
+    @PutMapping
+    public Result<Void> updateAudio(@RequestBody AudioUpdateDTO audioUpdateDTO) {
+        audioInfoService.updateAudio(audioUpdateDTO);
+        return Result.success();
+    }
+   }

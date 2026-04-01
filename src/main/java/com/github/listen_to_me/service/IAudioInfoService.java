@@ -2,6 +2,7 @@ package com.github.listen_to_me.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.domain.dto.AudioDTO;
+import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
 import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -38,4 +39,6 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     CreatorAudioDetailVO getAudioDetail(Long id);
 
     AudioStatusVO getAudioStatus(Long id);
+
+    void updateAudio(AudioUpdateDTO audioUpdateDTO);
 }
