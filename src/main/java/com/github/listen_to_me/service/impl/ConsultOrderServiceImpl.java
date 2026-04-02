@@ -2,6 +2,8 @@ package com.github.listen_to_me.service.impl;
 
 import java.time.LocalDateTime;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,7 +39,11 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
 
     private final IConsultSlotService consultSlotService;
     private final ISysUserService sysUserService;
-    private final IRefundApplyService refundApplyService;
+
+    @Lazy
+    @Autowired
+    // NOTE: 使用 @Lazy 注解打破与 RefundApplyServiceImpl 的循环依赖
+    private IRefundApplyService refundApplyService;
 
     @Override
     @Transactional

@@ -1,5 +1,7 @@
 package com.github.listen_to_me.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,10 +33,14 @@ import lombok.extern.slf4j.Slf4j;
 public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, RefundApply>
         implements IRefundApplyService {
 
-    private final IConsultOrderService iConsultOrderService;
     private final IConsultSlotService iConsultSlotService;
     private final ISysUserService iSysUserService;
     private final RefundApplyMapper refundApplyMapper;
+
+    @Lazy
+    @Autowired
+    // NOTE: 使用 @Lazy 注解打破与 ConsultOrderServiceImpl 的循环依赖
+    private IConsultOrderService iConsultOrderService;
 
     @Override
     public IPage<RefundApplyVO> getRefundApplyPage(RefundPageQuery query) {
