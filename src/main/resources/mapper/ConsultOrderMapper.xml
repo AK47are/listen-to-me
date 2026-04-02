@@ -37,4 +37,37 @@
         ORDER BY co.create_time DESC
     </select>
 
+    <select id="selectCreatorConsultPage" resultType="com.github.listen_to_me.domain.vo.ConsultOrderVO">
+        SELECT
+            co.id,
+            co.slot_id,
+            co.status,
+            cs.address,
+            co.creator_id,
+            co.message,
+            co.create_time,
+            cs.start_time,
+            cs.end_time,
+            cs.price,
+            su.nickname AS user_nickname,
+            su.avatar AS user_avatar,
+            co.user_id,
+            ra.reject_reason AS reject_reason
+        FROM consult_order co
+        LEFT JOIN consult_slot cs ON co.slot_id = cs.id
+        LEFT JOIN sys_user su ON co.user_id = su.id
+        LEFT JOIN refund_apply ra ON co.id = ra.order_id AND ra.status = 'PROCESSED'
+        WHERE co.creator_id = #{creatorId}
+        <if test="query.status != null and query.status != ''">
+            AND co.status = #{query.status}
+        </if>
+        <if test="query.startTime != null">
+            AND cs.start_time >= #{query.startTime}
+        </if>
+        <if test="query.endTime != null">
+            AND cs.start_time &lt;= #{query.endTime}
+        </if>
+        ORDER BY co.create_time DESC
+    </select>
+
 </mapper>

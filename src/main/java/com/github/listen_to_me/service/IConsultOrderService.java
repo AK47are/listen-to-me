@@ -44,4 +44,13 @@ public interface IConsultOrderService extends IService<ConsultOrder> {
      * @param refundApplyDTO 退款申请参数
      */
     void applyRefund(Long userId, Long orderId, RefundApplyDTO refundApplyDTO);
+
+    /**
+     * 分页查询指定创作者的预约订单
+     * 
+     * @param creatorId 创作者ID
+     * @param query     分页查询条件
+     * @return 分页结果
+     */
+    IPage<ConsultOrderVO> getCreatorConsultPage(Long creatorId, ConsultPageQuery query);
 }
