@@ -87,13 +87,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         String creatorAvatar = null;
         if (creator != null) {
             creatorName = creator.getNickname();
-            if (creator.getAvatar() != null && !creator.getAvatar().isBlank()) {
-                try {
-                    creatorAvatar = MinioUtils.getPresignedUrl(creator.getAvatar());
-                } catch (Exception e) {
-                    log.warn("生成头像临时链接失败 - 路径: {}", creator.getAvatar(), e);
-                }
-            }
+            creatorAvatar = MinioUtils.getPresignedUrl(creator.getAvatar());
         }
 
         // 组装返回 VO
@@ -121,15 +115,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
 
         // 处理头像临时 URL
         result.getRecords().forEach(vo -> {
-            if (vo.getCreatorAvatar() != null && !vo.getCreatorAvatar().isBlank()) {
-                try {
-                    String avatarUrl = MinioUtils.getPresignedUrl(vo.getCreatorAvatar());
-                    vo.setCreatorAvatar(avatarUrl);
-                } catch (Exception e) {
-                    log.warn("生成头像临时链接失败 - 路径: {}", vo.getCreatorAvatar(), e);
-                    vo.setCreatorAvatar(null);
-                }
-            }
+            vo.setCreatorAvatar(MinioUtils.getPresignedUrl(vo.getCreatorAvatar()));
         });
 
         return result;
@@ -226,17 +212,8 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         Page<ConsultOrderVO> page = new Page<>(query.getPageNum(), query.getPageSize());
         IPage<ConsultOrderVO> result = baseMapper.selectCreatorConsultPage(page, creatorId, query);
 
-        // 处理用户头像临时 URL
         result.getRecords().forEach(vo -> {
-            if (!StrUtil.hasBlank(vo.getUserAvatar())) {
-                try {
-                    String avatarUrl = MinioUtils.getPresignedUrl(vo.getUserAvatar());
-                    vo.setUserAvatar(avatarUrl);
-                } catch (Exception e) {
-                    log.warn("生成用户头像临时链接失败 - 路径: {}", vo.getUserAvatar(), e);
-                    vo.setUserAvatar(null);
-                }
-            }
+            vo.setUserAvatar(MinioUtils.getPresignedUrl(vo.getUserAvatar()));
         });
 
         return result;

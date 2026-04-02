@@ -51,15 +51,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
 
         // 处理头像临时 URL
         result.getRecords().forEach(vo -> {
-            if (!StrUtil.hasBlank(vo.getUserAvatar())) {
-                try {
-                    String avatarUrl = MinioUtils.getPresignedUrl(vo.getUserAvatar());
-                    vo.setUserAvatar(avatarUrl);
-                } catch (Exception e) {
-                    log.warn("生成头像临时链接失败 - 路径: {}", vo.getUserAvatar(), e);
-                    vo.setUserAvatar(null);
-                }
-            }
+            vo.setUserAvatar(MinioUtils.getPresignedUrl(vo.getUserAvatar()));
         });
 
         return result;
