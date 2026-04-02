@@ -262,3 +262,32 @@ CREATE TABLE IF NOT EXISTS `coin_transaction` (
   INDEX idx_create_time (create_time),
   CONSTRAINT fk_coin_transaction_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='虚拟币流水表';
+
+
+-- 评论表
+CREATE TABLE IF NOT EXISTS comments (
+  id bigint PRIMARY KEY AUTO_INCREMENT,
+  audio_id bigint NOT NULL,      -- 评论所属对象ID
+  parent_id bigint DEFAULT 0 COMMENT '父评论ID，0 表示顶评论',       -- 父评论ID，0 表示顶评论
+  user_id bigint NOT NULL,
+  content text NOT NULL,
+  like_count bigint DEFAULT 0 COMMENT '点赞数',
+  create_time datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  INDEX idx_audio_id_created (audio_id, create_time),
+  INDEX idx_parent_id (parent_id),
+  INDEX idx_user_id (user_id),
+  CONSTRAINT fk_comments_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`),
+  CONSTRAINT fk_comments_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论表';
+
+CREATE TABLE IF NOT EXISTS comment_likes (
+  id bigint PRIMARY KEY AUTO_INCREMENT,
+  comment_id bigint NOT NULL COMMENT '被点赞的评论ID',
+  user_id bigint NOT NULL COMMENT '点赞用户ID',
+  create_time datetime DEFAULT CURRENT_TIMESTAMP COMMENT '点赞时间',
+  INDEX idx_comment_id (comment_id),
+  INDEX idx_user_id (user_id),
+  UNIQUE KEY uk_comment_user (comment_id, user_id) COMMENT '防止同一用户重复点赞同一评论',
+  CONSTRAINT fk_likes_comment FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+  CONSTRAINT fk_likes_user FOREIGN KEY (user_id) REFERENCES sys_user(id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论点赞表';
