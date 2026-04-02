@@ -46,4 +46,13 @@ public class ConsultController {
         consultOrderService.confirmConsult(creatorId, id, address);
         return Result.success();
     }
+
+    @PutMapping("/{id}/reject")
+    @Operation(summary = "拒绝预约")
+    public Result<Void> rejectConsult(
+            @AuthenticationPrincipal Long creatorId,
+            @PathVariable Long id) {
+        consultOrderService.rejectConsult(creatorId, id);
+        return Result.success();
+    }
 }
