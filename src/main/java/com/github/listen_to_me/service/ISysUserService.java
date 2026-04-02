@@ -58,4 +58,18 @@ public interface ISysUserService extends IService<SysUser> {
      * @return true-增加成功
      */
     boolean addBalance(Long userId, BigDecimal amount, String bizType, String bizId);
+
+    /**
+     * 封禁用户
+     * 
+     * @param userId 用户ID
+     */
+    void banUser(Long userId);
+
+    /**
+     * 解封用户
+     * 
+     * @param userId 用户ID
+     */
+    void unbanUser(Long userId);
 }
