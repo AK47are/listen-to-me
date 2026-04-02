@@ -25,10 +25,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RestController
 @Tag(name = "预约管理")
 @RequiredArgsConstructor
 @RequestMapping("/user/consult")
+@RestController("userConsultController")
 public class ConsultController {
 
     private final IConsultOrderService consultOrderService;
