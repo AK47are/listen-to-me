@@ -276,4 +276,44 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
 
         log.debug("确认预约成功 - 订单ID: {}", orderId);
     }
+
+    @Override
+    @Transactional
+    public void rejectConsult(Long creatorId, Long orderId) {
+        log.debug("拒绝预约 - 创作者ID: {}, 订单ID: {}", creatorId, orderId);
+
+        // 校验订单存在且属于当前创作者
+        ConsultOrder order = getById(orderId);
+        if (order == null) {
+            throw new BaseException(404, "订单不存在");
+        }
+        if (!order.getCreatorId().equals(creatorId)) {
+            throw new BaseException(404, "订单不存在");
+        }
+
+        // 校验订单状态
+        if (!"PENDING_CONFIRM".equals(order.getStatus())) {
+            throw new BaseException(400, "订单已处理，无法拒绝");
+        }
+
+        // 退还余额
+        boolean added = sysUserService.addBalance(order.getUserId(), order.getPayAmount(), "REFUND",
+                String.valueOf(orderId));
+        if (!added) {
+            throw new BaseException("退还余额失败");
+        }
+
+        // 更新订单状态为 CANCELLED
+        order.setStatus("CANCELLED");
+        updateById(order);
+
+        // 释放时间槽
+        ConsultSlot slot = consultSlotService.getById(order.getSlotId());
+        if (slot != null) {
+            slot.setStatus("AVAILABLE");
+            consultSlotService.updateById(slot);
+        }
+
+        log.debug("拒绝预约成功 - 订单ID: {}", orderId);
+    }
 }

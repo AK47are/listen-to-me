@@ -62,4 +62,12 @@ public interface IConsultOrderService extends IService<ConsultOrder> {
      * @param address   预约地址（可选，不传则使用时间槽原地址）
      */
     void confirmConsult(Long creatorId, Long orderId, String address);
+
+    /**
+     * 拒绝预约
+     * 
+     * @param creatorId 创作者ID
+     * @param orderId   订单ID
+     */
+    void rejectConsult(Long creatorId, Long orderId);
 }
