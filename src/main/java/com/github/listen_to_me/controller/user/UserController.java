@@ -17,9 +17,9 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@RestController
 @AllArgsConstructor
 @RequestMapping("/user")
+@RestController("userUserController")
 @Tag(name = "用户管理", description = "包含查询、修改用户信息等接口")
 public class UserController {
     private final ISysUserService sysUserService;
