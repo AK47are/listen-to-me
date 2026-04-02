@@ -55,15 +55,22 @@ public class MinioUtils {
     /**
      * 生成临时访问链接
      */
-    public static String getPresignedUrl(String fullPath) throws Exception {
-        log.info("生成临时链接 - 完整路径: {}", fullPath);
-        return CLIENT.getPresignedObjectUrl(
-                GetPresignedObjectUrlArgs.builder()
-                        .method(Method.GET)
-                        .bucket(BUCKET)
-                        .object(fullPath)
-                        .expiry(EXPIRATION, TimeUnit.MINUTES)
-                        .build());
+    public static String getPresignedUrl(String fullPath) {
+        if (!StrUtil.hasBlank(fullPath)) {
+            try {
+                log.info("生成临时链接 - 完整路径: {}", fullPath);
+                return CLIENT.getPresignedObjectUrl(
+                        GetPresignedObjectUrlArgs.builder()
+                                .method(Method.GET)
+                                .bucket(BUCKET)
+                                .object(fullPath)
+                                .expiry(EXPIRATION, TimeUnit.MINUTES)
+                                .build());
+            } catch (Exception e) {
+                log.warn("生成临时链接失败", e);
+            }
+        }
+        return null;
     }
 
     /**
@@ -109,6 +116,7 @@ public class MinioUtils {
                 .object(fullPath)
                 .build());
     }
+
     /**
      * 下载文件到本地
      */
@@ -121,8 +129,7 @@ public class MinioUtils {
                 GetObjectArgs.builder()
                         .bucket(BUCKET)
                         .object(objectName)
-                        .build()
-        )) {
+                        .build())) {
             Files.copy(in, localFile.toPath());
             log.info("MinIO 下载文件到本地成功：{} → {}", objectName, localFile.getAbsolutePath());
             return localFile.getAbsolutePath();
@@ -131,6 +138,7 @@ public class MinioUtils {
             throw new RuntimeException("下载文件失败：" + objectName, e);
         }
     }
+
     /**
      * 上传本地文件到 MinIO
      */
@@ -148,8 +156,7 @@ public class MinioUtils {
                             .object(fullPath)
                             .filename(localFilePath)
                             .contentType(Files.probeContentType(file.toPath()))
-                            .build()
-            );
+                            .build());
             return fullPath;
         } catch (Exception e) {
             log.error("MinIO 上传本地文件失败 - 文件路径：{}", localFilePath, e);
