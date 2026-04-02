@@ -230,4 +230,39 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         return true;
     }
 
+    @Override
+    public void banUser(Long userId) {
+        log.debug("封禁用户 - 用户ID: {}", userId);
+
+        SysUser user = getById(userId);
+        if (user == null) {
+            throw new BaseException(404, "用户不存在");
+        }
+        if ("BANNED".equals(user.getStatus())) {
+            throw new BaseException(400, "用户已是封禁状态");
+        }
+
+        user.setStatus("BANNED");
+        updateById(user);
+
+        log.debug("封禁用户成功 - 用户ID: {}", userId);
+    }
+
+    @Override
+    public void unbanUser(Long userId) {
+        log.debug("解封用户 - 用户ID: {}", userId);
+
+        SysUser user = getById(userId);
+        if (user == null) {
+            throw new BaseException(404, "用户不存在");
+        }
+        if ("NORMAL".equals(user.getStatus())) {
+            throw new BaseException(400, "用户已是正常状态");
+        }
+
+        user.setStatus("NORMAL");
+        updateById(user);
+
+        log.debug("解封用户成功 - 用户ID: {}", userId);
+    }
 }
