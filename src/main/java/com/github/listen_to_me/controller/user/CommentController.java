@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.CommentDTO;
 import com.github.listen_to_me.domain.dto.CommentLikeDTO;
+import com.github.listen_to_me.domain.dto.CommentReplyDTO;
 import com.github.listen_to_me.domain.query.CommentQuery;
 import com.github.listen_to_me.domain.vo.CommentVO;
 import com.github.listen_to_me.service.CommentLikeService;
@@ -41,6 +42,13 @@ public class CommentController {
     @PostMapping("/like")
     public Result<Void> likeComment(@Valid @RequestBody CommentLikeDTO commentLikeDTO) {
         commentLikeService.likeComment(commentLikeDTO);
+        return Result.success();
+    }
+
+    @Operation(summary = "回复评论")
+    @PostMapping("/reply")
+    public Result<Void> replyComment(@Valid @RequestBody CommentReplyDTO commentReplyDTO) {
+        commentService.replyComment(commentReplyDTO);
         return Result.success();
     }
 }

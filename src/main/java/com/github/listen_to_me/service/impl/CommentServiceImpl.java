@@ -7,6 +7,7 @@ import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.CommentDTO;
+import com.github.listen_to_me.domain.dto.CommentReplyDTO;
 import com.github.listen_to_me.domain.entity.Comment;
 import com.github.listen_to_me.domain.entity.CommentLike;
 import com.github.listen_to_me.domain.query.CommentQuery;
@@ -83,5 +84,26 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             }
         }
         return topPageResult;
+    }
+
+    @Override
+    public void replyComment(CommentReplyDTO commentReplyDTO) {
+        Long currId = SecurityUtils.getCurrentUserId();
+        Comment replayComment = commentMapper.selectById(commentReplyDTO.getCommentId());
+        if (replayComment == null) {
+            throw new BaseException(404,"评论不存在");
+        }
+        if (commentReplyDTO.getContent().isBlank()) {
+            throw new BaseException(400,"回复内容不能为空");
+        }
+        if(SensitiveWordHelper.contains(commentReplyDTO.getContent())){
+            throw new BaseException(400,"回复内容包含敏感词");
+        }
+        Comment comment = new Comment();
+        comment.setUserId(currId);
+        comment.setAudioId(replayComment.getAudioId());
+        comment.setParentId(commentReplyDTO.getCommentId());
+        comment.setContent(commentReplyDTO.getContent());
+        commentMapper.insert(comment);
     }
 }
