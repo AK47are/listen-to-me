@@ -241,4 +241,39 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
 
         return result;
     }
+
+    @Override
+    @Transactional
+    public void confirmConsult(Long creatorId, Long orderId, String address) {
+        log.debug("确认预约 - 创作者ID: {}, 订单ID: {}, 地址: {}", creatorId, orderId, address);
+
+        // 校验订单存在且属于当前创作者
+        ConsultOrder order = getById(orderId);
+        if (order == null) {
+            throw new BaseException(404, "订单不存在");
+        }
+        if (!order.getCreatorId().equals(creatorId)) {
+            throw new BaseException(404, "订单不存在");
+        }
+
+        // 校验订单状态
+        if (!"PENDING_CONFIRM".equals(order.getStatus())) {
+            throw new BaseException(400, "订单已处理，无法确认");
+        }
+
+        // 更新订单状态为 CONFIRMED
+        order.setStatus("CONFIRMED");
+        updateById(order);
+
+        // 更新地址（如果传入新地址）
+        if (!StrUtil.hasBlank(address)) {
+            ConsultSlot slot = consultSlotService.getById(order.getSlotId());
+            if (slot != null) {
+                slot.setAddress(address);
+                consultSlotService.updateById(slot);
+            }
+        }
+
+        log.debug("确认预约成功 - 订单ID: {}", orderId);
+    }
 }

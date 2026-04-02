@@ -3,7 +3,10 @@ package com.github.listen_to_me.controller.creator;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -32,5 +35,15 @@ public class ConsultController {
             @AuthenticationPrincipal Long creatorId,
             @ParameterObject ConsultPageQuery query) {
         return Result.success(consultOrderService.getCreatorConsultPage(creatorId, query));
+    }
+
+    @PutMapping("/{id}/confirm")
+    @Operation(summary = "确认预约")
+    public Result<Void> confirmConsult(
+            @AuthenticationPrincipal Long creatorId,
+            @PathVariable Long id,
+            @RequestParam(required = false) String address) {
+        consultOrderService.confirmConsult(creatorId, id, address);
+        return Result.success();
     }
 }
