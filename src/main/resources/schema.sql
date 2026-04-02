@@ -13,12 +13,14 @@ CREATE TABLE IF NOT EXISTS `sys_user` (
   `is_creator` tinyint(1) DEFAULT 0 COMMENT '0-听众, 1-创作者',
   `balance` decimal(12, 2) DEFAULT 0.00 COMMENT '可提现余额',
   `frozen_balance` decimal(12, 2) DEFAULT 0.00 COMMENT '账期内冻结金额',
+  `status` enum('NORMAL','BANNED') DEFAULT 'NORMAL' COMMENT '状态: NORMAL(正常), BANNED(封禁)',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX idx_email (email),
   INDEX idx_phone (phone),
   INDEX idx_openid (openid),
-  INDEX idx_is_creator (is_creator)
+  INDEX idx_is_creator (is_creator),
+  INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `sys_role` (

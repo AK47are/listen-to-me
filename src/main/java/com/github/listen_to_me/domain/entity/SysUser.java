@@ -1,23 +1,17 @@
 package com.github.listen_to_me.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * <p>
- * 
- * </p>
- *
- * @author baomidou
- * @since 2026-03-25
- */
 @Getter
 @Setter
 @TableName("sys_user")
@@ -58,6 +52,9 @@ public class SysUser implements Serializable {
 
     @Schema(description = "账期内冻结金额")
     private BigDecimal frozenBalance;
+
+    @Schema(description = "状态: NORMAL(正常), BANNED(封禁)")
+    private String status;
 
     private LocalDateTime createTime;
 

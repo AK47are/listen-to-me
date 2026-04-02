@@ -23,12 +23,12 @@ INSERT INTO `sys_permission` (`perm_name`, `perm_code`) VALUES
 ('管理员基本权限','admin:basic');
 
 -- 系统用户（密码均为 123456）
-INSERT INTO `sys_user` (`username`, `password`, `nickname`, `avatar`, `phone`, `email`, `openid`, `is_creator`, `balance`, `frozen_balance`) VALUES
-('admin', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '系统管理员', 'img/avatar/默认头像.png', '13800138000', 'admin@example.com', 'wx_admin_001', 0, 9999999.00, 0.00),
-('creator_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '有声的小雅', 'img/avatar/默认头像.png', '13800138001', 'wx_creator_001@example.com','wx_creator_001', 1, 936.38, 320.50),
-('listener_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '听书小迷弟', 'img/avatar/默认头像.png', '13800138002', 'wx_listener_001@example.com', 'wx_listener_001', 0, 44.30, 0.00),
-('listener_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '深夜听众', 'img/avatar/默认头像.png', '13800138003', 'wx_listener_002@example.com', 'wx_listener_002', 0, 67.20, 0.00),
-('creator_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '老杨说故事', 'img/avatar/默认头像.png', '13800138004', 'wx_creator_002@example.com', 'wx_creator_002@example', 1, 734.10, 156.20);
+INSERT INTO `sys_user` (`username`, `password`, `nickname`, `avatar`, `phone`, `email`, `openid`, `is_creator`, `balance`, `frozen_balance`, `status`) VALUES
+('admin', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '系统管理员', 'img/avatar/默认头像.png', '13800138000', 'admin@example.com', 'wx_admin_001', 0, 9999999.00, 0.00, 'NORMAL'),
+('creator_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '有声的小雅', 'img/avatar/默认头像.png', '13800138001', 'wx_creator_001@example.com','wx_creator_001', 1, 936.38, 320.50, 'NORMAL'),
+('listener_01', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '听书小迷弟', 'img/avatar/默认头像.png', '13800138002', 'wx_listener_001@example.com', 'wx_listener_001', 0, 44.30, 0.00, 'NORMAL'),
+('listener_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '深夜听众', 'img/avatar/默认头像.png', '13800138003', 'wx_listener_002@example.com', 'wx_listener_002', 0, 67.20, 0.00, 'NORMAL'),
+('creator_02', '$2a$10$jUcTKqj1NZ5KZFqIW9hba.7RSiXLd2GxVBxQm6KI7QO40XedjJdU2', '老杨说故事', 'img/avatar/默认头像.png', '13800138004', 'wx_creator_002@example.com', 'wx_creator_002@example', 1, 734.10, 156.20, 'NORMAL');
 
 -- 用户-角色关联
 INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
