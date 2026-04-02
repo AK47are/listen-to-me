@@ -10,7 +10,8 @@ public enum RedisKey {
     IMAGE_CAPTCHA("captcha:codes:", 2L, TimeUnit.MINUTES),
     VERIFY_CODE("captcha:verify:", 5L, TimeUnit.MINUTES),
     TEMP_AUDIO_URL("temp:audio:", 10L, TimeUnit.MINUTES),
-    TEMP_COVER_URL("temp:cover:", 10L, TimeUnit.MINUTES);
+    TEMP_COVER_URL("temp:cover:", 10L, TimeUnit.MINUTES),
+    HOT_AUDIO_RANK("hot:audio:rank", 30L, TimeUnit.DAYS);
     private final String prefix;
     private final Long expire;
     private final TimeUnit unit;
