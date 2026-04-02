@@ -44,11 +44,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         Long currId = SecurityUtils.getCurrentUserId();
         log.debug("查询详情 - ID: {}", currId);
         SysUser sysUser = this.getById(currId);
-        try {
-            sysUser.setAvatar(MinioUtils.getPresignedUrl(sysUser.getAvatar()));
-        } catch (Exception e) {
-            throw new BaseException("头像 url 获取异常！");
-        }
+        sysUser.setAvatar(MinioUtils.getPresignedUrl(sysUser.getAvatar()));
         UserVO userVO = BeanUtil.copyProperties(sysUser, UserVO.class);
         log.debug("查询详情 - ID: {}, 用户信息: {}", currId, userVO);
         return userVO;

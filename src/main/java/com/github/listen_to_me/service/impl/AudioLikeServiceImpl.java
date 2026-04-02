@@ -1,6 +1,7 @@
 package com.github.listen_to_me.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
+import org.springframework.stereotype.Service;
+
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -16,9 +17,9 @@ import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.mapper.AudioLikeMapper;
 import com.github.listen_to_me.service.IAudioLikeService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
+import cn.hutool.core.bean.BeanUtil;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -31,20 +32,20 @@ public class AudioLikeServiceImpl extends ServiceImpl<AudioLikeMapper, AudioLike
         Wrapper<AudioLike> wrapper = Wrappers.lambdaQuery(AudioLike.class)
                 .eq(AudioLike::getUserId, currId)
                 .eq(AudioLike::getAudioId, likeActionDTO.getAudioId());
-        if(likeActionDTO.getAction().equals("LIKE")){
-            if(audioLikeMapper.selectOne(wrapper) != null ){
+        if (likeActionDTO.getAction().equals("LIKE")) {
+            if (audioLikeMapper.selectOne(wrapper) != null) {
                 throw new ConflictException("音频已喜欢");
             }
             AudioLike audioLike = new AudioLike();
             audioLike.setUserId(currId);
             audioLike.setAudioId(likeActionDTO.getAudioId());
             audioLikeMapper.insert(audioLike);
-        }else if(likeActionDTO.getAction().equals("UNLIKE")){
-            if(audioLikeMapper.selectOne(wrapper) == null){
-                throw new BaseException(404,"喜欢记录不存在");
+        } else if (likeActionDTO.getAction().equals("UNLIKE")) {
+            if (audioLikeMapper.selectOne(wrapper) == null) {
+                throw new BaseException(404, "喜欢记录不存在");
             }
             audioLikeMapper.delete(wrapper);
-        }else {
+        } else {
             throw new BaseException("前端操作错误");
         }
     }

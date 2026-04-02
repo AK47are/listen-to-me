@@ -56,16 +56,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
-
-        if (StrUtil.isNotBlank(user.getAvatar())) {
-            try {
-                String tempUrl = MinioUtils.getPresignedUrl(user.getAvatar());
-                userVO.setAvatar(tempUrl);
-            } catch (Exception e) {
-                log.error("生成头像失败 - 错误信息: {}", e.getMessage());
-                userVO.setAvatar(null);
-            }
-        }
+        userVO.setAvatar(MinioUtils.getPresignedUrl(user.getAvatar()));
 
         LoginVO loginVO = new LoginVO();
         loginVO.setToken(token);
@@ -87,13 +78,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
-        if (StrUtil.isNotBlank(user.getAvatar())) {
-            try {
-                userVO.setAvatar(MinioUtils.getPresignedUrl(user.getAvatar()));
-            } catch (Exception e) {
-                log.error("生成头像失败 - 错误信息: {}", e.getMessage());
-            }
-        }
+        userVO.setAvatar(MinioUtils.getPresignedUrl(user.getAvatar()));
 
         LoginVO vo = new LoginVO();
         vo.setToken(newToken);

@@ -8,13 +8,14 @@ import org.springframework.stereotype.Service;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author kun
  * @since 2026-03-24
  */
 @Service
-public class AudioTranscriptServiceImpl extends ServiceImpl<AudioTranscriptMapper, AudioTranscript> implements IAudioTranscriptService {
+public class AudioTranscriptServiceImpl extends ServiceImpl<AudioTranscriptMapper, AudioTranscript>
+        implements IAudioTranscriptService {
 
 }
