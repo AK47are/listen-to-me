@@ -70,4 +70,12 @@ public interface IConsultOrderService extends IService<ConsultOrder> {
      * @param orderId   订单ID
      */
     void rejectConsult(Long creatorId, Long orderId);
+
+    /**
+     * 标记订单完成
+     * 
+     * @param creatorId 创作者ID
+     * @param orderId   订单ID
+     */
+    void completeConsult(Long creatorId, Long orderId);
 }
