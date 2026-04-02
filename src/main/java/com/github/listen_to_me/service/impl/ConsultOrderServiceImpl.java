@@ -316,4 +316,30 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
 
         log.debug("拒绝预约成功 - 订单ID: {}", orderId);
     }
+
+    @Override
+    @Transactional
+    public void completeConsult(Long creatorId, Long orderId) {
+        log.debug("标记完成 - 创作者ID: {}, 订单ID: {}", creatorId, orderId);
+
+        // 校验订单存在且属于当前创作者
+        ConsultOrder order = getById(orderId);
+        if (order == null) {
+            throw new BaseException(404, "订单不存在");
+        }
+        if (!order.getCreatorId().equals(creatorId)) {
+            throw new BaseException(404, "订单不存在");
+        }
+
+        // 校验订单状态
+        if (!"CONFIRMED".equals(order.getStatus())) {
+            throw new BaseException(400, "订单未确认，无法标记完成");
+        }
+
+        // 更新订单状态为 COMPLETED
+        order.setStatus("COMPLETED");
+        updateById(order);
+
+        log.debug("标记完成成功 - 订单ID: {}", orderId);
+    }
 }

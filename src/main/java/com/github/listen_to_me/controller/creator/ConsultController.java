@@ -55,4 +55,13 @@ public class ConsultController {
         consultOrderService.rejectConsult(creatorId, id);
         return Result.success();
     }
+
+    @PutMapping("/{id}/complete")
+    @Operation(summary = "标记完成")
+    public Result<Void> completeConsult(
+            @AuthenticationPrincipal Long creatorId,
+            @PathVariable Long id) {
+        consultOrderService.completeConsult(creatorId, id);
+        return Result.success();
+    }
 }
