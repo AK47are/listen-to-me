@@ -2,8 +2,6 @@ package com.github.listen_to_me.service.impl;
 
 import java.time.LocalDateTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +26,7 @@ import com.github.listen_to_me.service.IConsultSlotService;
 import com.github.listen_to_me.service.IRefundApplyService;
 import com.github.listen_to_me.service.ISysUserService;
 
+import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,11 +38,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
 
     private final IConsultSlotService consultSlotService;
     private final ISysUserService sysUserService;
-
-    @Lazy
-    @Autowired
-    // NOTE: 使用 @Lazy 注解打破与 RefundApplyServiceImpl 的循环依赖
-    private IRefundApplyService refundApplyService;
+    private final IRefundApplyService refundApplyService;
 
     @Override
     @Transactional
@@ -223,4 +218,27 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         log.debug("申请退款成功 - 订单ID: {}, 退款申请ID: {}", orderId, apply.getId());
     }
 
+    @Override
+    public IPage<ConsultOrderVO> getCreatorConsultPage(Long creatorId, ConsultPageQuery query) {
+        log.debug("创作者端分页查询预约订单 - 创作者ID: {}, 状态: {}, 开始时间: {}, 结束时间: {}",
+                creatorId, query.getStatus(), query.getStartTime(), query.getEndTime());
+
+        Page<ConsultOrderVO> page = new Page<>(query.getPageNum(), query.getPageSize());
+        IPage<ConsultOrderVO> result = baseMapper.selectCreatorConsultPage(page, creatorId, query);
+
+        // 处理用户头像临时 URL
+        result.getRecords().forEach(vo -> {
+            if (!StrUtil.hasBlank(vo.getUserAvatar())) {
+                try {
+                    String avatarUrl = MinioUtils.getPresignedUrl(vo.getUserAvatar());
+                    vo.setUserAvatar(avatarUrl);
+                } catch (Exception e) {
+                    log.warn("生成用户头像临时链接失败 - 路径: {}", vo.getUserAvatar(), e);
+                    vo.setUserAvatar(null);
+                }
+            }
+        });
+
+        return result;
+    }
 }
