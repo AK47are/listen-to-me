@@ -1,6 +1,5 @@
 package com.github.listen_to_me.controller.common;
 
-import com.github.listen_to_me.domain.dto.UserRegisterDTO;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,6 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.LoginDTO;
+import com.github.listen_to_me.domain.dto.UserRegisterDTO;
 import com.github.listen_to_me.domain.dto.VerifyCodeDTO;
 import com.github.listen_to_me.domain.vo.ImageCaptchaVO;
 import com.github.listen_to_me.domain.vo.LoginVO;

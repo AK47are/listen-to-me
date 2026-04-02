@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.exception.AuthException;
+import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.RegisterException;
 import com.github.listen_to_me.common.util.JwtUtils;
 import com.github.listen_to_me.common.util.MinioUtils;
@@ -49,6 +50,11 @@ public class AuthServiceImpl implements AuthService {
 
         SysUserAdapter userAdapter = (SysUserAdapter) auth.getPrincipal();
         SysUser user = userAdapter.getSysUser();
+
+        if ("BANNED".equals(user.getStatus())) {
+            log.debug("用户已被封禁 - ID: {}", user.getId());
+            throw new BaseException(403, "账号已被封禁");
+        }
 
         String token = JwtUtils.generateToken(
                 user.getId().toString(),
