@@ -53,4 +53,13 @@ public interface IConsultOrderService extends IService<ConsultOrder> {
      * @return 分页结果
      */
     IPage<ConsultOrderVO> getCreatorConsultPage(Long creatorId, ConsultPageQuery query);
+
+    /**
+     * 确认预约
+     * 
+     * @param creatorId 创作者ID
+     * @param orderId   订单ID
+     * @param address   预约地址（可选，不传则使用时间槽原地址）
+     */
+    void confirmConsult(Long creatorId, Long orderId, String address);
 }
