@@ -7,7 +7,8 @@ package com.github.listen_to_me.common.enumeration;
 public enum UniqueIndexEnum {
     UK_PHONE("phone", "手机号"),
     UK_EMAIL("email", "邮箱"),
-    UK_USERNAME("username", "用户名");
+    UK_USERNAME("username", "用户名"),
+    UK_COMMENT_USER("uk_comment_user", "点赞记录");
 
     private final String indexName;
     private final String fieldDesc;

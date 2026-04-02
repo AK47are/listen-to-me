@@ -3,8 +3,10 @@ package com.github.listen_to_me.controller.user;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.CommentDTO;
+import com.github.listen_to_me.domain.dto.CommentLikeDTO;
 import com.github.listen_to_me.domain.query.CommentQuery;
 import com.github.listen_to_me.domain.vo.CommentVO;
+import com.github.listen_to_me.service.CommentLikeService;
 import com.github.listen_to_me.service.CommentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user/comment")
 public class CommentController {
     private final CommentService commentService;
+    private final CommentLikeService commentLikeService;
 
     @PostMapping
     @Operation(summary = "发布评论")
@@ -32,5 +35,12 @@ public class CommentController {
     @GetMapping("/page")
     public Result<IPage<CommentVO>> getCommentPage(@ParameterObject CommentQuery commentQuery) {
         return Result.success(commentService.findCommentPage(commentQuery));
+    }
+
+    @Operation(summary = "点赞/取消点赞评论")
+    @PostMapping("/like")
+    public Result<Void> likeComment(@Valid @RequestBody CommentLikeDTO commentLikeDTO) {
+        commentLikeService.likeComment(commentLikeDTO);
+        return Result.success();
     }
 }
