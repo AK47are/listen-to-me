@@ -2,6 +2,7 @@ package com.github.listen_to_me.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -49,6 +50,7 @@ public class AudioInfo implements Serializable {
     private Integer playCount;
     private LocalDateTime createTime;
     @Schema(description = "逻辑删除：0-未删除 1-已删除")
+    @TableLogic
     private Byte isDeleted;
     @Schema(description = "可见性：PUBLIC-公开可见 PRIVATE-仅自己/管理员可见")
     private String visibility;
