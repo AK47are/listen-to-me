@@ -1,15 +1,16 @@
 package com.github.listen_to_me.service.impl;
 
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.io.FileTypeUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.file.FileNameUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.math.BigDecimal;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.producer.AudioTranscodeProducer;
@@ -19,10 +20,7 @@ import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.AudioDTO;
 import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
 import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
-import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.domain.entity.AudioInfo;
-import com.github.listen_to_me.domain.entity.AudioLike;
-import com.github.listen_to_me.domain.entity.PlayHistory;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioPublishVO;
@@ -34,23 +32,22 @@ import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.mapper.AudioLikeMapper;
 import com.github.listen_to_me.mapper.PlayHistoryMapper;
 import com.github.listen_to_me.service.IAudioInfoService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.io.FileTypeUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.file.FileNameUtil;
 import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.math.BigDecimal;
-import java.util.Map;
 
 /**
  * <p>
- *  服务实现类
+ * 服务实现类
  * </p>
  *
  * @author kun
@@ -70,6 +67,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     private final AudioLikeMapper audioLikeMapper;
 
     private final AudioFolderRelationMapper audioFolderRelationMapper;
+
     @Override
     public IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery) {
         // 构建分页
@@ -153,12 +151,12 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         RedisUtils.delete(RedisKey.TEMP_AUDIO_URL, audioUrlBase64);
         RedisUtils.delete(RedisKey.TEMP_COVER_URL, coverUrlBase64);
 
-
-        //发送转码任务到队列
+        // 发送转码任务到队列
         audioTranscodeProducer.sendTranscodeTask(audioInfo.getId(), (String) audioMap.get("objectName"),
                 audioInfo.getTrialDuration());
         return audioPublishVO;
     }
+
     @Override
     public void MoveAudioToOnline(Long audioId) throws Exception {
         log.info("将音频移动到在线存储 - audioId: {}", audioId);
@@ -190,18 +188,20 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     public CreatorAudioDetailVO getAudioDetail(Long id) {
         Long userId = SecurityUtils.getCurrentUserId();
         AudioInfo audioInfo = audioInfoMapper.selectById(id);
-        if(audioInfo == null || !audioInfo.getCreatorId().equals(userId)){
+        if (audioInfo == null || !audioInfo.getCreatorId().equals(userId)) {
             throw new BaseException(404, "稿件不存在");
         }
         CreatorAudioDetailVO creatorAudioDetailVO = new CreatorAudioDetailVO();
         BeanUtil.copyProperties(audioInfo, creatorAudioDetailVO);
         creatorAudioDetailVO.setCoverUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath()));
-        //TODO: 音频文字内容获取
+        // TODO: 音频文字内容获取
         creatorAudioDetailVO.setPlayCount(audioInfo.getPlayCount());
 
-        creatorAudioDetailVO.setLikeCount(audioInfo.getLikeCount());
+        // TODO: 等添加 Like 统计字段后再启用
+        // creatorAudioDetailVO.setLikeCount(audioInfo.getLikeCount());
 
-        creatorAudioDetailVO.setCollectCount(audioInfo.getCollectCount());
+        // TODO: 等添加 Collect 统计字段后再启用
+        // creatorAudioDetailVO.setCollectCount(audioInfo.getCollectCount());
 
         return creatorAudioDetailVO;
     }
@@ -210,13 +210,13 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     public AudioStatusVO getAudioStatus(Long id) {
         Long userId = SecurityUtils.getCurrentUserId();
         AudioInfo audioInfo = audioInfoMapper.selectById(id);
-        if(audioInfo == null || !audioInfo.getCreatorId().equals(userId)){
+        if (audioInfo == null || !audioInfo.getCreatorId().equals(userId)) {
             throw new BaseException(404, "稿件不存在");
         }
         AudioStatusVO audioStatusVO = new AudioStatusVO();
         audioStatusVO.setAudioId(id);
         audioStatusVO.setStatus(audioInfo.getStatus());
-        if("FAILED".equals(audioInfo.getStatus())){
+        if ("FAILED".equals(audioInfo.getStatus())) {
             audioStatusVO.setFailReason("转码失败");
         }
         return audioStatusVO;
@@ -225,20 +225,22 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     @Override
     public void updateAudio(AudioUpdateDTO audioUpdateDTO) {
         AudioInfo audioInfo = audioInfoMapper.selectById(audioUpdateDTO.getId());
-        if(audioInfo == null || !audioInfo.getCreatorId().equals(SecurityUtils.getCurrentUserId())) {
+        if (audioInfo == null || !audioInfo.getCreatorId().equals(SecurityUtils.getCurrentUserId())) {
             throw new BaseException(404, "稿件不存在");
         }
-        if(audioUpdateDTO.getCoverUrl() != null && !audioUpdateDTO.getCoverUrl().equals(audioInfo.getCoverPath())){
+        if (audioUpdateDTO.getCoverUrl() != null && !audioUpdateDTO.getCoverUrl().equals(audioInfo.getCoverPath())) {
             String coverUrlBase64 = Base64.encode(audioUpdateDTO.getCoverUrl());
-            if(RedisUtils.get(RedisKey.TEMP_COVER_URL, coverUrlBase64) != null) {
-                String coverPath =  RedisUtils.get(RedisKey.TEMP_COVER_URL, coverUrlBase64);
+            if (RedisUtils.get(RedisKey.TEMP_COVER_URL, coverUrlBase64) != null) {
+                String coverPath = RedisUtils.get(RedisKey.TEMP_COVER_URL, coverUrlBase64);
                 audioInfo.setCoverPath(coverPath);
             }
         }
 
-        if(audioUpdateDTO.getTrialDuration() != null && !audioUpdateDTO.getTrialDuration().equals(audioInfo.getTrialDuration())){
+        if (audioUpdateDTO.getTrialDuration() != null
+                && !audioUpdateDTO.getTrialDuration().equals(audioInfo.getTrialDuration())) {
             audioInfo.setStatus("PENDING_TRANSCODE");
-            audioTranscodeProducer.sendTranscodeTask(audioUpdateDTO.getId(), audioInfo.getRawPath(), audioInfo.getTrialDuration());
+            audioTranscodeProducer.sendTranscodeTask(audioUpdateDTO.getId(), audioInfo.getRawPath(),
+                    audioInfo.getTrialDuration());
         }
         audioInfo.setTitle(audioUpdateDTO.getTitle());
         audioInfo.setDescription(audioUpdateDTO.getDescription());
@@ -252,10 +254,10 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     public void removeAudioInfo(Long id) {
         Long userId = SecurityUtils.getCurrentUserId();
         AudioInfo audioInfo = audioInfoMapper.selectById(id);
-        if(audioInfo == null || !audioInfo.getCreatorId().equals(userId)){
+        if (audioInfo == null || !audioInfo.getCreatorId().equals(userId)) {
             throw new BaseException(404, "稿件不存在");
         }
-        //逻辑删除
+        // 逻辑删除
         audioInfo.setIsDeleted((byte) 1);
         audioInfoMapper.updateById(audioInfo);
     }
