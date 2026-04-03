@@ -97,3 +97,11 @@ alipay:
   # 开发需使用 ngrok 进行内网击穿，格式如下：https://{xxxx}.ngrok-free.app/api/user/callback/alipay
   notifyUrl: ${ALIPAY_NOTIFY_URL}
   gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+
+aliyun:
+  dashscope:
+    api-key: ${LISTEN_TO_ME_DASHSCOPE_API_KEY}
+    transcription-model: qwen3-asr-flash-filetrans
+    summarization-model: qwen3-omni-30b-a3b-captioner
+    translation-model: qwen-plus
+    slot-model: qwen-plus
