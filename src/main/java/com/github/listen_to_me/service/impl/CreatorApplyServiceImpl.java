@@ -8,15 +8,23 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.ConflictException;
 import com.github.listen_to_me.common.util.SecurityUtils;
+import com.github.listen_to_me.domain.dto.ApplyAuditDTO;
 import com.github.listen_to_me.domain.dto.CreatorApplyDTO;
 import com.github.listen_to_me.domain.entity.CreatorApply;
+import com.github.listen_to_me.domain.entity.SysRole;
+import com.github.listen_to_me.domain.entity.SysUser;
+import com.github.listen_to_me.domain.entity.SysUserRole;
 import com.github.listen_to_me.domain.query.AuditQuery;
 import com.github.listen_to_me.domain.vo.AuditApplyVO;
 import com.github.listen_to_me.domain.vo.CreatorApplyVO;
 import com.github.listen_to_me.mapper.CreatorApplyMapper;
+import com.github.listen_to_me.mapper.SysRoleMapper;
+import com.github.listen_to_me.mapper.SysUserMapper;
+import com.github.listen_to_me.mapper.SysUserRoleMapper;
 import com.github.listen_to_me.service.CreatorApplyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.stream.Collectors;
 
@@ -25,6 +33,9 @@ import java.util.stream.Collectors;
 public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, CreatorApply> implements CreatorApplyService {
 
     private final CreatorApplyMapper creatorApplyMapper;
+    private final SysUserMapper sysUserMapper;
+    private final SysUserRoleMapper sysUserRoleMapper;
+    private final SysRoleMapper sysRoleMapper;
 
     @Override
     public void addCreatorApply(CreatorApplyDTO creatorApplyDTO) {
@@ -68,5 +79,36 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
                 .stream().map(creatorApply -> BeanUtil.copyProperties(creatorApply, AuditApplyVO.class))
                 .collect(Collectors.toList()));
         return voPage;
+    }
+
+    @Transactional
+    @Override
+    public void auditApply(ApplyAuditDTO applyAuditDTO) {
+        CreatorApply creatorApply = getOne(Wrappers.lambdaQuery(CreatorApply.class)
+                .eq(CreatorApply::getId, applyAuditDTO.getApplyId()));
+        if(creatorApply == null || !"PENDING".equals(creatorApply.getStatus())){
+            throw new BaseException(400,"申请不存在或已处理");
+        }
+        if("APPROVED".equals(applyAuditDTO.getStatus())){
+            creatorApply.setStatus("APPROVED");
+            this.updateById(creatorApply);
+            sysUserMapper.update(Wrappers.lambdaUpdate(SysUser.class)
+                    .set(SysUser::getIsCreator,1)
+                    .eq(SysUser::getId, creatorApply.getUserId()));
+            Long role_id = sysRoleMapper.selectOne(Wrappers.lambdaQuery(SysRole.class)
+                    .eq(SysRole::getRoleCode,"ROLE_CREATOR")).getId();
+            sysUserRoleMapper.update(Wrappers.lambdaUpdate(SysUserRole.class)
+                            .set(SysUserRole::getRoleId,role_id)
+                            .eq(SysUserRole::getUserId, creatorApply.getUserId()));
+            // TODO 通知用户审核通过
+
+        }else if("REJECTED".equals(applyAuditDTO.getStatus())){
+            creatorApply.setStatus("REJECTED");
+            creatorApply.setReason(applyAuditDTO.getRejectReason());
+            this.updateById(creatorApply);
+            // TODO 通知用户驳回原因
+        }else{
+            throw new BaseException(400,"状态错误");
+        }
     }
 }
