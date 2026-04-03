@@ -46,7 +46,7 @@ public class AudioInfo implements Serializable {
     @Schema(description = "0-草稿/下架, 1-转码中, 2-已发布")
     private String status;
     @Schema(description = "点击量/热度基数")
-    private Integer viewCount;
+    private Integer playCount;
     private LocalDateTime createTime;
     @Schema(description = "逻辑删除：0-未删除 1-已删除")
     private Byte isDeleted;

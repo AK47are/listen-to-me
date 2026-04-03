@@ -48,7 +48,7 @@ INSERT INTO `sys_role_permission` (`role_id`, `perm_id`) VALUES
 -- 2. 音频资产域 - 测试数据
 -- ----------------------------
 -- 音频信息
-INSERT INTO `audio_info` (`creator_id`, `title`,`description`, `cover_path`, `raw_path`, `clip_path`, `is_paid`, `price`, `trial_duration`, `duration`, `audit_status`, `view_count`) VALUES
+INSERT INTO `audio_info` (`creator_id`, `title`,`description`, `cover_path`, `raw_path`, `clip_path`, `is_paid`, `price`, `trial_duration`, `duration`, `audit_status`, `play_count`) VALUES
 (2, '心理学入门30讲', '这是一个心理学入门的课程，包含心理学的定义、研究对象、认知心理学入门等', 'https://cover.com/psy30.jpg', 'minio/audio/psy30_raw.mp3', 'minio/audio/psy30_clip.mp3', 1, 29.90, 60, 60, 1, 2),
 (2, '职场沟通技巧', '这是一个职场沟通技巧的课程，包含沟通的核心、有效倾听、职场表达的3个技巧等', 'https://cover.com/office_talk.jpg', 'minio/audio/office_raw.mp3', 'minio/audio/office_clip.mp3', 1, 19.90, 45, 240, 1, 2),
 (5, '民间故事大全', '这是一个民间故事的课程，包含民间的狐仙故事、民间的狼妖传说等', 'https://cover.com/story.jpg', 'minio/audio/story_raw.mp3', 'minio/audio/story_clip.mp3',1, 9.90, 30, 300, 1, 2),
