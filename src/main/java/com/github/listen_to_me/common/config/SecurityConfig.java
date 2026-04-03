@@ -68,11 +68,11 @@ public class SecurityConfig {
                         .accessDeniedHandler((req, res, ex) -> {
                             String msg = "权限不足，拒绝访问";
                             String uri = req.getRequestURI();
-                            if (uri.contains("/creator/")) {
+                            if (uri.contains("/api/creator/")) {
                                 msg = "您还不是创作者，无法执行此操作";
-                            } else if (uri.contains("/admin/")) {
+                            } else if (uri.contains("/api/admin/")) {
                                 msg = "您还不是管理员，无法执行此操作";
-                            } else if (uri.contains("/user/")) {
+                            } else if (uri.contains("/api/user/")) {
                                 msg = "您还不是普通用户，无法执行此操作";
                             }
                             renderJson(res, HttpStatus.HTTP_FORBIDDEN, Result.fail(403, msg));
