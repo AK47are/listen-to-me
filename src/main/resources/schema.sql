@@ -291,3 +291,22 @@ CREATE TABLE IF NOT EXISTS comment_likes (
   CONSTRAINT fk_likes_comment FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
   CONSTRAINT fk_likes_user FOREIGN KEY (user_id) REFERENCES sys_user(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论点赞表';
+
+
+-- 创作者申请表
+-- 创作者申请表
+CREATE TABLE IF NOT EXISTS creator_apply (
+  id bigint PRIMARY KEY AUTO_INCREMENT,
+  user_id bigint NOT NULL,                           -- 申请人用户ID
+  real_name varchar(50) NOT NULL COMMENT '真实姓名',   -- 真实姓名
+  phone varchar(11) NOT NULL COMMENT '联系电话',     -- 手机号码
+  intro text COMMENT '个人简介/申请说明',            -- 自我介绍/申请理由
+  attachment varchar(500) COMMENT '申请附件',         -- 资质附件地址/文件信息
+  status ENUM('PENDING','APPROVED','REJECTED') NOT NULL DEFAULT 'PENDING' COMMENT '申请状态：待审核/已通过/已拒绝', -- 申请状态
+  reason varchar(255) COMMENT '审核拒绝原因',        -- 审核不通过的原因
+  create_time datetime DEFAULT CURRENT_TIMESTAMP COMMENT '申请时间', -- 申请提交时间
+  UNIQUE INDEX idx_user_id (user_id),                       -- 用户ID索引
+  INDEX idx_status (status),                         -- 申请状态索引
+  INDEX idx_create_time (create_time),                   -- 申请时间索引
+  CONSTRAINT fk_creator_apply_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='创作者申请表';

@@ -227,4 +227,12 @@ INSERT INTO comment_likes (comment_id, user_id) VALUES
 -- 评论14 (like_count=1)：用户2点赞
 (14, 2);
 -- 开启外键检查
+
+
+-- 创作者申请测试数据
+-- 批量插入创作者申请记录（已通过审核）
+INSERT INTO creator_apply (user_id, real_name, phone, status) VALUES
+(2, '陈梓菱', '13800138001', 'APPROVED'),
+(5, '张宏', '13800138004', 'APPROVED');
+
 SET FOREIGN_KEY_CHECKS = 1;
