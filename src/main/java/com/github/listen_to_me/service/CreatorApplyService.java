@@ -2,6 +2,7 @@ package com.github.listen_to_me.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.listen_to_me.domain.dto.ApplyAuditDTO;
 import com.github.listen_to_me.domain.dto.CreatorApplyDTO;
 import com.github.listen_to_me.domain.entity.CreatorApply;
 import com.github.listen_to_me.domain.query.AuditQuery;
@@ -13,4 +14,6 @@ public interface CreatorApplyService extends IService<CreatorApply> {
     CreatorApplyVO findApplyStatus();
 
     IPage<AuditApplyVO> findAuditApplyPage(AuditQuery query);
+
+    void auditApply(ApplyAuditDTO applyAuditDTO);
 }
