@@ -261,7 +261,6 @@ CREATE TABLE IF NOT EXISTS comment_likes (
   CONSTRAINT fk_likes_user FOREIGN KEY (user_id) REFERENCES sys_user(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='评论点赞表';
 
-
 -- 创作者申请表
 CREATE TABLE IF NOT EXISTS creator_apply (
   id bigint PRIMARY KEY AUTO_INCREMENT,
@@ -319,3 +318,20 @@ CREATE TABLE IF NOT EXISTS `user_recharge_order` (
 
     CONSTRAINT fk_recharge_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户虚拟币充值订单表';
+
+CREATE TABLE IF NOT EXISTS `ai_task` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `task_id` varchar(64) UNIQUE NOT NULL COMMENT '任务ID',
+  `user_id` bigint NOT NULL COMMENT '创建者ID',
+  `audio_id` bigint DEFAULT NULL COMMENT '音频ID（转写/摘要时必填）',
+  `type` ENUM('TRANSCRIPTION', 'SUMMARIZATION', 'SLOT_GENERATION') NOT NULL COMMENT '任务类型',
+  `status` ENUM('PENDING', 'PROCESSING', 'SUCCESS', 'FAILED') NOT NULL DEFAULT 'PENDING' COMMENT '任务状态',
+  `result` json COMMENT '任务结果',
+  `fail_reason` varchar(500) COMMENT '失败原因',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_task_id (task_id),
+  INDEX idx_user_id (user_id),
+  INDEX idx_audio_id (audio_id),
+  INDEX idx_status (status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI任务表';
