@@ -27,7 +27,7 @@ public interface IConsultSlotService extends IService<ConsultSlot> {
     void saveSlotBatch(List<SlotDTO> slotDTOList);
 
     /**
-     * 分页查询时间槽，创作者端使用，可返回 address
+     * 分页查询当前创作者的时间槽，创作者端使用，可返回 address
      * 
      * @param query 分页查询条件
      * @return 分页结果
@@ -48,4 +48,13 @@ public interface IConsultSlotService extends IService<ConsultSlot> {
      * @param slotId 时间槽ID
      */
     void removeSlot(Long slotId);
+
+    /**
+     * 分页查询创作者可用时间槽（用户端）
+     *
+     * @param creatorId 创作者ID
+     * @param pageQuery 分页参数
+     * @return 分页结果（隐藏 address）
+     */
+    IPage<SlotVO> getCreatorSlotPage(Long creatorId, SlotPageQuery pageQuery);
 }
