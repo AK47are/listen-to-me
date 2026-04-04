@@ -36,4 +36,15 @@
         ORDER BY uf.create_time DESC
     </select>
 
+    <select id="selectFansPage" resultType="com.github.listen_to_me.domain.vo.FansVO">
+        SELECT 
+            u.id AS user_id,
+            u.nickname,
+            u.avatar,
+            uf.create_time AS follow_time
+        FROM user_follow uf
+        LEFT JOIN sys_user u ON uf.user_id = u.id
+        WHERE uf.creator_id = #{creatorId}
+        ORDER BY uf.create_time DESC
+    </select>
 </mapper>

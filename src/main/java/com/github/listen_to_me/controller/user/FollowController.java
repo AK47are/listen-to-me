@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.CreatorVO;
+import com.github.listen_to_me.domain.vo.FansVO;
 import com.github.listen_to_me.service.IUserFollowService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,5 +51,12 @@ public class FollowController {
     public Result<IPage<CreatorVO>> getFollowPage(@ParameterObject PageQuery pageQuery,
             @AuthenticationPrincipal Long userId) {
         return Result.success(userFollowService.getFollowPage(userId, pageQuery));
+    }
+
+    @GetMapping("/{creatorId}/fans/page")
+    @Operation(summary = "分页查询创作者的粉丝列表")
+    public Result<IPage<FansVO>> getFansPage(@PathVariable Long creatorId,
+            @ParameterObject PageQuery pageQuery) {
+        return Result.success(userFollowService.getFansPage(creatorId, pageQuery));
     }
 }

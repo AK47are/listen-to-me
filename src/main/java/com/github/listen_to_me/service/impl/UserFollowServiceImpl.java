@@ -8,11 +8,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
-import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.common.util.MinioUtils;
+import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.entity.UserFollow;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.CreatorVO;
+import com.github.listen_to_me.domain.vo.FansVO;
 import com.github.listen_to_me.mapper.UserFollowMapper;
 import com.github.listen_to_me.service.ISysUserService;
 import com.github.listen_to_me.service.IUserFollowService;
@@ -85,6 +86,24 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         log.debug("分页查询关注的创作者 - 用户ID: {}", userId);
         Page<CreatorVO> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
         IPage<CreatorVO> result = baseMapper.selectFollowPage(page, userId);
+
+        result.getRecords().forEach(vo -> vo.setAvatar(MinioUtils.getPresignedUrl(vo.getAvatar())));
+
+        return result;
+    }
+
+    @Override
+    public IPage<FansVO> getFansPage(Long creatorId, PageQuery pageQuery) {
+        log.debug("分页查询粉丝列表 - 创作者ID: {}", creatorId);
+
+        // 校验是否为创作者
+        SysUser user = iSysUserService.getById(creatorId);
+        if (user == null || !user.getIsCreator()) {
+            throw new BaseException(400, "该用户不是创作者");
+        }
+
+        Page<FansVO> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
+        IPage<FansVO> result = baseMapper.selectFansPage(page, creatorId);
 
         result.getRecords().forEach(vo -> vo.setAvatar(MinioUtils.getPresignedUrl(vo.getAvatar())));
 

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.entity.UserFollow;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.CreatorVO;
+import com.github.listen_to_me.domain.vo.FansVO;
 
 public interface IUserFollowService extends IService<UserFollow> {
 
@@ -32,4 +33,13 @@ public interface IUserFollowService extends IService<UserFollow> {
      * @return 分页结果
      */
     IPage<CreatorVO> getFollowPage(Long userId, PageQuery pageQuery);
+
+    /**
+     * 分页查询指定创作者的粉丝列表
+     *
+     * @param creatorId 创作者ID
+     * @param pageQuery 分页查询条件
+     * @return 分页结果
+     */
+    IPage<FansVO> getFansPage(Long creatorId, PageQuery pageQuery);
 }
