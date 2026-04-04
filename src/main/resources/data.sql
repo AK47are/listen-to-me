@@ -244,4 +244,8 @@ INSERT INTO user_follow (user_id, creator_id, create_time) VALUES
 -- 深夜听众 (user_id=4) 关注了 有声的小雅 (creator_id=2)
 (4, 2, '2025-05-22 09:15:00');
 
+INSERT INTO `creator_profile` (`user_id`, `intro`) VALUES
+(2, '10年后端开发经验，擅长微服务架构设计、分布式系统、高并发处理。曾任职于多家互联网大厂。'),
+(5, '12年产品经验，从0到1主导过多个千万级用户产品，擅长产品规划和用户增长策略。');
+
 SET FOREIGN_KEY_CHECKS = 1;

@@ -322,3 +322,13 @@ CREATE TABLE IF NOT EXISTS `user_follow` (
   CONSTRAINT fk_follow_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`),
   CONSTRAINT fk_follow_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户关注创作者表';
+
+-- 创作者资料表
+CREATE TABLE IF NOT EXISTS `creator_profile` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `user_id` bigint NOT NULL UNIQUE COMMENT '用户ID',
+  `intro` text COMMENT '个人简介',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_creator_profile_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='创作者资料表';
