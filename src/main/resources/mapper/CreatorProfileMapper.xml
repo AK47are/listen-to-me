@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.listen_to_me.mapper.CreatorProfileMapper">
+
+    <sql id="creatorStatFields">
+        u.id AS creator_id,
+        u.nickname,
+        u.avatar,
+        cp.intro,
+        (
+            SELECT COUNT(*) FROM consult_order co
+            WHERE co.creator_id = u.id
+            AND co.status = 'COMPLETED'
+            AND NOT EXISTS (
+                SELECT 1 FROM refund_apply ra WHERE ra.order_id = co.id
+            )
+        ) AS consult_count,
+        (
+            SELECT COUNT(*) FROM audio_info ai
+            WHERE ai.creator_id = u.id
+              AND ai.audit_status = 1
+              AND ai.is_deleted = 0
+        ) AS audio_count,
+        (
+            SELECT COUNT(*) FROM user_follow uf2 WHERE uf2.creator_id = u.id
+        ) AS fans_count,
+        (
+            SELECT MIN(cs.price) FROM consult_slot cs
+            WHERE cs.creator_id = u.id AND cs.status = 'AVAILABLE'
+        ) AS min_price
+    </sql>
+
+    
+    <select id="selectCreatorPage" resultType="com.github.listen_to_me.domain.vo.CreatorVO">
+        SELECT 
+            <include refid="creatorStatFields"/>,
+            EXISTS (
+                SELECT 1 FROM user_follow uf 
+                WHERE uf.user_id = #{userId} AND uf.creator_id = u.id
+            ) AS is_following
+        FROM sys_user u
+        LEFT JOIN creator_profile cp ON u.id = cp.user_id
+        WHERE u.is_creator = 1
+        AND EXISTS (
+            SELECT 1 FROM creator_apply ca 
+            WHERE ca.user_id = u.id AND ca.status = 'APPROVED'
+        )
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (u.nickname LIKE CONCAT('%', #{query.keyword}, '%')
+                OR cp.intro LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        ORDER BY consult_count DESC
+    </select>
+
+</mapper>
