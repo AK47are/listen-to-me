@@ -4,10 +4,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.domain.entity.SysUser;
+import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.domain.entity.UserFollow;
+import com.github.listen_to_me.domain.query.PageQuery;
+import com.github.listen_to_me.domain.vo.CreatorVO;
 import com.github.listen_to_me.mapper.UserFollowMapper;
 import com.github.listen_to_me.service.ISysUserService;
 import com.github.listen_to_me.service.IUserFollowService;
@@ -73,5 +78,16 @@ public class UserFollowServiceImpl extends ServiceImpl<UserFollowMapper, UserFol
         }
 
         log.debug("取消关注成功 - 用户ID: {}, 创作者ID: {}", userId, creatorId);
+    }
+
+    @Override
+    public IPage<CreatorVO> getFollowPage(Long userId, PageQuery pageQuery) {
+        log.debug("分页查询关注的创作者 - 用户ID: {}", userId);
+        Page<CreatorVO> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
+        IPage<CreatorVO> result = baseMapper.selectFollowPage(page, userId);
+
+        result.getRecords().forEach(vo -> vo.setAvatar(MinioUtils.getPresignedUrl(vo.getAvatar())));
+
+        return result;
     }
 }

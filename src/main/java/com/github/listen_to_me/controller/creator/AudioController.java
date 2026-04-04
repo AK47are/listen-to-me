@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Tag(name = "音频稿件管理", description = "包含上传音频、上传封面等接口")
 public class AudioController {
     private final IAudioInfoService audioInfoService;
+
     @PostMapping("/upload")
     @PreAuthorize("hasAuthority('audio:upload')")
     @Operation(summary = "上传音频", description = "上传 MP3 格式的音频文件")
@@ -47,18 +48,22 @@ public class AudioController {
             @Parameter(description = "音频稿件信息", required = true) @RequestBody AudioDTO audioDTO) throws Exception {
         return Result.success(audioInfoService.saveAudio(audioDTO));
     }
+
     @GetMapping("/page")
-    public Result<IPage<CreatorAudioVO>> getAudioPage(@ParameterObject PageQuery pageQuery){
+    public Result<IPage<CreatorAudioVO>> getAudioPage(@ParameterObject PageQuery pageQuery) {
         return Result.success(audioInfoService.getAudioPage(pageQuery));
     }
+
     @GetMapping("/{id}")
     public Result<CreatorAudioDetailVO> getAudio(@PathVariable Long id){
-        return Result.success(audioInfoService.getAudioDetail(id));
+        return Result.success(audioInfoService.(id));
     }
+
     @GetMapping("/{id}/status")
-    public Result<AudioStatusVO> getAudioStatus(@PathVariable Long id){
+    public Result<AudioStatusVO> getAudioStatus(@PathVariable Long id) {
         return Result.success(audioInfoService.getAudioStatus(id));
     }
+
     @PutMapping
     public Result<Void> updateAudio(@RequestBody AudioUpdateDTO audioUpdateDTO) {
         audioInfoService.updateAudio(audioUpdateDTO);

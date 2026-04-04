@@ -1,16 +1,15 @@
 package com.github.listen_to_me.service.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.math.BigDecimal;
-import java.util.Map;
-
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
+import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.io.FileTypeUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.file.FileNameUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.producer.AudioTranscodeProducer;
@@ -20,7 +19,10 @@ import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.AudioDTO;
 import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
 import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
+import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.domain.entity.AudioInfo;
+import com.github.listen_to_me.domain.entity.AudioLike;
+import com.github.listen_to_me.domain.entity.PlayHistory;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioPublishVO;
@@ -32,18 +34,19 @@ import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.mapper.AudioLikeMapper;
 import com.github.listen_to_me.mapper.PlayHistoryMapper;
 import com.github.listen_to_me.service.IAudioInfoService;
-
-import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.codec.Base64;
-import cn.hutool.core.io.FileTypeUtil;
-import cn.hutool.core.io.FileUtil;
-import cn.hutool.core.io.IoUtil;
-import cn.hutool.core.io.file.FileNameUtil;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bramp.ffmpeg.FFprobe;
 import net.bramp.ffmpeg.probe.FFmpegProbeResult;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * <p>

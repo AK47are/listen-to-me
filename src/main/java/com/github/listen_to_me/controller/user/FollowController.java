@@ -1,13 +1,18 @@
 package com.github.listen_to_me.controller.user;
 
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
+import com.github.listen_to_me.domain.query.PageQuery;
+import com.github.listen_to_me.domain.vo.CreatorVO;
 import com.github.listen_to_me.service.IUserFollowService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,5 +43,12 @@ public class FollowController {
             @AuthenticationPrincipal Long userId) {
         userFollowService.unfollow(userId, creatorId);
         return Result.success();
+    }
+
+    @GetMapping("/follow/page")
+    @Operation(summary = "分页查询关注的创作者列表")
+    public Result<IPage<CreatorVO>> getFollowPage(@ParameterObject PageQuery pageQuery,
+            @AuthenticationPrincipal Long userId) {
+        return Result.success(userFollowService.getFollowPage(userId, pageQuery));
     }
 }

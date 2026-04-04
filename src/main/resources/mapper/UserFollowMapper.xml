@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.listen_to_me.mapper.UserFollowMapper">
+
+    <select id="selectFollowPage" resultType="com.github.listen_to_me.domain.vo.CreatorVO">
+        SELECT 
+            u.id AS creator_id,
+            u.nickname,
+            u.avatar,
+            COALESCE((
+                SELECT COUNT(*) FROM consult_order co
+                WHERE co.creator_id = u.id
+                  AND co.status = 'COMPLETED'
+                  AND NOT EXISTS (
+                      SELECT 1 FROM refund_apply ra WHERE ra.order_id = co.id
+                  )
+            ), 0) AS consult_count,
+            COALESCE((
+                SELECT COUNT(*) FROM audio_info ai
+                WHERE ai.creator_id = u.id
+                  AND ai.audit_status = 1
+                  AND ai.is_deleted = 0
+            ), 0) AS audio_count,
+            COALESCE((
+                SELECT COUNT(*) FROM user_follow uf2 WHERE uf2.creator_id = u.id
+            ), 0) AS fans_count,
+            COALESCE((
+                SELECT MIN(cs.price) FROM consult_slot cs
+                WHERE cs.creator_id = u.id AND cs.status = 'AVAILABLE'
+            ), 0) AS min_price,
+            TRUE AS is_following
+        FROM user_follow uf
+        LEFT JOIN sys_user u ON uf.creator_id = u.id
+        WHERE uf.user_id = #{userId}
+          AND u.is_creator = 1
+        ORDER BY uf.create_time DESC
+    </select>
+
+</mapper>
