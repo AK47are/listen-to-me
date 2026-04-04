@@ -11,8 +11,6 @@ public class AudioVO {
     private String title;
 
     private String coverUrl;
-    // TODO: 根据用户是否付费以及音频是否免费，返回不同的url
-    private String audioUrl;
 
     private BigDecimal price;
 
