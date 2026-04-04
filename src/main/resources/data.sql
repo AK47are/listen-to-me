@@ -235,4 +235,13 @@ INSERT INTO creator_apply (user_id, real_name, phone, status) VALUES
 (2, '陈梓菱', '13800138001', 'APPROVED'),
 (5, '张宏', '13800138004', 'APPROVED');
 
+-- 用户关注创作者记录
+INSERT INTO user_follow (user_id, creator_id, create_time) VALUES
+-- 听书小迷弟 (user_id=3) 关注了 有声的小雅 (creator_id=2)
+(3, 2, '2025-05-20 10:30:00'),
+-- 听书小迷弟 (user_id=3) 关注了 老杨说故事 (creator_id=5)
+(3, 5, '2025-05-21 14:20:00'),
+-- 深夜听众 (user_id=4) 关注了 有声的小雅 (creator_id=2)
+(4, 2, '2025-05-22 09:15:00');
+
 SET FOREIGN_KEY_CHECKS = 1;
