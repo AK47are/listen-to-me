@@ -25,7 +25,7 @@ const getFolderList = async () => {
       getFavoriteList()
     }
   } catch (error) {
-    ElMessage.error('获取收藏夹列表失败')
+    console.error(error.message)
   }
 }
 
@@ -41,7 +41,6 @@ const getFavoriteList = async () => {
     audioList.value = res.records || []
   } catch (error) {
     console.error(error.message)
-    ElMessage.error('获取收藏列表失败')
   } finally {
     loading.value = false
   }
@@ -59,7 +58,7 @@ const handleCreateFolder = async () => {
     folderForm.value = { name: '', description: '' }
     await getFolderList()
   } catch (error) {
-    ElMessage.error('创建失败')
+    console.error(error.message)
   }
 }
 
@@ -79,7 +78,7 @@ const handleDeleteFolder = async (folderId) => {
     await getFolderList()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('删除失败')
+      console.error(error.message)
     }
   }
 }

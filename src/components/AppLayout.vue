@@ -9,6 +9,7 @@ const userStore = useUserStore()
 const isLogin = computed(() => userStore.isLogin)
 const userInfo = computed(() => userStore.userInfo)
 const isCreator = computed(() => userStore.userInfo.isCreator === 1)
+const isAdmin = computed(() => userStore.userInfo.username === 'admin')
 
 const handleNavigation = (path) => {
   router.push(path)
@@ -76,6 +77,11 @@ const handleLogout = () => {
                     </el-dropdown-item>
                     <el-dropdown-item @click="handleNavigation('/creator/consult')">
                       <el-icon><Message /></el-icon> 预约订单管理
+                    </el-dropdown-item>
+                  </template>
+                  <template v-if="isAdmin">
+                    <el-dropdown-item @click="handleNavigation('/admin')">
+                      <el-icon><Setting /></el-icon> 管理面板
                     </el-dropdown-item>
                   </template>
                   <el-dropdown-item divided @click="handleLogout">

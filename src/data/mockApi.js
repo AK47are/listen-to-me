@@ -9,6 +9,8 @@ const mockApi = {
         return Promise.resolve(mockData.listenerLogin)
       } else if (data.username === 'creator') {
         return Promise.resolve(mockData.creatorLogin)
+      } else if (data.username === 'admin') {
+        return Promise.resolve(mockData.adminLogin)
       } else {
         return Promise.resolve(mockData.login)
       }
@@ -267,6 +269,58 @@ const mockApi = {
         records: slotsWithCreator.slice(start, end),
         total: slotsWithCreator.length
       })
+    }
+  },
+
+  // 管理员相关
+  admin: {
+    // 管理员登录
+    login(data) {
+      if (data.username === 'admin') {
+        return Promise.resolve(mockData.adminLogin)
+      } else {
+        return Promise.resolve(mockData.login)
+      }
+    },
+    
+    // 待审音频分页
+    getAuditAudioPage(params) {
+      return Promise.resolve(mockData.auditAudioList)
+    },
+    
+    // 执行音频审核
+    auditAudio(data) {
+      return Promise.resolve({})
+    },
+    
+    // 封禁/解封用户
+    updateUserStatus(data) {
+      return Promise.resolve({})
+    },
+    
+    // 待审申请分页
+    getAuditApplyPage(params) {
+      return Promise.resolve(mockData.auditApplyList)
+    },
+    
+    // 执行申请审核
+    auditApply(data) {
+      return Promise.resolve({})
+    },
+    
+    // 全站数据大盘
+    getDashboard(params) {
+      return Promise.resolve(mockData.dashboard)
+    },
+    
+    // 退款申请分页
+    getRefundApplyPage(params) {
+      return Promise.resolve(mockData.refundApplyList)
+    },
+    
+    // 审核退款
+    auditRefund(data) {
+      return Promise.resolve({})
     }
   }
 }

@@ -615,7 +615,155 @@ const mockData = {
       minPrice: 55,
       isOnline: true
     }
-  ]
+  ],
+
+  // 管理员登录响应
+  adminLogin: {
+    data: {
+      token: 'mock-token-admin-123456',
+      userInfo: {
+        id: 0,
+        username: 'admin',
+        nickname: '管理员',
+        avatar: 'https://randomuser.me/api/portraits/men/68.jpg',
+        phone: '13800138009',
+        email: 'admin@example.com',
+        userType: 'ADMIN'
+      }
+    }
+  },
+
+  // 待审音频列表
+  auditAudioList: {
+    records: [
+      {
+        id: 1001,
+        title: '如何成为一名优秀的程序员',
+        coverUrl: 'https://picsum.photos/400/400?random=10',
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+        duration: 2400,
+        creatorId: 88,
+        creatorName: '后端架构师',
+        description: '本课程深入讲解如何成为一名优秀的程序员，包括编程思维、代码规范、持续学习等方面内容。',
+        transcript: '大家好，今天我要分享的是如何成为一名优秀的程序员。首先，我们需要培养良好的编程思维，这包括抽象思维、逻辑思维和系统思维。其次，代码规范非常重要，良好的代码规范不仅能让你的代码更易读，也能提高团队协作效率。最后，持续学习是程序员的必修课，技术在不断更新，我们需要保持学习的热情。',
+        submitTime: 1711425600000
+      },
+      {
+        id: 1002,
+        title: '前端性能优化实战',
+        coverUrl: 'https://picsum.photos/400/400?random=11',
+        audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3',
+        duration: 1800,
+        creatorId: 89,
+        creatorName: '前端专家',
+        description: '前端性能优化是一个重要的话题，本课程将探讨一些实战技巧，帮助你提升网站性能。',
+        transcript: '前端性能优化是一个重要的话题，今天我们来探讨一些实战技巧。首先，我们要关注资源加载优化，包括图片懒加载、代码分割、CDN加速等。其次，渲染性能也很关键，我们要避免重排和重绘，使用CSS硬件加速。最后，缓存策略能显著提升用户体验，合理使用浏览器缓存和服务端缓存。',
+        submitTime: 1711512000000
+      }
+    ],
+    total: 2
+  },
+
+  // 待审申请列表
+  auditApplyList: {
+    records: [
+      {
+        applyId: 1,
+        userId: 1001,
+        username: '听众_8848',
+        realName: '张三',
+        phone: '13800000000',
+        intro: '资深后端工程师，擅长技术分享',
+        attachment: 'https://picsum.photos/400/400?random=20',
+        applyTime: 1711425600000
+      },
+      {
+        applyId: 2,
+        userId: 1002,
+        username: '技术爱好者',
+        realName: '李四',
+        phone: '13800000001',
+        intro: '前端开发工程师，有丰富的项目经验',
+        attachment: 'https://picsum.photos/400/400?random=21',
+        applyTime: 1711512000000
+      }
+    ],
+    total: 2
+  },
+
+  // 全站数据大盘
+  dashboard: {
+    totalSales: 285000.00,
+    todaySales: 1500.00,
+    activeUsers: 12000,
+    totalUsers: 50000,
+    monthlyActiveUsers: 25000,
+    conversionRate: 0.085,
+    salesTrend: [
+      { date: '2026-03-20', amount: 1200 },
+      { date: '2026-03-21', amount: 1800 },
+      { date: '2026-03-22', amount: 1500 },
+      { date: '2026-03-23', amount: 2000 },
+      { date: '2026-03-24', amount: 1700 },
+      { date: '2026-03-25', amount: 1900 },
+      { date: '2026-03-26', amount: 2200 }
+    ],
+    hotAudioList: [
+      { id: 1, title: 'Spring Boot 核心原理解析', playCount: 1205 },
+      { id: 2, title: 'Vue 3 组合式 API 实战', playCount: 980 },
+      { id: 3, title: 'React 性能优化技巧', playCount: 850 },
+      { id: 4, title: '微服务架构设计', playCount: 720 },
+      { id: 5, title: 'Docker 容器化实践', playCount: 680 }
+    ],
+    creatorEarnings: [
+      { creatorName: '后端架构师', amount: 5000 },
+      { creatorName: '前端专家', amount: 3200 },
+      { creatorName: 'AI算法工程师', amount: 2800 },
+      { creatorName: '产品经理老王', amount: 2500 },
+      { creatorName: '数据分析师Lisa', amount: 1800 }
+    ]
+  },
+
+  // 退款申请列表
+  refundApplyList: {
+    records: [
+      {
+        id: 1,
+        orderId: 1,
+        slotId: 1,
+        date: '2026-04-01',
+        startTime: '10:00',
+        endTime: '11:00',
+        price: 50,
+        orderStatus: 'CONFIRMED',
+        userId: 1001,
+        userNickname: '听众_8848',
+        userAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
+        creatorId: 88,
+        creatorName: '后端架构师',
+        reason: '咨询质量不好，未解决我的问题',
+        applyTime: 1711425600000
+      },
+      {
+        id: 2,
+        orderId: 3,
+        slotId: 3,
+        date: '2026-04-02',
+        startTime: '10:00',
+        endTime: '11:00',
+        price: 50,
+        orderStatus: 'COMPLETED',
+        userId: 1002,
+        userNickname: '技术爱好者',
+        userAvatar: 'https://randomuser.me/api/portraits/women/22.jpg',
+        creatorId: 88,
+        creatorName: '后端架构师',
+        reason: '预约时间冲突，无法参加',
+        applyTime: 1711512000000
+      }
+    ],
+    total: 2
+  }
 }
 
 export default mockData
