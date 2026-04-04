@@ -1,5 +1,6 @@
 package com.github.listen_to_me.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -202,5 +203,39 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
             log.debug("时间槽冲突 - 数量: {}", conflictCount);
             throw new ConflictException("时间槽与已有槽位冲突");
         }
+    }
+
+    @Override
+    public IPage<SlotVO> getCreatorSlotPage(Long creatorId, SlotPageQuery query) {
+        log.debug("分页查询创作者时间槽 - 创作者ID: {}, 开始时间: {}, 结束时间: {}",
+                creatorId, query.getStartTime(), query.getEndTime());
+
+        Page<ConsultSlot> page = new Page<>(query.getPageNum(), query.getPageSize());
+        LambdaQueryWrapper<ConsultSlot> wrapper = Wrappers.<ConsultSlot>lambdaQuery()
+                .eq(ConsultSlot::getCreatorId, creatorId)
+                .eq(ConsultSlot::getStatus, "AVAILABLE")
+                .gt(ConsultSlot::getStartTime, LocalDateTime.now());
+
+        if (query.getStartTime() != null) {
+            wrapper.ge(ConsultSlot::getStartTime, query.getStartTime());
+        }
+        if (query.getEndTime() != null) {
+            wrapper.le(ConsultSlot::getEndTime, query.getEndTime());
+        }
+
+        wrapper.orderByAsc(ConsultSlot::getStartTime);
+
+        IPage<ConsultSlot> slotPage = page(page, wrapper);
+
+        return slotPage.convert(slot -> {
+            SlotVO vo = new SlotVO();
+            vo.setId(slot.getId());
+            vo.setStartTime(slot.getStartTime());
+            vo.setEndTime(slot.getEndTime());
+            vo.setPrice(slot.getPrice());
+            vo.setAddress(null);
+            vo.setStatus(slot.getStatus());
+            return vo;
+        });
     }
 }
