@@ -1,16 +1,42 @@
 package com.github.listen_to_me.controller.user;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.service.IUserFollowService;
 
-import lombok.RequiredArgsConstructor;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
-@RequiredArgsConstructor
+@AllArgsConstructor
 @RequestMapping("/user/creator")
+@Tag(name = "创作者关注", description = "包含关注、取消关注等接口")
 public class FollowController {
 
     private final IUserFollowService userFollowService;
+
+    @PostMapping("/{creatorId}/follow")
+    @Operation(summary = "关注创作者")
+    public Result<Void> follow(@PathVariable Long creatorId,
+            @AuthenticationPrincipal Long userId) {
+        userFollowService.follow(userId, creatorId);
+        return Result.success();
+    }
+
+    @DeleteMapping("/{creatorId}/follow")
+    @Operation(summary = "取消关注")
+    public Result<Void> unfollow(@PathVariable Long creatorId,
+            @AuthenticationPrincipal Long userId) {
+        userFollowService.unfollow(userId, creatorId);
+        return Result.success();
+    }
 }
