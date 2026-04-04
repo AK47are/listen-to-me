@@ -294,7 +294,6 @@ CREATE TABLE IF NOT EXISTS comment_likes (
 
 
 -- 创作者申请表
--- 创作者申请表
 CREATE TABLE IF NOT EXISTS creator_apply (
   id bigint PRIMARY KEY AUTO_INCREMENT,
   user_id bigint NOT NULL,                           -- 申请人用户ID
@@ -310,3 +309,16 @@ CREATE TABLE IF NOT EXISTS creator_apply (
   INDEX idx_create_time (create_time),                   -- 申请时间索引
   CONSTRAINT fk_creator_apply_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='创作者申请表';
+
+-- 用户关注创作者表
+CREATE TABLE IF NOT EXISTS `user_follow` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `user_id` bigint NOT NULL COMMENT '关注者用户ID',
+  `creator_id` bigint NOT NULL COMMENT '被关注的创作者ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '关注时间',
+  UNIQUE INDEX uk_user_creator (user_id, creator_id),
+  INDEX idx_creator_id (creator_id),
+  INDEX idx_user_id (user_id),
+  CONSTRAINT fk_follow_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`),
+  CONSTRAINT fk_follow_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户关注创作者表';
