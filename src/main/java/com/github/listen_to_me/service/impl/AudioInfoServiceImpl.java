@@ -3,7 +3,13 @@ package com.github.listen_to_me.service.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +35,7 @@ import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.CreatorAudioVO;
 import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.mapper.AudioVOMapper;
+import com.github.listen_to_me.service.HotRankService;
 import com.github.listen_to_me.service.IAudioInfoService;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -59,6 +66,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     private final AudioTranscodeProducer audioTranscodeProducer;
     private final AudioInfoMapper audioInfoMapper;
     private final AudioVOMapper audioVOMapper;
+    private final HotRankService hotRankService;
 
     @Override
     public IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery) {
@@ -252,5 +260,29 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         // 逻辑删除
         audioInfo.setIsDeleted((byte) 1);
         audioInfoMapper.updateById(audioInfo);
+    }
+
+    @Override
+    public List<AudioVO> getHotList() {
+        Set<Object> topIds = hotRankService.getTopN(10);
+        if (topIds == null || topIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<Long> audioIds = topIds.stream()
+                .map(id -> Long.valueOf(id.toString()))
+                .collect(Collectors.toList());
+
+        List<AudioVO> result = audioVOMapper.selectByIds(audioIds);
+        result.forEach(vo -> vo.setCoverUrl(MinioUtils.getPresignedUrl(vo.getCoverUrl())));
+
+        // 保持热榜顺序
+        Map<Long, AudioVO> idToVo = result.stream()
+                .collect(Collectors.toMap(AudioVO::getId, Function.identity()));
+
+        return audioIds.stream()
+                .map(idToVo::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 }

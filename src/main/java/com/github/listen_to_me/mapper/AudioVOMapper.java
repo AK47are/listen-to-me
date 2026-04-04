@@ -1,5 +1,7 @@
 package com.github.listen_to_me.mapper;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Mapper;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -14,4 +16,6 @@ public interface AudioVOMapper {
     IPage<AudioVO> selectByLikeUserId(Page<AudioVO> page, Long userId);
 
     IPage<AudioVO> selectHistoryByUserId(Page<AudioVO> page, Long userId);
+
+    List<AudioVO> selectByIds(List<Long> ids);
 }

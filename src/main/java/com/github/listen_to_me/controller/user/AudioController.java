@@ -1,5 +1,8 @@
 package com.github.listen_to_me.controller.user;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,7 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
 import com.github.listen_to_me.domain.dto.LikeActionDTO;
+import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.service.IAudioFolderRelationService;
+import com.github.listen_to_me.service.IAudioInfoService;
 import com.github.listen_to_me.service.IAudioLikeService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AudioController {
 
     private final IAudioLikeService audioLikeService;
+    private final IAudioInfoService audioInfoService;
     private final IAudioFolderRelationService audioFolderRelationService;
 
     @PostMapping("/action")
@@ -40,4 +46,9 @@ public class AudioController {
         return Result.success();
     }
 
+    @GetMapping("/hot")
+    @Operation(summary = "热榜")
+    public Result<List<AudioVO>> getHotList() {
+        return Result.success(audioInfoService.getHotList());
+    }
 }

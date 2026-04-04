@@ -12,11 +12,14 @@ import com.github.listen_to_me.domain.vo.AudioPublishVO;
 import com.github.listen_to_me.domain.vo.AudioStatusVO;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.CreatorAudioVO;
+
+import java.util.List;
+
 import org.springframework.web.multipart.MultipartFile;
 
 /**
  * <p>
- *  服务类
+ * 服务类
  * </p>
  *
  * @author kun
@@ -43,4 +46,6 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     void updateAudio(AudioUpdateDTO audioUpdateDTO);
 
     void removeAudioInfo(Long id);
+
+    List<AudioVO> getHotList();
 }
