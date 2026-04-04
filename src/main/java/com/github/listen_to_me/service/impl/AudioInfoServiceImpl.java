@@ -28,6 +28,7 @@ import com.github.listen_to_me.domain.vo.AudioStatusVO;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.CreatorAudioVO;
 import com.github.listen_to_me.mapper.AudioInfoMapper;
+import com.github.listen_to_me.mapper.AudioVOMapper;
 import com.github.listen_to_me.service.IAudioInfoService;
 
 import cn.hutool.core.bean.BeanUtil;
@@ -36,7 +37,6 @@ import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.FileNameUtil;
-import jakarta.annotation.Resource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bramp.ffmpeg.FFprobe;
@@ -54,19 +54,20 @@ import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 @AllArgsConstructor
 @Slf4j
 public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo> implements IAudioInfoService {
-    private final AudioInfoMapper audioInfoMapper;
+
     // 注入生产者
-    @Resource
-    private AudioTranscodeProducer audioTranscodeProducer;
+    private final AudioTranscodeProducer audioTranscodeProducer;
+    private final AudioInfoMapper audioInfoMapper;
+    private final AudioVOMapper audioVOMapper;
 
     @Override
     public IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery) {
-        // 构建分页
-        Page<AudioInfo> page = new Page<>(favoriteQuery.getPageNum(), favoriteQuery.getPageSize());
+        Page<AudioVO> page = new Page<>(favoriteQuery.getPageNum(), favoriteQuery.getPageSize());
+        IPage<AudioVO> result = audioVOMapper.selectByFolderId(page, favoriteQuery.getFolderId());
 
-        // 直接调用 mapper 联表分页查询
-        IPage<AudioInfo> audioPage = audioInfoMapper.selectAudioByFolderId(page, favoriteQuery.getFolderId());
-        return audioPage.convert(audio -> BeanUtil.copyProperties(audio, AudioVO.class));
+        result.getRecords().forEach(vo -> vo.setCoverUrl(MinioUtils.getPresignedUrl(vo.getCoverUrl())));
+
+        return result;
     }
 
     @Override

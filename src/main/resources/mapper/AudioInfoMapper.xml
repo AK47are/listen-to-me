@@ -6,19 +6,10 @@
         SET status = #{status}
         WHERE id = #{audioId}
     </update>
+
     <update id="updateStatusAndClipPathById">
         UPDATE audio_info
         SET status = #{status}, clip_path = #{clipPath}
         WHERE id = #{audioId}
     </update>
-
-    <select id="selectAudioByFolderId" resultType="com.github.listen_to_me.domain.entity.AudioInfo">
-        SELECT a.*
-        FROM audio_info a
-        INNER JOIN audio_folder_relation as r ON a.id = r.audio_id
-        WHERE 1=1
-        <if test="folderId != null">
-            AND r.folder_id = #{folderId}
-        </if>
-    </select>
 </mapper>

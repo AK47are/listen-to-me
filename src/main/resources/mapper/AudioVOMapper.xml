@@ -16,4 +16,12 @@
           AND ai.audit_status = 1
     </sql>
 
+    <select id="selectByFolderId" resultType="com.github.listen_to_me.domain.vo.AudioVO">
+        <include refid="baseAudioVOFields"/>
+        AND EXISTS (
+            SELECT 1 FROM audio_folder_relation afr
+            WHERE afr.audio_id = ai.id AND afr.folder_id = #{folderId}
+        )
+    </select>
+
 </mapper>
