@@ -8,6 +8,7 @@ public class CreatorVO {
     private Long creatorId;
     private String nickname;
     private String avatar;
+    private String intro;
     private Long consultCount;
     private Long audioCount;
     private Long fansCount;
