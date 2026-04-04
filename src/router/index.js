@@ -73,11 +73,6 @@ const router = createRouter({
           component: () => import('@/views/CreatorSlots.vue'),
         },
         {
-          path: 'consult/book',
-          name: 'ConsultBook',
-          component: () => import('@/views/ConsultBook.vue'),
-        },
-        {
           path: 'user/consult',
           name: 'UserConsult',
           component: () => import('@/views/UserConsult.vue'),

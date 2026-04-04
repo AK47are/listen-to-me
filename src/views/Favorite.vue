@@ -21,7 +21,7 @@ const getFolderList = async () => {
     const res = await favoriteApi.getFolderList()
     folders.value = res.data
     if (folders.value.length > 0 && !currentFolderId.value) {
-      currentFolderId.value = folders.value[0].folderId
+      currentFolderId.value = folders.value[0].id
       getFavoriteList()
     }
   } catch (error) {
@@ -125,9 +125,9 @@ onMounted(() => {
       <div class="folder-list">
         <div
           v-for="folder in folders"
-          :key="folder.folderId"
-          :class="['folder-item', { active: currentFolderId === folder.folderId }]"
-          @click="currentFolderId = folder.folderId; getFavoriteList()"
+          :key="folder.id"
+          :class="['folder-item', { active: currentFolderId === folder.id }]"
+          @click="currentFolderId = folder.id; getFavoriteList()"
         >
           <div class="folder-info">
             <el-icon><FolderOpened /></el-icon>
@@ -139,7 +139,7 @@ onMounted(() => {
             <el-button
               link
               type="danger"
-              @click.stop="handleDeleteFolder(folder.folderId)"
+              @click.stop="handleDeleteFolder(folder.id)"
             >
               <el-icon><Delete /></el-icon>
             </el-button>

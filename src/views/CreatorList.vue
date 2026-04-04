@@ -24,8 +24,8 @@ const getCreatorList = async () => {
       pageSize: pagination.value.pageSize,
       keyword: searchQuery.value
     })
-    creatorList.value = res.records
-    total.value = res.total
+    creatorList.value = res.data.records || []
+    total.value = res.data.total || 0
   } catch (error) {
     ElMessage.error('获取创作者列表失败')
   } finally {
@@ -44,7 +44,7 @@ const handlePageChange = (page) => {
 }
 
 const handleCreatorClick = (creator) => {
-  router.push(`/consult/creator/${creator.id}`)
+  router.push(`/consult/creator/${creator.creatorId}`)
 }
 
 onMounted(() => {
@@ -70,7 +70,7 @@ onMounted(() => {
       <div class="search-box">
         <el-input
           v-model="searchQuery"
-          placeholder="搜索创作者名称或专业领域..."
+          placeholder="搜索创作者名称..."
           size="large"
           clearable
           @keyup.enter="handleSearch"
@@ -113,26 +113,14 @@ onMounted(() => {
           <div class="card-header">
             <div class="avatar-wrapper">
               <img :src="creator.avatar" :alt="creator.nickname" class="avatar" />
-              <div v-if="creator.isOnline" class="online-badge"></div>
             </div>
             <div class="header-info">
               <h3 class="creator-name">{{ creator.nickname }}</h3>
-              <p class="creator-title">{{ creator.title }}</p>
             </div>
           </div>
 
           <div class="card-body">
-            <p class="creator-bio">{{ creator.bio }}</p>
-            <div class="creator-tags">
-              <el-tag
-                v-for="tag in creator.tags"
-                :key="tag"
-                size="small"
-                effect="plain"
-              >
-                {{ tag }}
-              </el-tag>
-            </div>
+            <p class="creator-bio">{{ creator.intro }}</p>
           </div>
 
           <div class="card-footer">
@@ -143,7 +131,11 @@ onMounted(() => {
               </span>
               <span class="stat-item">
                 <el-icon><Star /></el-icon>
-                {{ creator.followerCount }} 关注
+                {{ creator.fansCount }} 关注
+              </span>
+              <span class="stat-item">
+                <el-icon><ChatDotRound /></el-icon>
+                {{ creator.consultCount }} 咨询
               </span>
             </div>
             <div class="price-range">
@@ -167,7 +159,7 @@ onMounted(() => {
           v-model:current-page="pagination.pageNum"
           v-model:page-size="pagination.pageSize"
           :total="total"
-          :page-sizes="[12, 24, 36]"
+          :page-sizes="[1,12, 24, 36]"
           layout="total, sizes, prev, pager, next, jumper"
           @current-change="handlePageChange"
           @size-change="handleSearch"

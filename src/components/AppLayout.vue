@@ -8,7 +8,7 @@ const userStore = useUserStore()
 
 const isLogin = computed(() => userStore.isLogin)
 const userInfo = computed(() => userStore.userInfo)
-const isCreator = computed(() => userStore.userInfo.isCreator === 1)
+const isCreator = computed(() => userStore.userInfo.isCreator)
 const isAdmin = computed(() => userStore.userInfo.username === 'admin')
 
 const handleNavigation = (path) => {
