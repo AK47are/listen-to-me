@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.listen_to_me.mapper.AudioVOMapper">
+
+    <sql id="baseAudioVOFields">
+        SELECT 
+            ai.id,
+            ai.title,
+            ai.cover_path AS coverUrl,
+            u.nickname AS creatorName,
+            ai.play_count AS playCount,
+            (SELECT COUNT(*) FROM audio_folder_relation WHERE audio_id = ai.id) AS collectCount
+        FROM audio_info ai
+        INNER JOIN sys_user u ON ai.creator_id = u.id
+        WHERE ai.is_deleted = 0
+          AND ai.audit_status = 1
+    </sql>
+
+</mapper>
