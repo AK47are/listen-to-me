@@ -1,5 +1,7 @@
 package com.github.listen_to_me.domain.entity;
 
+import java.time.LocalDateTime;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -20,5 +22,5 @@ public class Folder {
     private String name;
     private String description;
     private Long audioCount;
-    private Long createTime;
+    private LocalDateTime createTime;
 }
