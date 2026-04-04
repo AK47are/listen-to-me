@@ -12,4 +12,6 @@ public interface AudioVOMapper {
     IPage<AudioVO> selectByFolderId(Page<AudioVO> page, Long folderId);
 
     IPage<AudioVO> selectByLikeUserId(Page<AudioVO> page, Long userId);
+
+    IPage<AudioVO> selectHistoryByUserId(Page<AudioVO> page, Long userId);
 }
