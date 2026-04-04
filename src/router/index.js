@@ -54,8 +54,8 @@ const router = createRouter({
         },
         {
           path: 'creator/slots',
-          name: 'CreatorSlots',
-          component: () => import('@/views/CreatorSlots.vue'),
+          name: 'SlotsDashboard',
+          component: () => import('@/views/SlotsDashboard.vue'),
         },
         {
           path: 'creator/consult',

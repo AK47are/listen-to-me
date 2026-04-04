@@ -1,10 +1,18 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { consultApi } from '@/api/consult'
+import { useUserStore } from '@/stores/user/user'
 
 const router = useRouter()
+const userStore = useUserStore()
+
+// 过滤后的创作者列表（排除当前用户）
+const filteredCreatorList = computed(() => {
+  const currentUserId = userStore.userInfo?.id
+  return creatorList.value.filter(creator => creator.creatorId !== currentUserId)
+})
 
 const loading = ref(false)
 const creatorList = ref([])
@@ -105,8 +113,8 @@ onMounted(() => {
 
       <div v-else class="creator-grid">
         <div
-          v-for="creator in creatorList"
-          :key="creator.id"
+          v-for="creator in filteredCreatorList"
+          :key="creator.creatorId"
           class="creator-card"
           @click="handleCreatorClick(creator)"
         >
@@ -159,7 +167,7 @@ onMounted(() => {
           v-model:current-page="pagination.pageNum"
           v-model:page-size="pagination.pageSize"
           :total="total"
-          :page-sizes="[1,12, 24, 36]"
+          :page-sizes="[12, 24, 36]"
           layout="total, sizes, prev, pager, next, jumper"
           @current-change="handlePageChange"
           @size-change="handleSearch"

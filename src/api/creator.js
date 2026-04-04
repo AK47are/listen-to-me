@@ -41,15 +41,37 @@ export const creatorApi = {
 
   // 时间槽管理
   saveSlotBatch(slots) {
-    return mockApi.creator.saveSlotBatch(slots)
+    return request({
+      url: '/creator/slots',
+      method: 'post',
+      data: slots
+    })
+    //return mockApi.creator.saveSlotBatch(slots)
   },
 
   getSlotPage(params) {
-    return mockApi.creator.getSlotPage(params)
+    return request({
+      url: 'creator/slots/page',
+      method: 'get',
+      params
+    })
   },
 
   updateSlot(id, status) {
-    return mockApi.creator.updateSlot(id, status)
+    return request({
+      url: `/creator/slots/${id}`,
+      method: 'put',
+      params: {
+        status
+      }
+    })
+  },
+
+  deleteSlot(id) {
+    return request({
+      url: `/creator/slots/${id}`,
+      method: 'delete'
+    })
   },
 
   // 预约订单管理
