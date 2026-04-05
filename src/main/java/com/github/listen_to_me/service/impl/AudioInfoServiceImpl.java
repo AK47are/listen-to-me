@@ -12,7 +12,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.listen_to_me.domain.query.AudioSearchQuery;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.listen_to_me.domain.entity.AudioOrder;
+import com.github.listen_to_me.mapper.AudioOrderMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -68,6 +73,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     private final AudioInfoMapper audioInfoMapper;
     private final AudioVOMapper audioVOMapper;
     private final HotRankService hotRankService;
+    private final AudioOrderMapper audioOrderMapper;
 
     @Override
     public IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery) {
@@ -291,15 +297,48 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     public IPage<AudioVO> searchAudio(AudioSearchQuery audioSearchQuery) {
         Page<AudioVO> page = new
                 Page<>(audioSearchQuery.getPageNum(), audioSearchQuery.getPageSize());
-        if("TITLE".equals(audioSearchQuery.getSearchType())) {
+        if ("TITLE".equals(audioSearchQuery.getSearchType())) {
             return audioVOMapper.selectByTitle(page, audioSearchQuery.getKeyword());
         }
-        if("CREATOR".equals(audioSearchQuery.getSearchType())){
+        if ("CREATOR".equals(audioSearchQuery.getSearchType())) {
             return audioVOMapper.selectByCreator(page, audioSearchQuery.getKeyword());
         }
-        if("TRANSCRIPT".equals(audioSearchQuery.getSearchType())){
+        if ("TRANSCRIPT".equals(audioSearchQuery.getSearchType())) {
             return audioVOMapper.selectByTranscript(page, audioSearchQuery.getKeyword());
         }
         throw new BaseException(400, "搜索类型无效，仅支持 TITLE、CREATOR、TRANSCRIPT");
+    }
+    @Transactional
+    @Override
+    public String getStreamSign(Long audioId) {
+        if(audioId == null) {
+            throw new BaseException(400, "音频ID不能为空");
+        }
+
+        Long userId = SecurityUtils.getCurrentUserId();
+
+        AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
+        if(audioInfo == null ) {
+            throw new BaseException(404, "音频不存在");
+        }
+        String suffix = userId + ":" + audioId;
+        Object cache = RedisUtils.get(RedisKey.USER_PLAY_COUNTED, suffix);
+        if (cache == null) {
+            RedisUtils.set(RedisKey.USER_PLAY_COUNTED, suffix, "1");
+            audioInfo.setPlayCount(audioInfo.getPlayCount() + 1);
+            audioInfoMapper.updateById(audioInfo);
+        }
+        Wrapper<AudioOrder> wrapper = Wrappers.lambdaQuery(AudioOrder.class)
+                .eq(AudioOrder::getAudioId, audioId)
+                .eq(AudioOrder::getUserId, userId);
+
+        AudioOrder audioOrder = audioOrderMapper.selectOne(wrapper);
+        if(audioInfo.getIsPaid() == false || (audioOrder != null && audioOrder.getPayStatus() == 1)) {
+            return MinioUtils.getPresignedUrl(audioInfo.getRawPath());
+        }else if(audioInfo.getTrialDuration() != null && audioInfo.getStatus().equals("ONLINE")) {
+            return MinioUtils.getPresignedUrl(audioInfo.getClipPath());
+        }else {
+            throw new BaseException(403, "请购买后收听完整版");
+        }
     }
 }

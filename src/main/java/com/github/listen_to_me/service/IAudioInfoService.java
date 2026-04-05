@@ -51,4 +51,6 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     List<AudioVO> getHotList();
 
     IPage<AudioVO> searchAudio(AudioSearchQuery audioSearchQuery);
+
+    String getStreamSign(Long audioId);
 }
