@@ -14,15 +14,15 @@ spring:
     deserialization:
       trust-all: true
   rabbitmq:
-    host: localhost  # 你的MQ地址
+    host: localhost # 你的MQ地址
     port: 5672
     username: guest
     password: guest
     virtual-host: /
     simple:
-      acknowledge-mode: auto  # 自动确认消息
+      acknowledge-mode: auto # 自动确认消息
       retry:
-        enabled: true         # 消费失败重试
+        enabled: true # 消费失败重试
   datasource:
     url: jdbc:mysql://127.0.0.1:3306/listen-to-me?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
     username: root
@@ -89,3 +89,11 @@ minio:
   expiration: 24 # 默认临时 URL 过期时间 (头像+封面, 24小时)
   raw-expiration: 1 # 原始文件临时 URL 过期时间 (1 小时)
   clip-expiration: 15 # 剪辑文件临时 URL 过期时间 (15 分钟)
+
+alipay:
+  appId: ${ALIPAY_APP_ID}
+  privateKey: ${ALIPAY_PRIVATE_KEY}
+  publicKey: ${ALIPAY_PUBLIC_KEY}
+  # 开发需使用 ngrok 进行内网击穿，格式如下：https://{xxxx}.ngrok-free.app/api/user/callback/alipay
+  notifyUrl: ${ALIPAY_NOTIFY_URL}
+  gatewayUrl: https://openapi-sandbox.dl.alipaydev.com/gateway.do
