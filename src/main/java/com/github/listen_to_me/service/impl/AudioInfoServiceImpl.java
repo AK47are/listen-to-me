@@ -192,7 +192,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     }
 
     @Override
-    public CreatorAudioDetailVO getAudioDetail(Long id) {
+    public CreatorAudioDetailVO getCreatorAudioDetail(Long id) {
         Long userId = SecurityUtils.getCurrentUserId();
         AudioInfo audioInfo = audioInfoMapper.selectById(id);
         if (audioInfo == null || !audioInfo.getCreatorId().equals(userId)) {

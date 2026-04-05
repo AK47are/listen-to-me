@@ -56,7 +56,7 @@ public class AudioController {
 
     @GetMapping("/{id}")
     public Result<CreatorAudioDetailVO> getAudio(@PathVariable Long id) {
-        return Result.success(audioInfoService.getAudioDetail(id));
+        return Result.success(audioInfoService.getCreatorAudioDetail(id));
     }
 
     @GetMapping("/{id}/status")
