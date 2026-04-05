@@ -9,11 +9,18 @@ const router = useRouter()
 const folders = ref([])
 const currentFolderId = ref(null)
 const audioList = ref([])
+const total = ref(0)
 const loading = ref(false)
 const showCreateFolderDialog = ref(false)
 const folderForm = ref({
   name: '',
   description: '',
+})
+
+// 分页参数
+const pagination = ref({
+  pageNum: 1,
+  pageSize: 12
 })
 
 const getFolderList = async () => {
@@ -35,10 +42,11 @@ const getFavoriteList = async () => {
   try {
     const res = await favoriteApi.getFavoritePage({
       folderId: currentFolderId.value,
-      pageNum: 1,
-      pageSize: 100,
+      pageNum: pagination.value.pageNum,
+      pageSize: pagination.value.pageSize,
     })
-    audioList.value = res.records || []
+    audioList.value = res.data.records || []
+    total.value = res.data.total || 0
   } catch (error) {
     console.error(error.message)
   } finally {
@@ -90,17 +98,31 @@ const handleRemoveFavorite = async (audioId) => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    await favoriteApi.deleteFavorite({
+    await favoriteApi.saveAudioAction({
       audioId,
       folderId: currentFolderId.value,
+      action: 'UNCOLLECT',
     })
     ElMessage.success('移除成功')
+    // 移除后重新获取当前页数据
     await getFavoriteList()
   } catch (error) {
     if (error !== 'cancel') {
-      ElMessage.error('移除失败')
+      console.error(error.message)
     }
   }
+}
+
+// 分页变化处理
+const handlePageChange = (page) => {
+  pagination.value.pageNum = page
+  getFavoriteList()
+}
+
+const handleSizeChange = (size) => {
+  pagination.value.pageSize = size
+  pagination.value.pageNum = 1
+  getFavoriteList()
 }
 
 const handlePlayAudio = (audioId) => {
@@ -155,30 +177,45 @@ onMounted(() => {
         <div v-else-if="audioList.length === 0" class="empty">
           <el-empty description="暂无收藏" />
         </div>
-        <div v-else class="audio-grid">
-          <div
-            v-for="audio in audioList"
-            :key="audio.id"
-            class="audio-card"
-          >
-          
-            <img :src="audio.coverUrl" alt="封面" class="cover" />
-            <div class="audio-info">
-              <h4>{{ audio.title }}</h4>
-              <p>{{ audio.creatorName }}</p>
-              <div class="stats">
-                <span><el-icon><Headset /></el-icon> {{ audio.playCount }}</span>
-                <span><el-icon><Star /></el-icon> {{ audio.collectCount }}</span>
+        <div v-else>
+          <div class="audio-grid">
+            <div
+              v-for="audio in audioList"
+              :key="audio.id"
+              class="audio-card"
+            >
+            
+              <img :src="audio.coverUrl" alt="封面" class="cover" />
+              <div class="audio-info">
+                <h4>{{ audio.title }}</h4>
+                <p>{{ audio.creatorName }}</p>
+                <div class="stats">
+                  <span><el-icon><Headset /></el-icon> {{ audio.playCount }}</span>
+                  <span><el-icon><Star /></el-icon> {{ audio.collectCount }}</span>
+                </div>
+              </div>
+              <div class="actions">
+                <el-button type="primary" size="small" @click="handlePlayAudio(audio.id)">
+                  播放
+                </el-button>
+                <el-button size="small" type="danger" @click="handleRemoveFavorite(audio.id)">
+                  移除
+                </el-button>
               </div>
             </div>
-            <div class="actions">
-              <el-button type="primary" size="small" @click="handlePlayAudio(audio.id)">
-                播放
-              </el-button>
-              <el-button size="small" type="danger" @click="handleRemoveFavorite(audio.id)">
-                移除
-              </el-button>
-            </div>
+          </div>
+          
+          <!-- 分页组件 -->
+          <div class="pagination" v-if="total > 0">
+            <el-pagination
+              v-model:current-page="pagination.pageNum"
+              v-model:page-size="pagination.pageSize"
+              :page-sizes="[1,12, 24, 36]"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="total"
+              @size-change="handleSizeChange"
+              @current-change="handlePageChange"
+            />
           </div>
         </div>
       </div>
@@ -346,5 +383,11 @@ onMounted(() => {
 
 .actions .el-button {
   flex: 1;
+}
+
+.pagination {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
 }
 </style>

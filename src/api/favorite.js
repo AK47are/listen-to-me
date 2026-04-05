@@ -1,9 +1,12 @@
-import mockApi from '@/data/mockApi'
 import request from '@/utils/request'
 
 export const favoriteApi = {
   saveAudioAction(data) {
-    return mockApi.favorite.saveAudioAction(data)
+    return request({
+      url: '/user/audio/action',
+      method: 'post',
+      data,
+    })
   },
 
   saveFavoriteFolder(data) {
@@ -22,11 +25,19 @@ export const favoriteApi = {
   },
 
   getFavoritePage(params) {
-    return mockApi.favorite.getFavoritePage(params)
+    return request({
+      url: '/user/favorite/page',
+      method: 'get',
+      params,
+    })
   },
 
   deleteFavorite(data) {
-    return mockApi.favorite.deleteFavorite(data)
+    return request({
+      url: '/user/favorite',
+      method: 'delete',
+      data,
+    })
   },
 
   deleteFavoriteFolder(folderId) {

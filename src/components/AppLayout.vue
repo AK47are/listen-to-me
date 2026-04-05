@@ -45,6 +45,9 @@ const handleLogout = () => {
           <div :class="['nav-item', { active: $route.path === '/history' }]" @click="handleNavigation('/history')">
             历史
           </div>
+          <div :class="['nav-item', { active: $route.path.startsWith('/user/follow') }]" @click="handleNavigation('/user/follow')">
+            关注
+          </div>
         </div>
         <div class="user-actions">
           <div v-if="isLogin" class="user-info">
@@ -66,6 +69,9 @@ const handleLogout = () => {
                     <el-icon><Calendar /></el-icon> 我的预约
                   </el-dropdown-item>
                   <template v-if="isCreator">
+                    <el-dropdown-item @click="handleNavigation('/user/fans')">
+                      <el-icon><User /></el-icon> 粉丝
+                    </el-dropdown-item>
                     <el-dropdown-item @click="handleNavigation('/creator/audio')">
                       <el-icon><Collection /></el-icon> 我的作品
                     </el-dropdown-item>

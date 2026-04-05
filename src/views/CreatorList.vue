@@ -3,6 +3,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { consultApi } from '@/api/consult'
+import { userApi } from '@/api/user'
 import { useUserStore } from '@/stores/user/user'
 
 const router = useRouter()
@@ -54,6 +55,7 @@ const handlePageChange = (page) => {
 const handleCreatorClick = (creator) => {
   router.push(`/consult/creator/${creator.creatorId}`)
 }
+
 
 onMounted(() => {
   getCreatorList()
@@ -146,9 +148,11 @@ onMounted(() => {
                 {{ creator.consultCount }} 咨询
               </span>
             </div>
-            <div class="price-range">
-              <span class="price-label">咨询价格</span>
-              <span class="price-value">¥{{ creator.minPrice }} 起</span>
+            <div class="card-actions">
+              <div class="price-range">
+                <span class="price-label">咨询价格</span>
+                <span class="price-value">¥{{ creator.minPrice }} 起</span>
+              </div>
             </div>
           </div>
 
@@ -179,4 +183,11 @@ onMounted(() => {
 
 <style scoped>
 @import '@/resource/css/creatorList.css';
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
 </style>

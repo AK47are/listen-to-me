@@ -10,7 +10,7 @@ const audioList = ref([])
 const loading = ref(false)
 const pagination = ref({
   pageNum: 1,
-  pageSize: 20,
+  pageSize: 12,
   total: 0,
 })
 
@@ -21,8 +21,8 @@ const getHistoryList = async () => {
       pageNum: pagination.value.pageNum,
       pageSize: pagination.value.pageSize,
     })
-    audioList.value = res.records || []
-    pagination.value.total = res.total || 0
+    audioList.value = res.data.records || []
+    pagination.value.total = res.data.total || 0
   } catch (error) {
     ElMessage.error('获取历史记录失败')
   } finally {
@@ -32,6 +32,12 @@ const getHistoryList = async () => {
 
 const handlePageChange = (page) => {
   pagination.value.pageNum = page
+  getHistoryList()
+}
+
+const handleSizeChange = (size) => {
+  pagination.value.pageSize = size
+  pagination.value.pageNum = 1
   getHistoryList()
 }
 
@@ -85,10 +91,12 @@ onMounted(() => {
     <div v-if="pagination.total > 0" class="pagination">
       <el-pagination
         v-model:current-page="pagination.pageNum"
-        :page-size="pagination.pageSize"
+        v-model:page-size="pagination.pageSize"
+        :page-sizes="[12, 24, 36]"
         :total="pagination.total"
-        layout="prev, pager, next"
+        layout="total, sizes, prev, pager, next, jumper"
         @current-change="handlePageChange"
+        @size-change="handleSizeChange"
       />
     </div>
   </div>

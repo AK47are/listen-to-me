@@ -55,5 +55,28 @@ export const adminApi = {
         method: 'put',
         data
     })
+  },
+
+  // 用户管理
+  getUserPage(params) {
+    return request({
+      url: '/admin/user/page',
+      method: 'get',
+      params
+    })
+  },
+
+  banUser(userId) {
+    return request({
+      url: `/admin/user/${userId}/ban`,
+      method: 'put'
+    })
+  },
+
+  unbanUser(userId) {
+    return request({
+      url: `/admin/user/${userId}/unban`,
+      method: 'put'
+    })
   }
 }

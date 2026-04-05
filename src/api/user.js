@@ -82,4 +82,35 @@ export const userApi = {
       method: 'get'
     })
   },
+
+  // 关注功能
+  followCreator(creatorId) {
+    return request({
+      url: `/user/creator/${creatorId}/follow`,
+      method: 'post'
+    })
+  },
+
+  unfollowCreator(creatorId) {
+    return request({
+      url: `/user/creator/${creatorId}/follow`,
+      method: 'delete'
+    })
+  },
+
+  getFollowPage(params) {
+    return request({
+      url: '/user/creator/follow/page',
+      method: 'get',
+      params
+    })
+  },
+
+  getFansPage(creatorId, params) {
+    return request({
+      url: `/user/creator/${creatorId}/fans/page`,
+      method: 'get',
+      params
+    })
+  },
 }

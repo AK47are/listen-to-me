@@ -255,13 +255,88 @@
         </tbody>
       </table>
     </div>
+
+    <!-- 用户管理 -->
+    <div v-if="activeTab === 'user-management'" class="refund-section">
+      <h2>用户管理</h2>
+      
+      <!-- 搜索栏 -->
+      <div class="search-bar">
+        <el-input
+          v-model="userSearchQuery"
+          placeholder="输入用户名查询"
+          clearable
+          style="width: 300px"
+          @keyup.enter="handleUserSearch"
+        >
+          <template #append>
+            <el-button type="primary" @click="handleUserSearch">
+              <el-icon><Search /></el-icon> 搜索
+            </el-button>
+          </template>
+        </el-input>
+      </div>
+      
+      <!-- 用户列表 -->
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>用户ID</th>
+            <th>用户名</th>
+            <th>昵称</th>
+            <th>创作者身份</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="user in userList.records" :key="user.id">
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.nickname }}</td>
+            <td>
+              <el-tag :type="user.isCreator ? 'success' : 'info'">
+                {{ user.isCreator ? '是' : '否' }}
+              </el-tag>
+            </td>
+            <td>
+              <button 
+                class="btn reject" 
+                @click="banUser(user.id)"
+              >
+                封禁
+              </button>
+              <button 
+                class="btn approve" 
+                @click="unbanUser(user.id)"
+              >
+                解封
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <!-- 分页 -->
+      <div class="pagination" v-if="userList.total > 0">
+        <el-pagination
+          v-model:current-page="userPagination.pageNum"
+          v-model:page-size="userPagination.pageSize"
+          :page-sizes="[10, 20, 50]"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="userList.total"
+          @size-change="handleUserSizeChange"
+          @current-change="handleUserPageChange"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { adminApi } from '@/api/admin'
-import { ElMessage,ElMessageBox } from 'element-plus'
+import { ElMessage,ElMessageBox, ElIcon } from 'element-plus'
+import { Search } from '@element-plus/icons-vue'
 
 // 响应式数据
 const activeTab = ref('dashboard')
@@ -269,7 +344,8 @@ const tabs = [
   { id: 'dashboard', name: '数据大盘' },
   { id: 'audit-audio', name: '音频审核' },
   { id: 'audit-apply', name: '申请审核' },
-  { id: 'refund', name: '退款审核' }
+  { id: 'refund', name: '退款审核' },
+  { id: 'user-management', name: '用户管理' }
 ]
 
 // 数据大盘
@@ -303,6 +379,17 @@ const refundApplyList = ref({
 const showAudioDetail = ref(false)
 const selectedAudio = ref(null)
 const audioUrl = ref('')
+
+// 用户管理
+const userList = ref({
+  records: [],
+  total: 0
+})
+const userSearchQuery = ref('')
+const userPagination = ref({
+  pageNum: 1,
+  pageSize: 10
+})
 
 // 加载数据
 const loadDashboardData = async () => {
@@ -345,6 +432,62 @@ const loadRefundApplyList = async () => {
     console.error('Failed to load refund apply list:', error)
     ElMessage.error('加载退款申请列表失败')
   }
+}
+
+// 加载用户列表
+const loadUserList = async () => {
+  try {
+    const response = await adminApi.getUserPage({
+      pageNum: userPagination.value.pageNum,
+      pageSize: userPagination.value.pageSize,
+      keyword: userSearchQuery.value
+    })
+    userList.value = response.data
+  } catch (error) {
+    console.error('Failed to load user list:', error)
+    ElMessage.error('加载用户列表失败')
+  }
+}
+
+// 封禁用户
+const banUser = async (userId) => {
+  try {
+    await adminApi.banUser(userId)
+    ElMessage.success('用户已封禁')
+    loadUserList()
+  } catch (error) {
+    console.error('Failed to ban user:', error)
+    ElMessage.error('封禁用户失败')
+  }
+}
+
+// 解封用户
+const unbanUser = async (userId) => {
+  try {
+    await adminApi.unbanUser(userId)
+    ElMessage.success('用户已解封')
+    loadUserList()
+  } catch (error) {
+    console.error('Failed to unban user:', error)
+    ElMessage.error('解封用户失败')
+  }
+}
+
+// 用户列表分页处理
+const handleUserPageChange = (page) => {
+  userPagination.value.pageNum = page
+  loadUserList()
+}
+
+const handleUserSizeChange = (size) => {
+  userPagination.value.pageSize = size
+  userPagination.value.pageNum = 1
+  loadUserList()
+}
+
+const handleUserSearch = () => {
+  userPagination.value.pageNum = 1
+  loadUserList()
 }
 
 // 审核操作
@@ -510,6 +653,7 @@ onMounted(() => {
   loadAuditAudioList()
   loadAuditApplyList()
   loadRefundApplyList()
+  loadUserList()
 })
 </script>
 
