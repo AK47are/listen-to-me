@@ -26,7 +26,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -74,11 +73,7 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
         Page<CreatorApply> page = new Page<>(query.getPageNum(), query.getPageSize());
         IPage<CreatorApply> iPage = creatorApplyMapper.selectPage(page, Wrappers.lambdaQuery(CreatorApply.class)
                 .eq(CreatorApply::getStatus, query.getStatus()));
-        IPage<AuditApplyVO> voPage = new Page<>(iPage.getCurrent(), iPage.getSize());
-        voPage.setRecords(iPage.getRecords()
-                .stream().map(creatorApply -> BeanUtil.copyProperties(creatorApply, AuditApplyVO.class))
-                .collect(Collectors.toList()));
-        return voPage;
+        return iPage.convert(creatorApply -> BeanUtil.copyProperties(creatorApply, AuditApplyVO.class));
     }
 
     @Transactional
