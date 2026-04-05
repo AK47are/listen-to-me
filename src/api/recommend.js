@@ -1,8 +1,12 @@
 import mockApi from '@/data/mockApi'
+import request from '@/utils/request'
 
 export const recommendApi = {
   getHotList() {
-    return mockApi.recommend.getHotList()
+    return request({
+      url: '/user/audio/hot',
+      method: 'get',
+    })
   },
 
   getRecommendList(params) {

@@ -13,6 +13,11 @@ const router = createRouter({
           component: () => import('@/views/Home.vue'),
         },
         {
+          path: 'hot',
+          name: 'HotRank',
+          component: () => import('@/views/HotRank.vue'),
+        },
+        {
           path: 'audio/:id',
           name: 'AudioDetail',
           component: () => import('@/views/AudioDetail.vue'),
@@ -116,8 +121,8 @@ const router = createRouter({
               path: 'user-management',
               name: 'UserManagement',
               component: () => import('@/views/admin/UserManagement.vue'),
-            }
-          ]
+            },
+          ],
         },
       ],
     },

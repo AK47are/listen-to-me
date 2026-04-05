@@ -69,6 +69,12 @@ onMounted(async () => {
             首页
           </div>
           <div
+            :class="['nav-link', { active: route.path === '/hot' }]"
+            @click="handleNavigation('/hot')"
+          >
+            全站热榜
+          </div>
+          <div
             :class="['nav-link', { active: route.path.startsWith('/consult') }]"
             @click="handleNavigation('/consult')"
           >
