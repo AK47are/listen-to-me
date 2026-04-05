@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.github.listen_to_me.domain.vo.AudioDetailVO;
+import org.springframework.web.bind.annotation.*;
 
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
@@ -60,5 +62,10 @@ public class AudioController {
     @Operation(summary = "音频搜索")
     public Result<IPage<AudioVO>> searchAudio(@Valid @ParameterObject AudioSearchQuery audioSearchQuery) {
         return Result.success(audioInfoService.searchAudio(audioSearchQuery));
+    }
+    @GetMapping("/{id}")
+    @Operation(summary = "获取音频详情")
+    public Result<AudioDetailVO> getAudioDetail(@PathVariable Long id) {
+        return Result.success(audioInfoService.getAudioDetail(id));
     }
 }

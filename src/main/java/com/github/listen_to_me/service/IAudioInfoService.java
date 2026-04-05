@@ -9,10 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.query.AudioSearchQuery;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
-import com.github.listen_to_me.domain.vo.AudioPublishVO;
-import com.github.listen_to_me.domain.vo.AudioStatusVO;
-import com.github.listen_to_me.domain.vo.AudioVO;
-import com.github.listen_to_me.domain.vo.CreatorAudioVO;
+import com.github.listen_to_me.domain.vo.*;
 
 import java.util.List;
 
@@ -53,4 +50,6 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     IPage<AudioVO> searchAudio(AudioSearchQuery audioSearchQuery);
 
     String getStreamSign(Long audioId);
+
+    AudioDetailVO getAudioDetail(Long id);
 }

@@ -16,6 +16,10 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.listen_to_me.domain.entity.AudioOrder;
 import com.github.listen_to_me.mapper.AudioOrderMapper;
+import cn.hutool.core.bean.BeanUtil;
+import com.github.listen_to_me.domain.entity.*;
+import com.github.listen_to_me.domain.vo.*;
+import com.github.listen_to_me.mapper.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,19 +36,10 @@ import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.AudioDTO;
 import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
 import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
-import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
-import com.github.listen_to_me.domain.vo.AudioPublishVO;
-import com.github.listen_to_me.domain.vo.AudioStatusVO;
-import com.github.listen_to_me.domain.vo.AudioVO;
-import com.github.listen_to_me.domain.vo.CreatorAudioVO;
-import com.github.listen_to_me.mapper.AudioInfoMapper;
-import com.github.listen_to_me.mapper.AudioVOMapper;
 import com.github.listen_to_me.service.HotRankService;
 import com.github.listen_to_me.service.IAudioInfoService;
-
-import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
@@ -74,6 +69,10 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     private final AudioVOMapper audioVOMapper;
     private final HotRankService hotRankService;
     private final AudioOrderMapper audioOrderMapper;
+    private final PlayHistoryMapper playHistoryMapper;
+    private final SysUserMapper sysUserMapper;
+    private final AudioLikeMapper audioLikeMapper;
+    private final AudioFolderRelationMapper audioFolderRelationMapper;
 
     @Override
     public IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery) {
@@ -340,5 +339,51 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         }else {
             throw new BaseException(403, "请购买后收听完整版");
         }
+    }
+
+    @Override
+    public AudioDetailVO getAudioDetail(Long id) {
+        AudioDetailVO audioDetailVO = new AudioDetailVO();
+        AudioInfo audioInfo = audioInfoMapper.selectById(id);
+        BeanUtil.copyProperties(audioInfo, audioDetailVO);
+        audioDetailVO.setCoverUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath()));
+
+        Wrapper<PlayHistory> playHistoryWrapper = Wrappers.lambdaQuery(PlayHistory.class)
+                .eq(PlayHistory::getAudioId, id)
+                .eq(PlayHistory::getUserId, SecurityUtils.getCurrentUserId());
+
+        PlayHistory playHistory = playHistoryMapper.selectOne(playHistoryWrapper);
+
+        if(playHistory != null) {
+            audioDetailVO.setProgress(playHistory.getLastPosition());
+        }else {
+            audioDetailVO.setProgress(0);
+        }
+
+        Wrapper<AudioOrder> wrapper = Wrappers.lambdaQuery(AudioOrder.class)
+                .eq(AudioOrder::getAudioId, id)
+                .eq(AudioOrder::getUserId, SecurityUtils.getCurrentUserId());
+
+        AudioOrder audioOrder = audioOrderMapper.selectOne(wrapper);
+        if(audioInfo.getIsPaid() == false && (audioOrder == null || audioOrder.getPayStatus() != 1)) {
+            audioDetailVO.setIsPurchased(false);
+        }else {
+            audioDetailVO.setIsPurchased(true);
+        }
+        AudioDetailVO.CreatorInfo creatorInfo = new AudioDetailVO.CreatorInfo();
+        creatorInfo.setId(audioInfo.getCreatorId());
+        SysUser user = sysUserMapper.selectById(audioInfo.getCreatorId());
+        creatorInfo.setNickname(user.getNickname());
+        creatorInfo.setAvatar(user.getAvatar());
+        audioDetailVO.setCreator(creatorInfo);
+
+        AudioDetailVO.StatsInfo statsInfo = new AudioDetailVO.StatsInfo();
+        statsInfo.setPlayCount(Long.valueOf(audioInfo.getPlayCount()));
+        statsInfo.setLikeCount(Long.valueOf(audioLikeMapper.selectCount(Wrappers.lambdaQuery(AudioLike.class)
+                .eq(AudioLike::getAudioId, id))));
+        statsInfo.setCollectCount(Long.valueOf(audioFolderRelationMapper.selectCount(Wrappers.lambdaQuery(AudioFolderRelation.class)
+                .eq(AudioFolderRelation::getAudioId, id))));
+        audioDetailVO.setStats(statsInfo);
+        return audioDetailVO;
     }
 }
