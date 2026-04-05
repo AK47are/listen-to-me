@@ -88,4 +88,5 @@ public interface ISysUserService extends IService<SysUser> {
 
     RechargeResultVO recharge(RechargeResultDTO rechargeResultDTO) throws Exception;
 
+    String alipayNotify(HttpServletRequest request) throws Exception;
 }
