@@ -2,6 +2,8 @@ package com.github.listen_to_me.domain.vo;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class UserVO {
     private Long id;
@@ -10,12 +12,12 @@ public class UserVO {
     private String avatar;
     private String phone;
     private String email;
-    private String balance;
-    private String frozenBalance;
+    private BigDecimal balance;
+    private BigDecimal frozenBalance;
 
     /**
-     * 创作者标识：0-听众, 1-创作者
+     * 创作者标识：false-听众, true-创作者
      * 前端根据此字段决定是否展示「创作中心」入口
      */
-    private Integer isCreator;
+    private Boolean isCreator;
 }
