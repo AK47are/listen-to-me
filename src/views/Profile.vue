@@ -1,6 +1,6 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElDialog } from 'element-plus'
 import { userApi } from '@/api/user'
 import { authApi } from '@/api/user'
 import { useUserStore } from '@/stores/user/user'
@@ -40,6 +40,19 @@ const sendingCode = ref(false)
 const countdown = ref(0)
 const isEditMode = ref(false)
 const captchaUrl = ref('')
+
+// 创作者申请相关
+const showApplyDialog = ref(false)
+const showStatusDialog = ref(false)
+const applyForm = reactive({
+  realName: '',
+  phone: '',
+  intro: '',
+  attachment: ''
+})
+const applyStatus = ref(null)
+const checkingStatus = ref(false)
+const submittingApply = ref(false)
 
 const getProfile = async () => {
   try {
@@ -166,6 +179,57 @@ const toggleEditMode = () => {
   isEditMode.value = !isEditMode.value
 }
 
+// 打开申请对话框
+const openApplyDialog = () => {
+  showApplyDialog.value = true
+}
+
+// 关闭申请对话框
+const closeApplyDialog = () => {
+  showApplyDialog.value = false
+  // 重置表单
+  applyForm.realName = ''
+  applyForm.phone = ''
+  applyForm.intro = ''
+  applyForm.attachment = ''
+}
+
+// 提交创作者申请
+const submitCreatorApply = async () => {
+  // 验证表单
+  if (!applyForm.realName || !applyForm.phone || !applyForm.intro) {
+    ElMessage.warning('请填写完整的申请信息')
+    return
+  }
+
+  submittingApply.value = true
+  try {
+    await userApi.applyCreator(applyForm)
+    ElMessage.success('申请提交成功')
+    closeApplyDialog()
+    // 刷新个人资料
+    getProfile()
+  } catch (error) {
+    console.error(error)
+  } finally {
+    submittingApply.value = false
+  }
+}
+
+// 查询申请状态
+const checkApplyStatus = async () => {
+  checkingStatus.value = true
+  try {
+    const res = await userApi.getCreatorApplyStatus()
+    applyStatus.value = res.data
+    showStatusDialog.value = true
+  } catch (error) {
+    console.error(error)
+  } finally {
+    checkingStatus.value = false
+  }
+}
+
 onMounted(() => {
   getProfile()
   getCaptcha()
@@ -208,13 +272,30 @@ onMounted(() => {
             <span class="value">{{ profileInfo.frozenBalance }} 虚拟币</span>
           </div>
           <div class="info-item">
-            <span class="label">创作者身份</span>
-            <span class="value">
-              <el-tag :type="profileInfo.isCreator === 1 ? 'success' : 'info'">
-                {{ profileInfo.isCreator === 1 ? '是' : '否' }}
-              </el-tag>
-            </span>
-          </div>
+          <span class="label">创作者身份</span>
+          <span class="value">
+            <el-tag :type="profileInfo.isCreator ? 'success' : 'info'">
+              {{ profileInfo.isCreator ? '是' : '否' }}
+            </el-tag>
+            <el-button
+              v-if="!profileInfo.isCreator"
+              type="primary"
+              size="small"
+              style="margin-left: 10px"
+              @click="openApplyDialog"
+            >
+              申请成为创作者
+            </el-button>
+            <el-button
+              type="info"
+              size="small"
+              style="margin-left: 10px"
+              @click="checkApplyStatus"
+            >
+              查看申请状态
+            </el-button>
+          </span>
+        </div>
         </div>
       </div>
     </div>
@@ -304,9 +385,80 @@ onMounted(() => {
         </el-form-item>
       </el-form>
     </div>
+
+    <!-- 创作者申请对话框 -->
+    <el-dialog
+      v-model="showApplyDialog"
+      title="申请成为创作者"
+      width="500px"
+    >
+      <el-form :model="applyForm" label-width="100px">
+        <el-form-item label="真实姓名" required>
+          <el-input v-model="applyForm.realName" placeholder="请输入真实姓名" />
+        </el-form-item>
+        <el-form-item label="手机号码" required>
+          <el-input v-model="applyForm.phone" placeholder="请输入手机号码" />
+        </el-form-item>
+        <el-form-item label="个人简介" required>
+          <el-input
+            v-model="applyForm.intro"
+            type="textarea"
+            :rows="4"
+            placeholder="请简要介绍您的专业背景和擅长领域"
+          />
+        </el-form-item>
+        <el-form-item label="附件链接">
+          <el-input v-model="applyForm.attachment" placeholder="请输入作品集或个人网站链接（可选）" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="closeApplyDialog">取消</el-button>
+          <el-button type="primary" :loading="submittingApply" @click="submitCreatorApply">
+            提交申请
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
+
+    <!-- 申请状态对话框 -->
+    <el-dialog
+      v-model="showStatusDialog"
+      title="申请状态"
+      width="400px"
+    >
+      <div v-if="checkingStatus" class="loading-state">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        加载中...
+      </div>
+      <div v-else class="status-content">
+        <div class="status-item">
+          <span class="label">状态：</span>
+          <span class="value">
+            <el-tag :type="applyStatus.status === 'PENDING' ? 'warning' : applyStatus.status === 'APPROVED' ? 'success' : 'danger'">
+              {{ applyStatus.status === 'PENDING' ? '审核中' : applyStatus.status === 'APPROVED' ? '已通过' : '已拒绝' }}
+            </el-tag>
+          </span>
+        </div>
+        <div class="status-item" v-if="applyStatus.reason">
+          <span class="label">原因：</span>
+          <span class="value">{{ applyStatus.reason }}</span>
+        </div>
+        <div class="status-item">
+          <span class="label">申请时间：</span>
+          <span class="value">{{ applyStatus.applyTime }}</span>
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showStatusDialog = false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <style scoped>
 @import '@/resource/css/profile.css';
+
 </style>

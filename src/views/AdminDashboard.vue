@@ -190,25 +190,30 @@
         <thead>
           <tr>
             <th>申请ID</th>
-            <th>用户名</th>
             <th>真实姓名</th>
             <th>电话</th>
             <th>简介</th>
+            <th>附件链接</th>
             <th>申请时间</th>
             <th>操作</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="apply in auditApplyList.records" :key="apply.applyId">
-            <td>{{ apply.applyId }}</td>
-            <td>{{ apply.username }}</td>
+            <td>{{ apply.id }}</td>
             <td>{{ apply.realName }}</td>
             <td>{{ apply.phone }}</td>
             <td>{{ apply.intro }}</td>
+            <td>
+              <a v-if="apply.attachment" :href="apply.attachment" target="_blank" class="attachment-link">
+                {{ apply.attachment }}
+              </a>
+              <span v-else>-</span>
+            </td>
             <td>{{ formatDate(apply.applyTime) }}</td>
             <td>
-              <button class="btn approve" @click="auditApply(apply.applyId, 'APPROVED')">通过</button>
-              <button class="btn reject" @click="auditApply(apply.applyId, 'REJECTED')">拒绝</button>
+              <button class="btn approve" @click="auditApply(apply.id, 'APPROVED')">通过</button>
+              <button class="btn reject" @click="auditApply(apply.id, 'REJECTED')">拒绝</button>
             </td>
           </tr>
         </tbody>
@@ -236,7 +241,7 @@
           <tr v-for="apply in refundApplyList.records" :key="apply.id">
             <td>{{ apply.id }}</td>
             <td>{{ apply.orderId }}</td>
-            <td>{{ apply.date }}</td>
+            <td>{{ apply.applyTime }}</td>
             <td>{{ apply.startTime }}-{{ apply.endTime }}</td>
             <td>¥{{ apply.price }}</td>
             <td>{{ apply.userNickname }}</td>
@@ -253,536 +258,261 @@
   </div>
 </template>
 
-<script>
-import mockApi from '@/data/mockApi'
+<script setup>
+import { ref, onMounted } from 'vue'
+import { adminApi } from '@/api/admin'
+import { ElMessage,ElMessageBox } from 'element-plus'
 
-export default {
-  name: 'AdminDashboard',
-  data() {
-    return {
-      activeTab: 'dashboard',
-      tabs: [
-        { id: 'dashboard', name: '数据大盘' },
-        { id: 'audit-audio', name: '音频审核' },
-        { id: 'audit-apply', name: '申请审核' },
-        { id: 'refund', name: '退款审核' }
-      ],
-      dashboard: {
-        totalSales: 0,
-        todaySales: 0,
-        activeUsers: 0,
-        totalUsers: 0,
-        monthlyActiveUsers: 0,
-        conversionRate: 0,
-        salesTrend: [],
-        hotAudioList: [],
-        creatorEarnings: []
-      },
-      auditAudioList: {
-        records: [],
-        total: 0
-      },
-      auditApplyList: {
-        records: [],
-        total: 0
-      },
-      refundApplyList: {
-        records: [],
-        total: 0
-      },
-      showAudioDetail: false,
-      selectedAudio: null,
-      audioUrl: ''
-    }
-  },
-  mounted() {
-    this.loadDashboardData()
-    this.loadAuditAudioList()
-    this.loadAuditApplyList()
-    this.loadRefundApplyList()
-  },
-  methods: {
-    async loadDashboardData() {
-      try {
-        const response = await mockApi.admin.getDashboard()
-        this.dashboard = response
-      } catch (error) {
-        console.error('Failed to load dashboard data:', error)
-      }
-    },
-    
-    async loadAuditAudioList() {
-      try {
-        const response = await mockApi.admin.getAuditAudioPage()
-        this.auditAudioList = response
-      } catch (error) {
-        console.error('Failed to load audit audio list:', error)
-      }
-    },
-    
-    async loadAuditApplyList() {
-      try {
-        const response = await mockApi.admin.getAuditApplyPage()
-        this.auditApplyList = response
-      } catch (error) {
-        console.error('Failed to load audit apply list:', error)
-      }
-    },
-    
-    async loadRefundApplyList() {
-      try {
-        const response = await mockApi.admin.getRefundApplyPage()
-        this.refundApplyList = response
-      } catch (error) {
-        console.error('Failed to load refund apply list:', error)
-      }
-    },
-    
-    async auditAudio(audioId, status) {
-      try {
-        await mockApi.admin.auditAudio({
-          audioId,
-          status,
-          rejectReason: status === 'REJECTED' ? '不符合平台规范' : null
-        })
-        this.loadAuditAudioList()
-        alert('审核操作已完成')
-      } catch (error) {
-        console.error('Failed to audit audio:', error)
-      }
-    },
-    
-    async auditApply(applyId, status) {
-      try {
-        await mockApi.admin.auditApply({
-          applyId,
-          status,
-          rejectReason: status === 'REJECTED' ? '不符合创作者要求' : null
-        })
-        this.loadAuditApplyList()
-        alert('审核操作已完成')
-      } catch (error) {
-        console.error('Failed to audit apply:', error)
-      }
-    },
-    
-    async auditRefund(applyId, approved) {
-      try {
-        await mockApi.admin.auditRefund({
-          applyId,
-          approved,
-          rejectReason: !approved ? '不符合退款条件' : null
-        })
-        this.loadRefundApplyList()
-        alert('审核操作已完成')
-      } catch (error) {
-        console.error('Failed to audit refund:', error)
-      }
-    },
-    
-    formatDuration(seconds) {
-      const minutes = Math.floor(seconds / 60)
-      const remainingSeconds = seconds % 60
-      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
-    },
-    
-    formatDate(timestamp) {
-      const date = new Date(timestamp)
-      return date.toLocaleString('zh-CN')
-    },
-    
-    openAudioDetail(audio) {
-      this.selectedAudio = audio
-      this.audioUrl = audio.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
-      this.showAudioDetail = true
-    },
-    
-    closeAudioDetail() {
-      this.showAudioDetail = false
-      this.selectedAudio = null
-      this.audioUrl = ''
-    },
-    
-    async auditAudioAndClose(audioId, status) {
-      await this.auditAudio(audioId, status)
-      this.closeAudioDetail()
-    }
+// 响应式数据
+const activeTab = ref('dashboard')
+const tabs = [
+  { id: 'dashboard', name: '数据大盘' },
+  { id: 'audit-audio', name: '音频审核' },
+  { id: 'audit-apply', name: '申请审核' },
+  { id: 'refund', name: '退款审核' }
+]
+
+// 数据大盘
+const dashboard = ref({
+  totalSales: 0,
+  todaySales: 0,
+  activeUsers: 0,
+  totalUsers: 0,
+  monthlyActiveUsers: 0,
+  conversionRate: 0,
+  salesTrend: [],
+  hotAudioList: [],
+  creatorEarnings: []
+})
+
+// 审核列表
+const auditAudioList = ref({
+  records: [],
+  total: 0
+})
+const auditApplyList = ref({
+  records: [],
+  total: 0
+})
+const refundApplyList = ref({
+  records: [],
+  total: 0
+})
+
+// 音频详情
+const showAudioDetail = ref(false)
+const selectedAudio = ref(null)
+const audioUrl = ref('')
+
+// 加载数据
+const loadDashboardData = async () => {
+  try {
+    //const response = await adminApi.getDashboard()
+    dashboard.value = response.data
+  } catch (error) {
+    console.error('Failed to load dashboard data:', error)
+    ElMessage.error('加载数据大盘失败')
   }
 }
+
+const loadAuditAudioList = async () => {
+  try {
+    //const response = await adminApi.getAuditAudioPage()
+    auditAudioList.value = response.data
+  } catch (error) {
+    console.error('Failed to load audit audio list:', error)
+    ElMessage.error('加载待审音频列表失败')
+  }
+}
+
+const loadAuditApplyList = async () => {
+  try {
+    const response = await adminApi.getAuditApplyPage()
+    auditApplyList.value = response.data
+  } catch (error) {
+    console.error('Failed to load audit apply list:', error)
+    ElMessage.error('加载待审申请列表失败')
+  }
+}
+
+const loadRefundApplyList = async () => {
+  try {
+    const response = await adminApi.getRefundApplyPage({
+      status: 'PENDING'
+    })
+    refundApplyList.value = response.data
+  } catch (error) {
+    console.error('Failed to load refund apply list:', error)
+    ElMessage.error('加载退款申请列表失败')
+  }
+}
+
+// 审核操作
+const auditAudio = async (audioId, status) => {
+  try {
+    let rejectReason = null
+    if (status === 'REJECTED') {
+      console.log("拒绝审核")
+      ElMessageBox.prompt('请输入拒绝原因', '拒绝审核', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPlaceholder: '请输入拒绝原因',
+        inputValidator: (value) => {
+          if (!value || value.trim() === '') {
+            return '拒绝原因不能为空'
+          }
+          return true
+        }
+      }).then(async (result) => {
+        rejectReason = result.value
+        
+        await adminApi.auditAudio({
+          audioId,
+          status,
+          rejectReason
+        })
+        await loadAuditAudioList()
+        ElMessage.success('审核操作已完成')
+      }).catch(() => {
+        // 用户取消输入
+      })
+    } else {
+      await adminApi.auditAudio({
+        audioId,
+        status,
+        rejectReason
+      })
+      await loadAuditAudioList()
+      ElMessage.success('审核操作已完成')
+    }
+  } catch (error) {
+    console.error('Failed to audit audio:', error)
+  }
+}
+
+const auditApply = async (applyId, status) => {
+  try {
+    let rejectReason = null
+    if (status === 'REJECTED') {
+      ElMessageBox.prompt('请输入拒绝原因', '拒绝审核', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPlaceholder: '请输入拒绝原因',
+        inputValidator: (value) => {
+          if (!value || value.trim() === '') {
+            return '拒绝原因不能为空'
+          }
+          return true
+        }
+      }).then(async (result) => {
+        rejectReason = result.value
+        
+        await adminApi.auditApply({
+          applyId,
+          status,
+          rejectReason
+        })
+        await loadAuditApplyList()
+        ElMessage.success('审核操作已完成')
+      }).catch(() => {
+        // 用户取消输入
+      })
+    } else {
+      await adminApi.auditApply({
+        applyId,
+        status,
+        rejectReason
+      })
+      await loadAuditApplyList()
+      ElMessage.success('审核操作已完成')
+    }
+  } catch (error) {
+    console.error('Failed to audit apply:', error)
+    ElMessage.error('审核操作失败')
+  }
+}
+
+const auditRefund = async (applyId, approved) => {
+  try {
+    let rejectReason = null
+    if (!approved) {
+      ElMessageBox.prompt('请输入拒绝原因', '拒绝审核', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPlaceholder: '请输入拒绝原因',
+        inputValidator: (value) => {
+          if (!value || value.trim() === '') {
+            return '拒绝原因不能为空'
+          }
+          return true
+        }
+      }).then(async (result) => {
+        rejectReason = result.value
+        
+        await adminApi.auditRefund({
+          applyId,
+          approved,
+          rejectReason
+        })
+        await loadRefundApplyList()
+        ElMessage.success('审核操作已完成')
+      }).catch(() => {
+        // 用户取消输入
+      })
+    } else {
+      await adminApi.auditRefund({
+        applyId,
+        approved,
+        rejectReason
+      })
+      await loadRefundApplyList()
+      ElMessage.success('审核操作已完成')
+    }
+  } catch (error) {
+    console.error('Failed to audit refund:', error)
+    ElMessage.error('审核操作失败')
+  }
+}
+
+// 工具函数
+const formatDuration = (seconds) => {
+  const minutes = Math.floor(seconds / 60)
+  const remainingSeconds = seconds % 60
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`
+}
+
+const formatDate = (timestamp) => {
+  const date = new Date(timestamp)
+  return date.toLocaleString('zh-CN')
+}
+
+// 音频详情
+const openAudioDetail = (audio) => {
+  selectedAudio.value = audio
+  audioUrl.value = audio.audioUrl || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+  showAudioDetail.value = true
+}
+
+const closeAudioDetail = () => {
+  showAudioDetail.value = false
+  selectedAudio.value = null
+  audioUrl.value = ''
+}
+
+const auditAudioAndClose = async (audioId, status) => {
+  await auditAudio(audioId, status)
+  closeAudioDetail()
+}
+
+// 生命周期
+onMounted(() => {
+  loadDashboardData()
+  loadAuditAudioList()
+  loadAuditApplyList()
+  loadRefundApplyList()
+})
 </script>
 
 <style scoped>
-.admin-dashboard {
-  padding: 20px;
-}
-
-h1 {
-  margin-bottom: 30px;
-  color: #333;
-}
-
-.admin-nav {
-  display: flex;
-  margin-bottom: 30px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.admin-nav button {
-  padding: 10px 20px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  font-size: 16px;
-  color: #666;
-  border-bottom: 3px solid transparent;
-  transition: all 0.3s;
-}
-
-.admin-nav button:hover {
-  color: #1890ff;
-}
-
-.admin-nav button.active {
-  color: #1890ff;
-  border-bottom-color: #1890ff;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.stat-card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-.stat-title {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-}
-
-.chart-section {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
-}
-
-.chart-container {
-  display: flex;
-  align-items: end;
-  height: 300px;
-  gap: 10px;
-  padding: 20px 0;
-}
-
-.chart-bar {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.bar-container {
-  flex: 1;
-  width: 100%;
-  background: #f0f0f0;
-  border-radius: 4px 4px 0 0;
-  overflow: hidden;
-  margin: 10px 0;
-  position: relative;
-}
-
-.bar {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #1890ff;
-  transition: height 0.5s;
-}
-
-.bar-label {
-  font-size: 12px;
-  color: #666;
-}
-
-.bar-value {
-  font-size: 12px;
-  color: #333;
-  margin-top: 5px;
-}
-
-.list-section {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 30px;
-}
-
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-}
-
-.data-table th,
-.data-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.data-table th {
-  background: #f5f5f5;
-  font-weight: bold;
-  color: #333;
-}
-
-.data-table tr:hover {
-  background: #f9f9f9;
-}
-
-.cover-small {
-  width: 50px;
-  height: 50px;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-.btn {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  margin-right: 5px;
-  transition: all 0.3s;
-}
-
-.btn.approve {
-  background: #52c41a;
-  color: white;
-}
-
-.btn.approve:hover {
-  background: #73d13d;
-}
-
-.btn.reject {
-  background: #ff4d4f;
-  color: white;
-}
-
-.btn.reject:hover {
-  background: #ff7875;
-}
-
-.audit-section,
-.refund-section {
-  background: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* 音频详情弹窗样式 */
-.audio-detail-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.audio-detail-content {
-  background: #fff;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 800px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-.audio-detail-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.audio-detail-header h3 {
-  margin: 0;
-  color: #333;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 28px;
-  cursor: pointer;
-  color: #999;
-  padding: 0;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.3s;
-}
-
-.close-btn:hover {
-  background: #f0f0f0;
-  color: #333;
-}
-
-.audio-detail-body {
-  padding: 20px;
-}
-
-.audio-info {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-}
-
-.audio-cover {
-  width: 150px;
-  height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-
-.audio-meta {
-  flex: 1;
-}
-
-.audio-meta p {
-  margin: 8px 0;
-  color: #666;
-}
-
-.audio-player-section {
-  margin: 20px 0;
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 8px;
-}
-
-.audio-player {
-  width: 100%;
-  height: 40px;
-}
-
-.transcript-section {
-  margin: 20px 0;
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 8px;
-}
-
-.transcript-section h4 {
-  margin: 0 0 15px 0;
-  color: #333;
-}
-
-.description-section {
-  margin: 20px 0;
-  padding: 20px;
-  background: #f9f9f9;
-  border-radius: 8px;
-}
-
-.description-section h4 {
-  margin: 0 0 15px 0;
-  color: #333;
-}
-
-.description-content {
-  padding: 15px;
-  background: #fff;
-  border-radius: 4px;
-  line-height: 1.6;
-  color: #666;
-}
-
-.transcript-content {
-  max-height: 200px;
-  overflow-y: auto;
-  padding: 15px;
-  background: #fff;
-  border-radius: 4px;
-  line-height: 1.6;
-  color: #666;
-}
-
-.audit-actions {
-  display: flex;
-  gap: 15px;
-  justify-content: center;
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
-}
-
-.clickable-title {
-  cursor: pointer;
-  color: #1890ff;
-  text-decoration: underline;
-}
-
-.clickable-title:hover {
-  color: #40a9ff;
-}
-
-.clickable-cover {
-  cursor: pointer;
-  transition: transform 0.3s;
-}
-
-.clickable-cover:hover {
-  transform: scale(1.05);
-}
-
-@media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .chart-container {
-    height: 200px;
-  }
-  
-  .data-table {
-    font-size: 14px;
-  }
-  
-  .data-table th,
-  .data-table td {
-    padding: 8px;
-  }
-}
+ @import '@/resource/css/adminDash.css';
 </style>

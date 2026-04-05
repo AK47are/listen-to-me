@@ -165,3 +165,40 @@
     align-items: center;
   }
 }
+
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.status-content {
+  padding: 20px 0;
+}
+
+.status-item {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: flex-start;
+}
+
+.status-item .label {
+  width: 80px;
+  font-weight: 500;
+  color: #666;
+}
+
+.status-item .value {
+  flex: 1;
+  color: #333;
+}
+
+.loading-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+  color: #999;
+  gap: 10px;
+}

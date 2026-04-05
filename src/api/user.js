@@ -67,4 +67,19 @@ export const userApi = {
       }
     })
   },
+
+  applyCreator(data) {
+    return request({
+      url: '/user/creator/apply',
+      method: 'post',
+      data
+    })
+  },
+
+  getCreatorApplyStatus() {
+    return request({
+      url: '/user/creator/apply/status',
+      method: 'get'
+    })
+  },
 }
