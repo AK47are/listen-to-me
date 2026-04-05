@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +27,19 @@ public class HotRankService {
     private static final RedisKey HOT_RANK_KEY = RedisKey.HOT_AUDIO_RANK;
 
     private final AudioInfoMapper audioInfoMapper;
+
+    /**
+     * 项目启动完成后立即刷新一次热榜
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReady() {
+        log.info("检测到项目启动完成，正在执行首次热榜初始化...");
+        try {
+            refreshHotRank();
+        } catch (Exception e) {
+            log.error("项目启动初始化热榜失败: ", e);
+        }
+    }
 
     @Scheduled(cron = "0 0 * * * *")
     public void refreshHotRank() {
