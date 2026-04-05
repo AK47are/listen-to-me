@@ -1,9 +1,11 @@
 package com.github.listen_to_me.controller.user;
 
+import com.github.listen_to_me.domain.dto.RechargeResultDTO;
+import com.github.listen_to_me.domain.vo.RechargeResultVO;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.vo.BalanceVO;
@@ -29,4 +31,11 @@ public class BalanceController {
         log.debug("查询余额 - 用户ID: {}", userId);
         return Result.success(sysUserService.getBalanceStats(userId));
     }
+
+    @PostMapping("/recharge")
+    @Operation(summary = "充值")
+    public Result<RechargeResultVO> recharge(@Valid @RequestBody RechargeResultDTO rechargeResultDTO) throws Exception {
+        return Result.success(sysUserService.recharge(rechargeResultDTO));
+    }
+
 }

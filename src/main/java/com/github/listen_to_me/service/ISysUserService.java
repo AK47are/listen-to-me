@@ -4,11 +4,14 @@ import java.math.BigDecimal;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.listen_to_me.domain.dto.RechargeResultDTO;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.query.UserPageQuery;
 import com.github.listen_to_me.domain.vo.BalanceVO;
+import com.github.listen_to_me.domain.vo.RechargeResultVO;
 import com.github.listen_to_me.domain.vo.UserVO;
+import jakarta.servlet.http.HttpServletRequest;
 
 public interface ISysUserService extends IService<SysUser> {
 
@@ -82,4 +85,7 @@ public interface ISysUserService extends IService<SysUser> {
      * @return 分页结果
      */
     IPage<UserVO> getUserPage(UserPageQuery query);
+
+    RechargeResultVO recharge(RechargeResultDTO rechargeResultDTO) throws Exception;
+
 }

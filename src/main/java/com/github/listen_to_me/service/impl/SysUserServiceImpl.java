@@ -1,11 +1,20 @@
 package com.github.listen_to_me.service.impl;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.listen_to_me.domain.query.UserPageQuery;
+import com.alipay.easysdk.factory.Factory;
+import com.github.listen_to_me.common.config.AlipayConfig;
+import com.github.listen_to_me.domain.dto.RechargeResultDTO;
+import com.github.listen_to_me.domain.entity.UserRechargeOrder;
+import com.github.listen_to_me.domain.vo.RechargeResultVO;
+import com.github.listen_to_me.mapper.CoinTransactionMapper;
+import com.github.listen_to_me.mapper.UserRechargeOrderMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +50,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private final PasswordEncoder passwordEncoder;
     private final SysUserMapper sysUserMapper;
     private final ICoinTransactionService iCoinTransactionService;
+    private final AlipayConfig alipayConfig;
+    private final CoinTransactionMapper coinTransactionMapper;
+    private final UserRechargeOrderMapper userRechargeOrderMapper;
 
     @Override
     public UserVO findProfile() {
@@ -282,5 +294,35 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             vo.setNickname(sysUser.getNickname());
             return vo;
         });
+    }
+    private String generateRechargeSn() {
+        return "RC" + UUID.randomUUID().toString().replace("-", "");
+    }
+
+    @Override
+    public RechargeResultVO recharge(RechargeResultDTO rechargeResultDTO) throws Exception {
+        log.debug("充值 - 金额: {}, 支付方式: {}", rechargeResultDTO.getAmount(), rechargeResultDTO.getPaymentMethod());
+
+        if (rechargeResultDTO.getAmount() > 10000) {
+            throw new BaseException(400, "充值金额不能超过10000");
+        }
+        if (!"ALIPAY".equals(rechargeResultDTO.getPaymentMethod())) {
+            throw new BaseException(400, "不支持的支付方式");
+        }
+        UserRechargeOrder order = new UserRechargeOrder();
+        order.setRechargeSn(generateRechargeSn());
+        order.setUserId(SecurityUtils.getCurrentUserId());
+        order.setRechargeAmount(rechargeResultDTO.getAmount());
+        order.setPayStatus("PENDING");
+        order.setPayChannel(rechargeResultDTO.getPaymentMethod());
+        userRechargeOrderMapper.insert(order);
+
+        String payUrl = Factory.Payment.Page()
+                .pay("用户虚拟币充值", order.getRechargeSn(), order.getRechargeAmount().toString(), alipayConfig.getNotifyUrl())
+                .getBody();
+        RechargeResultVO rechargeResultVO = new RechargeResultVO();
+        rechargeResultVO.setRechargeSn(order.getRechargeSn());
+        rechargeResultVO.setPayUrl(payUrl);
+        return rechargeResultVO;
     }
 }
