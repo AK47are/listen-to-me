@@ -55,6 +55,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/common/auth/refresh").authenticated()
                         .requestMatchers("/api/common/auth/**").permitAll()
+                        .requestMatchers("/api/user/callback/alipay").permitAll()
                         .requestMatchers("/api/creator/**").hasAuthority("creator:basic")
                         .requestMatchers("/api/user/**").hasAuthority("user:basic")
                         .requestMatchers("/api/admin/**").hasAuthority("admin:basic")
