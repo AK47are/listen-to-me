@@ -38,4 +38,9 @@ public class BalanceController {
         return Result.success(sysUserService.recharge(rechargeResultDTO));
     }
 
+    @PostMapping("/callback/alipay")
+    @Operation(summary = "支付宝回调")
+    public String alipayCallback(HttpServletRequest request) throws Exception {
+        return sysUserService.alipayNotify(request);
+       }
 }

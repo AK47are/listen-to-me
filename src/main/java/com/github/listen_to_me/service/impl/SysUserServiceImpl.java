@@ -1,9 +1,11 @@
 package com.github.listen_to_me.service.impl;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.Map;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -15,6 +17,7 @@ import com.github.listen_to_me.domain.entity.UserRechargeOrder;
 import com.github.listen_to_me.domain.vo.RechargeResultVO;
 import com.github.listen_to_me.mapper.CoinTransactionMapper;
 import com.github.listen_to_me.mapper.UserRechargeOrderMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,7 +54,6 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private final SysUserMapper sysUserMapper;
     private final ICoinTransactionService iCoinTransactionService;
     private final AlipayConfig alipayConfig;
-    private final CoinTransactionMapper coinTransactionMapper;
     private final UserRechargeOrderMapper userRechargeOrderMapper;
 
     @Override
@@ -324,5 +326,48 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         rechargeResultVO.setRechargeSn(order.getRechargeSn());
         rechargeResultVO.setPayUrl(payUrl);
         return rechargeResultVO;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public String alipayNotify(HttpServletRequest request) throws Exception {
+        Map<String, String> params = new HashMap<>();
+        Enumeration<String> parameterNames = request.getParameterNames();
+        while (parameterNames.hasMoreElements()) {
+            String key = parameterNames.nextElement();
+            params.put(key, request.getParameter(key));
+        }
+
+        boolean signVerified = Factory.Payment.Common().verifyNotify(params);
+        if (!signVerified) {
+            return "fail";
+        }
+
+        String orderSn = params.get("out_trade_no");
+        String tradeStatus = params.get("trade_status");
+        LambdaQueryWrapper<UserRechargeOrder> queryWrapper = Wrappers.lambdaQuery(UserRechargeOrder.class)
+                .eq(UserRechargeOrder::getRechargeSn, orderSn);
+        UserRechargeOrder order = userRechargeOrderMapper.selectOne(queryWrapper);
+        if (order == null) {
+            throw new BaseException(400, "订单不存在");
+        }
+
+        if (order.getPayStatus().equals("SUCCESS")) {
+            return "success";
+        }
+
+        if (!order.getPayStatus().equals("PENDING")) {
+            return "fail";
+        }
+
+        if ("TRADE_SUCCESS".equals(tradeStatus)) {
+            order.setPayStatus("SUCCESS");
+            userRechargeOrderMapper.updateById(order);
+
+            addBalance(order.getUserId(), BigDecimal.valueOf(order.getRechargeAmount()), "RECHARGE", order.getRechargeSn());
+
+            return "success";
+        }
+
+        return "fail";
     }
 }
