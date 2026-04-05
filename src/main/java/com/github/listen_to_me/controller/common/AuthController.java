@@ -1,5 +1,6 @@
 package com.github.listen_to_me.controller.common;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -56,7 +57,7 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "用户注册")
-    public Result<Void> register(@RequestBody UserRegisterDTO userRegisterDTO) {
+    public Result<Void> register(@Valid @RequestBody UserRegisterDTO userRegisterDTO) {
         authService.addSysUser(userRegisterDTO);
         return Result.success();
     }
