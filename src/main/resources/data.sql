@@ -49,11 +49,11 @@ INSERT INTO `sys_role_permission` (`role_id`, `perm_id`) VALUES
 -- ----------------------------
 -- 音频信息
 INSERT INTO `audio_info` (`creator_id`, `title`,`description`, `cover_path`, `raw_path`, `clip_path`, `is_paid`, `price`, `trial_duration`, `duration`, `audit_status`, `play_count`) VALUES
-(2, '心理学入门30讲', '这是一个心理学入门的课程，包含心理学的定义、研究对象、认知心理学入门等', 'https://cover.com/psy30.jpg', 'minio/audio/psy30_raw.mp3', 'minio/audio/psy30_clip.mp3', 1, 29.90, 60, 60, 1, 2),
-(2, '职场沟通技巧', '这是一个职场沟通技巧的课程，包含沟通的核心、有效倾听、职场表达的3个技巧等', 'https://cover.com/office_talk.jpg', 'minio/audio/office_raw.mp3', 'minio/audio/office_clip.mp3', 1, 19.90, 45, 240, 1, 2),
-(5, '民间故事大全', '这是一个民间故事的课程，包含民间的狐仙故事、民间的狼妖传说等', 'https://cover.com/story.jpg', 'minio/audio/story_raw.mp3', 'minio/audio/story_clip.mp3',1, 9.90, 30, 300, 1, 2),
-(5, '悬疑短篇合集', '这是一个悬疑短篇的课程，包含悬疑的狐仙故事、悬疑的狼妖传说等', 'https://cover.com/suspense.jpg', 'minio/audio/suspense_raw.mp3', 'minio/audio/suspense_clip.mp3', 1, 15.90, 40, 480, 1, 2),
-(2, '负能量清理指南', '这是一个负能量清理指南的课程，包含负能量的定义、清理的方法、清理的注意事项等', 'https://cover.com/negative.jpg', 'minio/audio/negative_raw.mp3', 'minio/audio/negative_clip.mp3', 1, 12.90, 30, 300, 1, 2);
+(2, '心理学入门30讲', '这是一个心理学入门的课程，包含心理学的定义、研究对象、认知心理学入门等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 29.90, 60, 60, 1, 2),
+(2, '职场沟通技巧', '这是一个职场沟通技巧的课程，包含沟通的核心、有效倾听、职场表达的3个技巧等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 19.90, 45, 240, 1, 2),
+(5, '民间故事大全', '这是一个民间故事的课程，包含民间的狐仙故事、民间的狼妖传说等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3',1, 9.90, 30, 300, 1, 2),
+(5, '悬疑短篇合集', '这是一个悬疑短篇的课程，包含悬疑的狐仙故事、悬疑的狼妖传说等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 15.90, 40, 480, 1, 2),
+(2, '负能量清理指南', '这是一个负能量清理指南的课程，包含负能量的定义、清理的方法、清理的注意事项等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 12.90, 30, 300, 1, 2);
 
 -- 音频转写
 INSERT INTO `audio_transcript` (`audio_id`, `full_text`, `segment_json`) VALUES
