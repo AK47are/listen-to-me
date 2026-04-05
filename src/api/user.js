@@ -54,7 +54,7 @@ export const userApi = {
       data,
     })
   },
-  
+
   uploadAvatar(file) {
     const formData = new FormData()
     formData.append('coverFile', file)
@@ -63,8 +63,8 @@ export const userApi = {
       method: 'post',
       data: formData,
       headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        'Content-Type': 'multipart/form-data',
+      },
     })
   },
 
@@ -72,14 +72,14 @@ export const userApi = {
     return request({
       url: '/user/creator/apply',
       method: 'post',
-      data
+      data,
     })
   },
 
   getCreatorApplyStatus() {
     return request({
       url: '/user/creator/apply/status',
-      method: 'get'
+      method: 'get',
     })
   },
 
@@ -87,14 +87,14 @@ export const userApi = {
   followCreator(creatorId) {
     return request({
       url: `/user/creator/${creatorId}/follow`,
-      method: 'post'
+      method: 'post',
     })
   },
 
   unfollowCreator(creatorId) {
     return request({
       url: `/user/creator/${creatorId}/follow`,
-      method: 'delete'
+      method: 'delete',
     })
   },
 
@@ -102,7 +102,7 @@ export const userApi = {
     return request({
       url: '/user/creator/follow/page',
       method: 'get',
-      params
+      params,
     })
   },
 
@@ -110,7 +110,8 @@ export const userApi = {
     return request({
       url: `/user/creator/${creatorId}/fans/page`,
       method: 'get',
-      params
+      params,
     })
   },
 }
+
