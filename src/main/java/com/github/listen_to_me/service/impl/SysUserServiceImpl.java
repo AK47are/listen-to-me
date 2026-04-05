@@ -3,6 +3,9 @@ package com.github.listen_to_me.service.impl;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.listen_to_me.domain.query.UserPageQuery;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -260,5 +263,24 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         updateById(user);
 
         log.debug("解封用户成功 - 用户ID: {}", userId);
+    }
+
+    @Override
+    public IPage<UserVO> getUserPage(UserPageQuery query) {
+        Page<SysUser> page = new Page<>(query.getPageNum(), query.getPageSize());
+        LambdaQueryWrapper<SysUser> wrapper = Wrappers.<SysUser>lambdaQuery();
+        if (StrUtil.isNotBlank(query.getUsername())) {
+            wrapper.like(SysUser::getUsername, query.getUsername());
+        }
+        Page<SysUser> userPage = sysUserMapper.selectPage(page, wrapper);
+
+        return userPage.convert(sysUser -> {
+            UserVO vo = new UserVO();
+            vo.setId(sysUser.getId());
+            vo.setIsCreator(sysUser.getIsCreator());
+            vo.setUsername(sysUser.getUsername());
+            vo.setNickname(sysUser.getNickname());
+            return vo;
+        });
     }
 }
