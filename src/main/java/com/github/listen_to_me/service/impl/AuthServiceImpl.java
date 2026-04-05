@@ -1,5 +1,12 @@
 package com.github.listen_to_me.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
+import com.github.listen_to_me.domain.entity.*;
+import com.github.listen_to_me.mapper.FolderMapper;
+import com.github.listen_to_me.mapper.SysRoleMapper;
+import com.github.listen_to_me.mapper.SysUserFolderMapper;
+import com.github.listen_to_me.mapper.SysUserRoleMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +26,6 @@ import com.github.listen_to_me.domain.SysUserAdapter;
 import com.github.listen_to_me.domain.dto.LoginDTO;
 import com.github.listen_to_me.domain.dto.UserRegisterDTO;
 import com.github.listen_to_me.domain.dto.VerifyCodeDTO;
-import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.vo.ImageCaptchaVO;
 import com.github.listen_to_me.domain.vo.LoginVO;
 import com.github.listen_to_me.domain.vo.UserVO;
@@ -33,6 +39,7 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -42,6 +49,10 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final ISysUserService iSysUserService;
     private final PasswordEncoder passwordEncoder;
+    private final SysRoleMapper sysRoleMapper;
+    private final SysUserRoleMapper sysUserRoleMapper;
+    private final SysUserFolderMapper sysUserFolderMapper;
+    private final FolderMapper folderMapper;
 
     @Override
     public LoginVO loginUser(LoginDTO loginDTO) {
@@ -122,33 +133,62 @@ public class AuthServiceImpl implements AuthService {
         log.debug("校验码发送 - 目标: {}, 验证码: {}", verifyCodeDTO.getTarget(), verifyCode);
     }
 
+    @Transactional
     @Override
     public void addSysUser(UserRegisterDTO userRegisterDTO) {
-        if (StrUtil.isBlank(userRegisterDTO.getUsername())) {
-            throw new RegisterException(400, "用户名不能为空");
+        if(SensitiveWordHelper.contains(userRegisterDTO.getUsername())){
+            throw new RegisterException(400, "用户名包含敏感词");
         }
-        String target = StrUtil.isBlank(userRegisterDTO.getPhone())
-                ? userRegisterDTO.getEmail()
-                : userRegisterDTO.getPhone();
-        if (StrUtil.isBlank(target)) {
-            throw new RegisterException(400, "手机号或邮箱不能为空");
+        if(StrUtil.isNotBlank(userRegisterDTO.getPhone())
+                && StrUtil.isNotBlank(userRegisterDTO.getEmail())){
+            throw new RegisterException(400, "手机号或邮箱不能同时填写");
         }
-        if (StrUtil.isBlank(userRegisterDTO.getPassword())) {
-            throw new RegisterException(400, "密码不能为空");
+        if(StrUtil.isBlank(userRegisterDTO.getPhone())
+                && StrUtil.isBlank(userRegisterDTO.getEmail())){
+            throw new RegisterException(400, "手机号或邮箱不能同时为空");
+        }
+        if(StrUtil.isNotBlank(userRegisterDTO.getPhone())){
+            String cachedVerifyCode = RedisUtils.get(RedisKey.VERIFY_CODE, userRegisterDTO.getPhone());
+            if (StrUtil.isBlank(cachedVerifyCode)
+                    || !cachedVerifyCode.equalsIgnoreCase(userRegisterDTO.getVerifyCode())) {
+                throw new RegisterException(400, "校验码错误或已过期");
+            }
+            RedisUtils.delete(RedisKey.VERIFY_CODE, userRegisterDTO.getPhone());
+        }
+        if(StrUtil.isNotBlank(userRegisterDTO.getEmail())){
+            String cachedVerifyCode = RedisUtils.get(RedisKey.VERIFY_CODE, userRegisterDTO.getEmail());
+            if (StrUtil.isBlank(cachedVerifyCode)
+                    || !cachedVerifyCode.equalsIgnoreCase(userRegisterDTO.getVerifyCode())) {
+                throw new RegisterException(400, "校验码错误或已过期");
+            }
+            RedisUtils.delete(RedisKey.VERIFY_CODE, userRegisterDTO.getEmail());
         }
         if (!userRegisterDTO.getPassword().equals(userRegisterDTO.getConfirmPassword())) {
             throw new RegisterException(400, "两次密码不一致");
         }
-
-        String cachedVerifyCode = RedisUtils.get(RedisKey.VERIFY_CODE, target);
-        if (StrUtil.isBlank(cachedVerifyCode) || !cachedVerifyCode.equalsIgnoreCase(userRegisterDTO.getVerifyCode())) {
-            throw new RegisterException(400, "校验码错误或已过期");
-        }
-        RedisUtils.delete(RedisKey.VERIFY_CODE, target);
         userRegisterDTO.setPassword(passwordEncoder.encode(userRegisterDTO.getPassword()));
-        iSysUserService.save(BeanUtil.copyProperties(userRegisterDTO, SysUser.class));
+        SysUser sysUser = BeanUtil.copyProperties(userRegisterDTO, SysUser.class);
+        iSysUserService.save(sysUser);
         log.debug("新用户注册 - 用户信息: {}", userRegisterDTO);
 
-        // FIX: 需要初始化其它关联表
+        Long roleId = sysRoleMapper.selectOne(Wrappers.<SysRole>lambdaQuery()
+                .eq(SysRole::getRoleCode, "ROLE_USER"))
+                .getId();
+        SysUserRole sysUserRole = new SysUserRole();
+        sysUserRole.setUserId(sysUser.getId());
+        sysUserRole.setRoleId(roleId);
+        sysUserRoleMapper.insert(sysUserRole);
+        log.debug("初始化用户角色关联 - 用户ID: {}, 角色ID: {}", sysUser.getId(), roleId);
+
+        Folder folder = new Folder();
+        folder.setName("默认收藏夹");
+        folder.setDescription(sysUser.getUsername()+ "的默认收藏夹");
+        folderMapper.insert(folder);
+        SysUserFolder sysUserFolder = new SysUserFolder();
+        sysUserFolder.setUserId(sysUser.getId());
+        sysUserFolder.setFolderId(folder.getId());
+        sysUserFolderMapper.insert(sysUserFolder);
+        log.debug("初始化用户收藏夹关联 - 用户ID: {}, 收藏夹ID: {}",
+                sysUserFolder.getUserId(), sysUserFolder.getFolderId());
     }
 }
