@@ -333,3 +333,21 @@ CREATE TABLE IF NOT EXISTS `creator_profile` (
   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT fk_creator_profile_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='创作者资料表';
+
+-- 用户虚拟币充值订单表
+CREATE TABLE IF NOT EXISTS `user_recharge_order` (
+    `id` bigint PRIMARY KEY AUTO_INCREMENT COMMENT '主键ID',
+    `recharge_sn` varchar(64) UNIQUE NOT NULL COMMENT '充值订单号（RC开头）',
+    `user_id` bigint NOT NULL COMMENT '用户ID',
+    `recharge_amount` decimal(10, 2) NOT NULL COMMENT '充值金额（元）',
+    `pay_status` varchar(20) DEFAULT 'PENDING' COMMENT '支付状态：PENDING-待支付，PAID-已支付，CANCELLED-已取消',
+    `pay_channel` varchar(20) COMMENT '支付渠道：alipay-支付宝，wechat-微信',
+    `pay_time` datetime COMMENT '支付成功时间',
+    `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+
+    INDEX idx_user_id (user_id),
+    INDEX idx_recharge_sn (recharge_sn),
+    INDEX idx_pay_status (pay_status),
+
+    CONSTRAINT fk_recharge_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户虚拟币充值订单表';
