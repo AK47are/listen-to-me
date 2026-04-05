@@ -33,7 +33,7 @@ public interface AudioInfoMapper extends BaseMapper<AudioInfo> {
             "ai.play_count AS playCount, " +
             "(SELECT COUNT(*) FROM audio_like WHERE audio_id = ai.id) AS likeCount, " +
             "(SELECT COUNT(*) FROM audio_folder_relation WHERE audio_id = ai.id) AS collectCount, " +
-            "(SELECT COUNT(*) FROM comment WHERE audio_id = ai.id) AS commentCount " +
+            "(SELECT COUNT(*) FROM comments WHERE audio_id = ai.id) AS commentCount " +
             "FROM audio_info ai " +
             "WHERE ai.create_time >= #{oneMonthAgo} " +
             "AND ai.is_deleted = 0 " +
