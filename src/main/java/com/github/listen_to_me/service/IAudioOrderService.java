@@ -2,6 +2,7 @@ package com.github.listen_to_me.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.entity.AudioOrder;
+import com.github.listen_to_me.domain.vo.AudioOrderVO;
 
 /**
  * <p>
@@ -13,4 +14,5 @@ import com.github.listen_to_me.domain.entity.AudioOrder;
  */
 public interface IAudioOrderService extends IService<AudioOrder> {
 
+    AudioOrderVO purchaseAudio(Long audioId);
 }
