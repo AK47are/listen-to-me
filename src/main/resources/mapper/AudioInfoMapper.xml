@@ -12,4 +12,27 @@
         SET status = #{status}, clip_path = #{clipPath}
         WHERE id = #{audioId}
     </update>
+
+    <select id="selectAuditAudioPage" resultType="com.github.listen_to_me.domain.vo.AuditAudioVO">
+        SELECT
+        ai.id, ai.title, ai.cover_path AS coverUrl, ai.duration,
+        ai.creator_id AS creatorId, ai.create_time AS submitTime,
+        u.nickname AS creatorName, t.full_text AS transcript
+        FROM audio_info ai
+        LEFT JOIN sys_user u ON ai.creator_id = u.id
+        LEFT JOIN audio_transcript t ON ai.id = t.audio_id
+        WHERE ai.is_deleted = 0
+        <if test="status != null and status == 'PENDING'">
+            AND ai.audit_status = 0
+        </if>
+        <if test="status != null and status == 'APPROVED'">
+            AND ai.audit_status = 1
+        </if>
+        <if test="status != null and status == 'REJECTED'">
+            AND ai.audit_status = 2
+        </if>
+        ORDER BY ai.create_time DESC
+    </select>
+
+
 </mapper>

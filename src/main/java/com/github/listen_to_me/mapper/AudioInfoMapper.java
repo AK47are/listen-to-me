@@ -3,6 +3,7 @@ package com.github.listen_to_me.mapper;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.github.listen_to_me.domain.vo.AuditAudioVO;
 import org.apache.ibatis.annotations.Select;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -39,4 +40,6 @@ public interface AudioInfoMapper extends BaseMapper<AudioInfo> {
             "AND ai.is_deleted = 0 " +
             "AND ai.audit_status = 1")
     List<AudioStatsDTO> selectAudioStatsForHotRank(LocalDateTime oneMonthAgo);
+
+    IPage<AuditAudioVO> selectAuditAudioPage(Page<AuditAudioVO> page, String status);
 }
