@@ -52,4 +52,25 @@
         ORDER BY consult_count DESC
     </select>
 
+    <select id="selectCreatorById" resultType="com.github.listen_to_me.domain.vo.CreatorVO">
+        SELECT 
+            <include refid="creatorStatFields"/>,
+            <if test="userId != null">
+                EXISTS (
+                    SELECT 1 FROM user_follow uf 
+                    WHERE uf.user_id = #{userId} AND uf.creator_id = u.id
+                ) AS is_following
+            </if>
+            <if test="userId == null">
+                FALSE AS is_following
+            </if>
+        FROM sys_user u
+        LEFT JOIN creator_profile cp ON u.id = cp.user_id
+        WHERE u.id = #{creatorId}
+        AND u.is_creator = 1
+        AND EXISTS (
+            SELECT 1 FROM creator_apply ca 
+            WHERE ca.user_id = u.id AND ca.status = 'APPROVED'
+        )
+    </select>
 </mapper>

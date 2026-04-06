@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.domain.entity.CreatorProfile;
 import com.github.listen_to_me.domain.query.CreatorPageQuery;
@@ -30,5 +31,18 @@ public class CreatorProfileServiceImpl extends ServiceImpl<CreatorProfileMapper,
         result.getRecords().forEach(vo -> vo.setAvatar(MinioUtils.getPresignedUrl(vo.getAvatar())));
 
         return result;
+    }
+
+    @Override
+    public CreatorVO getCreatorDetail(Long creatorId, Long userId) {
+        log.debug("获取创作者详情 - 创作者ID: {}, 当前用户ID: {}", creatorId, userId);
+
+        CreatorVO vo = baseMapper.selectCreatorById(creatorId, userId);
+        if (vo == null) {
+            throw new BaseException(404, "创作者不存在");
+        }
+
+        vo.setAvatar(MinioUtils.getPresignedUrl(vo.getAvatar()));
+        return vo;
     }
 }
