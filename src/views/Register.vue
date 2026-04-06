@@ -2,7 +2,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { authApi } from '@/api/user'
+import { authApi } from '@/api/common/auth'
 
 const router = useRouter()
 const activeMethod = ref('phone')

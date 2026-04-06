@@ -1,8 +1,8 @@
 <template>
- <!-- 用户管理 -->
-    <div class="refund-section">
+  <!-- 用户管理 -->
+  <div class="refund-section">
     <h1>用户管理</h1>
-      
+
     <!-- 搜索栏 -->
     <div class="search-bar">
       <el-input
@@ -19,7 +19,7 @@
         </template>
       </el-input>
     </div>
-    
+
     <!-- 用户列表 -->
     <table class="data-table">
       <thead>
@@ -42,24 +42,14 @@
             </el-tag>
           </td>
           <td>
-            <button 
-              class="btn reject" 
-              @click="banUser(user.id)"
-            >
-              封禁
-            </button>
-            <button 
-              class="btn approve" 
-              @click="unbanUser(user.id)"
-            >
-              解封
-            </button>
+            <button class="btn reject" @click="banUser(user.id)">封禁</button>
+            <button class="btn approve" @click="unbanUser(user.id)">解封</button>
           </td>
         </tr>
       </tbody>
     </table>
-      
-      <!-- 分页 -->
+
+    <!-- 分页 -->
     <div class="pagination" v-if="userList.total > 0">
       <el-pagination
         v-model:current-page="userPagination.pageNum"
@@ -76,29 +66,27 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { adminApi } from '@/api/admin'
-import { ElMessage,ElIcon } from 'element-plus'
+import { adminUserApi } from '@/api/admin/user'
+import { ElMessage, ElIcon } from 'element-plus'
 import { Search } from '@element-plus/icons-vue'
-
-
 
 const userList = ref({
   records: [],
-  total: 0
+  total: 0,
 })
 const userSearchQuery = ref('')
 const userPagination = ref({
   pageNum: 1,
-  pageSize: 10
+  pageSize: 10,
 })
 
 // 加载用户列表
 const loadUserList = async () => {
   try {
-    const response = await adminApi.getUserPage({
+    const response = await adminUserApi.getUserPage({
       pageNum: userPagination.value.pageNum,
       pageSize: userPagination.value.pageSize,
-      username: userSearchQuery.value
+      username: userSearchQuery.value,
     })
     userList.value = response.data
   } catch (error) {
@@ -109,7 +97,7 @@ const loadUserList = async () => {
 // 封禁用户
 const banUser = async (userId) => {
   try {
-    await adminApi.banUser(userId)
+    await adminUserApi.banUser(userId)
     ElMessage.success('用户已封禁')
     loadUserList()
   } catch (error) {
@@ -120,7 +108,7 @@ const banUser = async (userId) => {
 // 解封用户
 const unbanUser = async (userId) => {
   try {
-    await adminApi.unbanUser(userId)
+    await adminUserApi.unbanUser(userId)
     ElMessage.success('用户已解封')
     loadUserList()
   } catch (error) {
@@ -147,7 +135,6 @@ const handleUserSearch = () => {
 onMounted(() => {
   loadUserList()
 })
-
 </script>
 
 <style scoped>

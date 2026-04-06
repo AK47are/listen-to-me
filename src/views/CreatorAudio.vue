@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { creatorApi } from '@/api/creator'
+import { creatorAudioApi } from '@/api/creator/audio'
 
 const router = useRouter()
 
@@ -17,7 +17,7 @@ const pagination = ref({
 const getAudioList = async () => {
   loading.value = true
   try {
-    const res = await creatorApi.getAudioPage({
+    const res = await creatorAudioApi.getAudioPage({
       pageNum: pagination.value.pageNum,
       pageSize: pagination.value.pageSize,
     })
@@ -42,7 +42,7 @@ const handleDeleteAudio = async (audioId) => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    await creatorApi.removeAudio(audioId)
+    await creatorAudioApi.removeAudio(audioId)
     ElMessage.success('删除成功')
     await getAudioList()
   } catch (error) {
@@ -92,20 +92,44 @@ onMounted(() => {
             <div class="meta">
               <span v-if="audio.isPaid" class="price">¥{{ audio.price }}</span>
               <span class="duration">{{ Math.floor(audio.duration / 60) }} 分钟</span>
-              <el-tag :type="audio.status === 'APPROVED' ? 'success' : audio.status === 'REJECTED' ? 'danger' : 'warning'">
-                {{ audio.status === 'APPROVED' ? '已通过' : audio.status === 'REJECTED' ? '已拒绝' : '审核中' }}
+              <el-tag
+                :type="
+                  audio.status === 'APPROVED'
+                    ? 'success'
+                    : audio.status === 'REJECTED'
+                      ? 'danger'
+                      : 'warning'
+                "
+              >
+                {{
+                  audio.status === 'APPROVED'
+                    ? '已通过'
+                    : audio.status === 'REJECTED'
+                      ? '已拒绝'
+                      : '审核中'
+                }}
               </el-tag>
             </div>
             <div class="stats">
-              <span><el-icon><Headset /></el-icon> {{ audio.playCount }}</span>
-              <span><el-icon><Star /></el-icon> {{ audio.collectCount }}</span>
-              <span><el-icon><Pointer /></el-icon> {{ audio.likeCount }}</span>
+              <span
+                ><el-icon><Headset /></el-icon> {{ audio.playCount }}</span
+              >
+              <span
+                ><el-icon><Star /></el-icon> {{ audio.collectCount }}</span
+              >
+              <span
+                ><el-icon><Pointer /></el-icon> {{ audio.likeCount }}</span
+              >
             </div>
             <div class="time">创建于 {{ new Date(audio.createTime).toLocaleString() }}</div>
           </div>
           <div class="actions">
-            <el-button size="large" type="primary" @click="handleEditAudio(audio.id)"><el-icon><Edit/></el-icon></el-button>
-            <el-button size="large" type="danger"  @click="handleDeleteAudio(audio.id)"><el-icon><Delete/></el-icon></el-button>
+            <el-button size="large" type="primary" @click="handleEditAudio(audio.id)"
+              ><el-icon><Edit /></el-icon
+            ></el-button>
+            <el-button size="large" type="danger" @click="handleDeleteAudio(audio.id)"
+              ><el-icon><Delete /></el-icon
+            ></el-button>
           </div>
         </div>
       </div>

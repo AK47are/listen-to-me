@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { likeApi } from '@/api/like'
+import { likeApi } from '@/api/user/like'
 
 const router = useRouter()
 
@@ -65,18 +65,18 @@ onMounted(() => {
         <el-empty description="暂无喜欢的音频" />
       </div>
       <div v-else class="audio-grid">
-        <div
-          v-for="audio in audioList"
-          :key="audio.id"
-          class="audio-card"
-        >
+        <div v-for="audio in audioList" :key="audio.id" class="audio-card">
           <img :src="audio.coverUrl" alt="封面" class="cover" />
           <div class="audio-info">
             <h4>{{ audio.title }}</h4>
             <p>{{ audio.creatorName }}</p>
             <div class="stats">
-              <span><el-icon><Headset /></el-icon> {{ audio.playCount }}</span>
-              <span><el-icon><Star /></el-icon> {{ audio.collectCount }}</span>
+              <span
+                ><el-icon><Headset /></el-icon> {{ audio.playCount }}</span
+              >
+              <span
+                ><el-icon><Star /></el-icon> {{ audio.collectCount }}</span
+              >
             </div>
           </div>
           <div class="actions">
@@ -200,3 +200,4 @@ onMounted(() => {
   margin-top: 20px;
 }
 </style>
+

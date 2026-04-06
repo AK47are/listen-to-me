@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { recommendApi } from '@/api/recommend'
+import { recommendApi } from '@/api/user/recommend'
 import { Headset, Star, Trophy, Loading, ArrowRight } from '@element-plus/icons-vue'
 
 const router = useRouter()

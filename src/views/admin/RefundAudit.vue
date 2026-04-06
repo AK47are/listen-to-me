@@ -1,7 +1,7 @@
 <template>
   <div class="admin-dashboard">
     <h1>退款审核</h1>
-    
+
     <div class="refund-section">
       <table class="data-table">
         <thead>
@@ -35,13 +35,13 @@
         </tbody>
       </table>
     </div>
-    
+
     <!-- 分页 -->
     <div class="pagination" v-if="refundApplyList.total > 0">
       <el-pagination
         v-model:current-page="pagination.pageNum"
         v-model:page-size="pagination.pageSize"
-        :page-sizes="[1,10, 20, 50]"
+        :page-sizes="[1, 10, 20, 50]"
         layout="total, sizes, prev, pager, next, jumper"
         :total="refundApplyList.total"
         @size-change="handleSizeChange"
@@ -53,25 +53,25 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { adminApi } from '@/api/admin'
-import { ElMessage,ElMessageBox } from 'element-plus'
+import { refundApi } from '@/api/admin/refund'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const refundApplyList = ref({
   records: [],
-  total: 0
+  total: 0,
 })
 
 const pagination = ref({
   pageNum: 1,
-  pageSize: 10
+  pageSize: 10,
 })
 
 const loadRefundApplyList = async () => {
   try {
-    const response = await adminApi.getRefundApplyPage({
+    const response = await refundApi.getRefundApplyPage({
       status: 'PENDING',
       pageNum: pagination.value.pageNum,
-      pageSize: pagination.value.pageSize
+      pageSize: pagination.value.pageSize,
     })
     refundApplyList.value = response.data
   } catch (error) {
@@ -103,26 +103,28 @@ const auditRefund = async (applyId, approved) => {
             return '拒绝原因不能为空'
           }
           return true
-        }
-      }).then(async (result) => {
-        rejectReason = result.value
-        
-        await adminApi.auditRefund({
-          applyId,
-          approved,
-          rejectReason
-        })
-        await loadRefundApplyList()
-        ElMessage.success('审核操作已完成')
-      }).catch(() => {
-        // 用户取消输入
-        ElMessage.info('审核操作已取消')
+        },
       })
+        .then(async (result) => {
+          rejectReason = result.value
+
+          await refundApi.auditRefund({
+            applyId,
+            approved,
+            rejectReason,
+          })
+          await loadRefundApplyList()
+          ElMessage.success('审核操作已完成')
+        })
+        .catch(() => {
+          // 用户取消输入
+          ElMessage.info('审核操作已取消')
+        })
     } else {
-      await adminApi.auditRefund({
+      await refundApi.auditRefund({
         applyId,
         approved,
-        rejectReason
+        rejectReason,
       })
       await loadRefundApplyList()
       ElMessage.success('审核操作已完成')

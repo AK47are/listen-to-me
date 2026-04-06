@@ -1,5 +1,5 @@
 <script setup>
-import { recommendApi } from '@/api/recommend'
+import { recommendApi } from '@/api/user/recommend'
 import { Headset, Loading, Opportunity, Star } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { onMounted, ref } from 'vue'

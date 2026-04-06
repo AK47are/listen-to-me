@@ -2,7 +2,7 @@
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { creatorApi } from '@/api/creator'
+import { creatorAudioApi } from '@/api/creator/audio'
 
 const router = useRouter()
 
@@ -24,7 +24,7 @@ const submitting = ref(false)
 const handleAudioUpload = async (file) => {
   uploadingAudio.value = true
   try {
-    const res = await creatorApi.uploadAudio(file.raw)
+    const res = await creatorAudioApi.uploadAudio(file.raw)
     audioForm.audioUrl = res
     ElMessage.success('音频上传成功')
   } catch (error) {
@@ -37,7 +37,7 @@ const handleAudioUpload = async (file) => {
 const handleCoverUpload = async (file) => {
   uploadingCover.value = true
   try {
-    const res = await creatorApi.uploadCover(file.raw)
+    const res = await creatorAudioApi.uploadCover(file.raw)
     audioForm.coverUrl = res
     ElMessage.success('封面上传成功')
   } catch (error) {
@@ -79,7 +79,7 @@ const handleSubmit = async () => {
 
   submitting.value = true
   try {
-    const res = await creatorApi.saveAudio(audioForm)
+    const res = await creatorAudioApi.saveAudio(audioForm)
     ElMessage.success('发布成功，稿件正在处理中')
     router.push('/creator/audio')
   } catch (error) {
@@ -103,7 +103,12 @@ const handleCancel = () => {
     <div class="content">
       <el-form :model="audioForm" label-width="120px">
         <el-form-item label="标题" required>
-          <el-input v-model="audioForm.title" placeholder="请输入标题" maxlength="100" show-word-limit />
+          <el-input
+            v-model="audioForm.title"
+            placeholder="请输入标题"
+            maxlength="100"
+            show-word-limit
+          />
         </el-form-item>
 
         <el-form-item label="封面" required>
@@ -161,12 +166,7 @@ const handleCancel = () => {
         </el-form-item>
 
         <el-form-item label="试听设置">
-          <el-input-number
-            v-model="audioForm.trialDuration"
-            :min="0"
-            :max="300"
-            :step="10"
-          />
+          <el-input-number v-model="audioForm.trialDuration" :min="0" :max="300" :step="10" />
           <span style="margin-left: 10px; color: #999">秒（0表示无试听）</span>
         </el-form-item>
 
@@ -194,9 +194,7 @@ const handleCancel = () => {
         </el-form-item>
 
         <el-form-item>
-          <el-button type="primary" :loading="submitting" @click="handleSubmit">
-            发布
-          </el-button>
+          <el-button type="primary" :loading="submitting" @click="handleSubmit"> 发布 </el-button>
           <el-button @click="handleCancel">取消</el-button>
         </el-form-item>
       </el-form>

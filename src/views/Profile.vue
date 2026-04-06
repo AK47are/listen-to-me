@@ -1,8 +1,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElDialog } from 'element-plus'
-import { userApi } from '@/api/user'
-import { authApi } from '@/api/user'
+import { profileApi } from '@/api/user/profile'
+import { authApi } from '@/api/common/auth'
+import { applyApi } from '@/api/user/apply'
 import { useUserStore } from '@/stores/user/user'
 
 const userStore = useUserStore()
@@ -34,21 +35,19 @@ const verifyCodeForm = reactive({
   imageCode: '',
 })
 
-
 const loading = ref(false)
 const sendingCode = ref(false)
 const countdown = ref(0)
 const isEditMode = ref(false)
 const captchaUrl = ref('')
 
-// 创作者申请相关
 const showApplyDialog = ref(false)
 const showStatusDialog = ref(false)
 const applyForm = reactive({
   realName: '',
   phone: '',
   intro: '',
-  attachment: ''
+  attachment: '',
 })
 const applyStatus = ref(null)
 const checkingStatus = ref(false)
@@ -56,13 +55,14 @@ const submittingApply = ref(false)
 
 const getProfile = async () => {
   try {
-    const res = await userApi.getProfile()
+    const res = await profileApi.getProfile()
     Object.assign(profileInfo, res.data)
     Object.assign(profileForm, res.data)
   } catch (error) {
     console.error(error)
   }
 }
+
 const getCaptcha = async () => {
   try {
     const res = await authApi.getImageCaptcha()
@@ -102,7 +102,7 @@ const handleFileChange = async (file) => {
   if (file.status === 'ready') {
     try {
       loading.value = true
-      const response = await userApi.uploadAvatar(file.raw)
+      const response = await profileApi.uploadAvatar(file.raw)
       if (response && response.data) {
         profileForm.avatar = response.data
         ElMessage.success('头像上传成功')
@@ -142,7 +142,7 @@ const handleUpdateProfile = async () => {
     data.phone = profileForm.phone
     data.email = profileForm.email
 
-    if ((profileInfo.phone !== profileForm.phone) || (profileInfo.email !== profileForm.email)) {
+    if (profileInfo.phone !== profileForm.phone || profileInfo.email !== profileForm.email) {
       if (!profileForm.verifyCode) {
         ElMessage.warning('修改手机号或邮箱需要验证码')
         loading.value = false
@@ -161,7 +161,7 @@ const handleUpdateProfile = async () => {
       data.newPassword = profileForm.newPassword
     }
 
-    await userApi.updateProfile(data)
+    await profileApi.updateProfile(data)
     ElMessage.success('修改成功')
     await getProfile()
     profileForm.verifyCode = ''
@@ -179,24 +179,19 @@ const toggleEditMode = () => {
   isEditMode.value = !isEditMode.value
 }
 
-// 打开申请对话框
 const openApplyDialog = () => {
   showApplyDialog.value = true
 }
 
-// 关闭申请对话框
 const closeApplyDialog = () => {
   showApplyDialog.value = false
-  // 重置表单
   applyForm.realName = ''
   applyForm.phone = ''
   applyForm.intro = ''
   applyForm.attachment = ''
 }
 
-// 提交创作者申请
 const submitCreatorApply = async () => {
-  // 验证表单
   if (!applyForm.realName || !applyForm.phone || !applyForm.intro) {
     ElMessage.warning('请填写完整的申请信息')
     return
@@ -204,10 +199,9 @@ const submitCreatorApply = async () => {
 
   submittingApply.value = true
   try {
-    await userApi.applyCreator(applyForm)
+    await applyApi.applyCreator(applyForm)
     ElMessage.success('申请提交成功')
     closeApplyDialog()
-    // 刷新个人资料
     getProfile()
   } catch (error) {
     console.error(error)
@@ -216,11 +210,10 @@ const submitCreatorApply = async () => {
   }
 }
 
-// 查询申请状态
 const checkApplyStatus = async () => {
   checkingStatus.value = true
   try {
-    const res = await userApi.getCreatorApplyStatus()
+    const res = await applyApi.getApplyStatus()
     applyStatus.value = res.data
     showStatusDialog.value = true
   } catch (error) {
@@ -246,14 +239,14 @@ onMounted(() => {
           <el-icon><Edit /></el-icon> 修改个人信息
         </el-button>
       </div>
-      
+
       <div class="profile-info">
         <div class="avatar-section">
           <img :src="profileInfo.avatar" alt="头像" class="avatar" />
           <h3>{{ profileInfo.nickname }}</h3>
           <p class="username">{{ profileInfo.username }}</p>
         </div>
-        
+
         <div class="info-grid">
           <div class="info-item">
             <span class="label">手机号</span>
@@ -272,34 +265,34 @@ onMounted(() => {
             <span class="value">{{ profileInfo.frozenBalance }} 虚拟币</span>
           </div>
           <div class="info-item">
-          <span class="label">创作者身份</span>
-          <span class="value">
-            <el-tag :type="profileInfo.isCreator ? 'success' : 'info'">
-              {{ profileInfo.isCreator ? '是' : '否' }}
-            </el-tag>
-            <el-button
-              v-if="!profileInfo.isCreator"
-              type="primary"
-              size="small"
-              style="margin-left: 10px"
-              @click="openApplyDialog"
-            >
-              申请成为创作者
-            </el-button>
-            <el-button
-              type="info"
-              size="small"
-              style="margin-left: 10px"
-              @click="checkApplyStatus"
-            >
-              查看申请状态
-            </el-button>
-          </span>
-        </div>
+            <span class="label">创作者身份</span>
+            <span class="value">
+              <el-tag :type="profileInfo.isCreator ? 'success' : 'info'">
+                {{ profileInfo.isCreator ? '是' : '否' }}
+              </el-tag>
+              <el-button
+                v-if="!profileInfo.isCreator"
+                type="primary"
+                size="small"
+                style="margin-left: 10px"
+                @click="openApplyDialog"
+              >
+                申请成为创作者
+              </el-button>
+              <el-button
+                type="info"
+                size="small"
+                style="margin-left: 10px"
+                @click="checkApplyStatus"
+              >
+                查看申请状态
+              </el-button>
+            </span>
+          </div>
         </div>
       </div>
     </div>
-    
+
     <!-- 编辑个人信息 -->
     <div class="profile-box" v-else>
       <div class="profile-header">
@@ -308,7 +301,7 @@ onMounted(() => {
           <el-icon><Close /></el-icon> 取消
         </el-button>
       </div>
-      
+
       <el-form :model="profileForm" label-width="100px">
         <el-form-item label="用户名">
           <el-input v-model="profileForm.username" disabled />
@@ -387,11 +380,7 @@ onMounted(() => {
     </div>
 
     <!-- 创作者申请对话框 -->
-    <el-dialog
-      v-model="showApplyDialog"
-      title="申请成为创作者"
-      width="500px"
-    >
+    <el-dialog v-model="showApplyDialog" title="申请成为创作者" width="500px">
       <el-form :model="applyForm" label-width="100px">
         <el-form-item label="真实姓名" required>
           <el-input v-model="applyForm.realName" placeholder="请输入真实姓名" />
@@ -408,7 +397,10 @@ onMounted(() => {
           />
         </el-form-item>
         <el-form-item label="附件链接">
-          <el-input v-model="applyForm.attachment" placeholder="请输入作品集或个人网站链接（可选）" />
+          <el-input
+            v-model="applyForm.attachment"
+            placeholder="请输入作品集或个人网站链接（可选）"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -422,11 +414,7 @@ onMounted(() => {
     </el-dialog>
 
     <!-- 申请状态对话框 -->
-    <el-dialog
-      v-model="showStatusDialog"
-      title="申请状态"
-      width="400px"
-    >
+    <el-dialog v-model="showStatusDialog" title="申请状态" width="400px">
       <div v-if="checkingStatus" class="loading-state">
         <el-icon class="is-loading"><Loading /></el-icon>
         加载中...
@@ -435,8 +423,22 @@ onMounted(() => {
         <div class="status-item">
           <span class="label">状态：</span>
           <span class="value">
-            <el-tag :type="applyStatus.status === 'PENDING' ? 'warning' : applyStatus.status === 'APPROVED' ? 'success' : 'danger'">
-              {{ applyStatus.status === 'PENDING' ? '审核中' : applyStatus.status === 'APPROVED' ? '已通过' : '已拒绝' }}
+            <el-tag
+              :type="
+                applyStatus.status === 'PENDING'
+                  ? 'warning'
+                  : applyStatus.status === 'APPROVED'
+                    ? 'success'
+                    : 'danger'
+              "
+            >
+              {{
+                applyStatus.status === 'PENDING'
+                  ? '审核中'
+                  : applyStatus.status === 'APPROVED'
+                    ? '已通过'
+                    : '已拒绝'
+              }}
             </el-tag>
           </span>
         </div>
@@ -460,5 +462,5 @@ onMounted(() => {
 
 <style scoped>
 @import '@/resource/css/profile.css';
-
 </style>
+

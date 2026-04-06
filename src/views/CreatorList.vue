@@ -133,7 +133,7 @@ import {
   Calendar,
   Close,
 } from '@element-plus/icons-vue'
-import { consultApi } from '@/api/consult'
+import { creatorApi } from '@/api/user/creator'
 import { useUserStore } from '@/stores/user/user'
 
 const router = useRouter()
@@ -162,7 +162,7 @@ const pagination = ref({
 const getCreatorList = async () => {
   loading.value = true
   try {
-    const res = await consultApi.getCreatorList({
+    const res = await creatorApi.getCreatorPage({
       pageNum: pagination.value.pageNum,
       pageSize: 12,
       keyword: searchQuery.value,
@@ -230,7 +230,10 @@ const handlePageChange = (page) => {
 }
 
 const handleCreatorClick = (creator) => {
-  router.push(`/consult/creator/${creator.creatorId}`)
+  router.push({
+    path: `/consult/creator/${creator.creatorId}`,
+    state: { creatorInfo: creator },
+  })
 }
 
 onMounted(() => {

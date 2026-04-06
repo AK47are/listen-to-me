@@ -1,39 +1,34 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { creatorApi } from '@/api/creator'
+import { slotApi } from '@/api/creator/slot'
 
-// 时间槽列表
 const slotList = ref([])
 const loading = ref(false)
 const submitting = ref(false)
 
-// 分页参数
 const pagination = reactive({
   pageNum: 1,
   pageSize: 10,
-  total: 0
+  total: 0,
 })
 
-// 查询参数
 const searchParams = reactive({
   startTime: '',
-  endTime: ''
+  endTime: '',
 })
 
-// 批量创建时间槽表单
 const batchForm = reactive({
   slots: [
     {
       startTime: '',
       endTime: '',
       price: 50,
-      address: '腾讯会议链接'
-    }
-  ]
+      address: '腾讯会议链接',
+    },
+  ],
 })
 
-// 获取时间槽列表
 const getSlotList = async () => {
   loading.value = true
   try {
@@ -41,9 +36,9 @@ const getSlotList = async () => {
       pageNum: pagination.pageNum,
       pageSize: pagination.pageSize,
       startTime: searchParams.startTime ? formatDateTime(searchParams.startTime) : '',
-      endTime: searchParams.endTime ? formatDateTime(searchParams.endTime) : ''
+      endTime: searchParams.endTime ? formatDateTime(searchParams.endTime) : '',
     }
-    const res = await creatorApi.getSlotPage(params)
+    const res = await slotApi.getSlotPage(params)
     slotList.value = res.data.records || []
     pagination.total = res.data.total || 0
   } catch (error) {
@@ -53,7 +48,6 @@ const getSlotList = async () => {
   }
 }
 
-// 格式化日期时间为后端期望的格式
 const formatDateTime = (date) => {
   if (!date) return ''
   const d = new Date(date)
@@ -66,38 +60,33 @@ const formatDateTime = (date) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
 }
 
-// 批量创建时间槽
 const handleBatchCreate = async () => {
-  // 验证表单
-  const hasEmpty = batchForm.slots.some(slot => 
-    !slot.startTime || !slot.endTime || !slot.price || !slot.address
+  const hasEmpty = batchForm.slots.some(
+    (slot) => !slot.startTime || !slot.endTime || !slot.price || !slot.address,
   )
   if (hasEmpty) {
     ElMessage.warning('请填写完整的时间槽信息')
     return
   }
 
-  // 格式化时间槽数据
-  const formattedSlots = batchForm.slots.map(slot => ({
+  const formattedSlots = batchForm.slots.map((slot) => ({
     ...slot,
     startTime: formatDateTime(slot.startTime),
-    endTime: formatDateTime(slot.endTime)
+    endTime: formatDateTime(slot.endTime),
   }))
 
   submitting.value = true
   try {
-    await creatorApi.saveSlotBatch(formattedSlots)
+    await slotApi.saveSlotBatch(formattedSlots)
     ElMessage.success('时间槽创建成功')
-    // 重置表单
     batchForm.slots = [
       {
         startTime: '',
         endTime: '',
         price: 50,
-        address: '腾讯会议链接'
-      }
+        address: '腾讯会议链接',
+      },
     ]
-    // 刷新列表
     getSlotList()
   } catch (error) {
     ElMessage.error('创建时间槽失败')
@@ -106,17 +95,15 @@ const handleBatchCreate = async () => {
   }
 }
 
-// 添加时间槽行
 const addSlotRow = () => {
   batchForm.slots.push({
     startTime: '',
     endTime: '',
     price: 50,
-    address: '腾讯会议链接'
+    address: '腾讯会议链接',
   })
 }
 
-// 删除时间槽行
 const removeSlotRow = (index) => {
   if (batchForm.slots.length > 1) {
     batchForm.slots.splice(index, 1)
@@ -125,10 +112,9 @@ const removeSlotRow = (index) => {
   }
 }
 
-// 更新时间槽状态
 const updateSlotStatus = async (slotId, status) => {
   try {
-    await creatorApi.updateSlot(slotId, status)
+    await slotApi.updateSlot(slotId, status)
     ElMessage.success('状态更新成功')
     getSlotList()
   } catch (error) {
@@ -136,15 +122,14 @@ const updateSlotStatus = async (slotId, status) => {
   }
 }
 
-// 删除时间槽
 const deleteSlot = async (slotId) => {
   try {
     await ElMessageBox.confirm('确定要删除这个时间槽吗？', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
-      type: 'warning'
+      type: 'warning',
     })
-    await creatorApi.deleteSlot(slotId)
+    await slotApi.deleteSlot(slotId)
     ElMessage.success('删除成功')
     getSlotList()
   } catch (error) {
@@ -154,13 +139,11 @@ const deleteSlot = async (slotId) => {
   }
 }
 
-// 搜索时间槽
 const handleSearch = () => {
   pagination.pageNum = 1
   getSlotList()
 }
 
-// 分页处理
 const handlePageChange = (page) => {
   pagination.pageNum = page
   getSlotList()
@@ -172,24 +155,22 @@ const handleSizeChange = (size) => {
   getSlotList()
 }
 
-// 格式化状态文本
 const formatStatusText = (status) => {
   const statusMap = {
-    'AVAILABLE': '可用',
-    'BOOKED': '已预约',
-    'EXPIRED': '已过期',
-    'CANCELLED': '已取消'
+    AVAILABLE: '可用',
+    BOOKED: '已预约',
+    EXPIRED: '已过期',
+    CANCELLED: '已取消',
   }
   return statusMap[status] || status
 }
 
-// 格式化状态类型
 const formatStatusType = (status) => {
   const typeMap = {
-    'AVAILABLE': 'success',
-    'BOOKED': 'warning',
-    'EXPIRED': 'info',
-    'CANCELLED': 'danger'
+    AVAILABLE: 'success',
+    BOOKED: 'warning',
+    EXPIRED: 'info',
+    CANCELLED: 'danger',
   }
   return typeMap[status] || 'info'
 }
@@ -253,10 +234,7 @@ onMounted(() => {
               </el-col>
               <el-col :span="12">
                 <el-form-item label="预约地址" required>
-                  <el-input
-                    v-model="slot.address"
-                    placeholder="请输入预约地址（如腾讯会议链接）"
-                  />
+                  <el-input v-model="slot.address" placeholder="请输入预约地址（如腾讯会议链接）" />
                 </el-form-item>
               </el-col>
               <el-col :span="4" class="form-actions">
@@ -277,11 +255,7 @@ onMounted(() => {
             <el-icon><Plus /></el-icon>
             添加时间槽
           </el-button>
-          <el-button
-            type="success"
-            :loading="submitting"
-            @click="handleBatchCreate"
-          >
+          <el-button type="success" :loading="submitting" @click="handleBatchCreate">
             <el-icon><Check /></el-icon>
             批量创建
           </el-button>

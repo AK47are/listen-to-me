@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { favoriteApi } from '@/api/favorite'
+import { favoriteApi } from '@/api/user/favorite'
 
 const router = useRouter()
 
@@ -17,10 +17,9 @@ const folderForm = ref({
   description: '',
 })
 
-// 分页参数
 const pagination = ref({
   pageNum: 1,
-  pageSize: 12
+  pageSize: 12,
 })
 
 const getFolderList = async () => {
@@ -104,7 +103,6 @@ const handleRemoveFavorite = async (audioId) => {
       action: 'UNCOLLECT',
     })
     ElMessage.success('移除成功')
-    // 移除后重新获取当前页数据
     await getFavoriteList()
   } catch (error) {
     if (error !== 'cancel') {
@@ -113,7 +111,6 @@ const handleRemoveFavorite = async (audioId) => {
   }
 }
 
-// 分页变化处理
 const handlePageChange = (page) => {
   pagination.value.pageNum = page
   getFavoriteList()
@@ -149,7 +146,10 @@ onMounted(() => {
           v-for="folder in folders"
           :key="folder.id"
           :class="['folder-item', { active: currentFolderId === folder.id }]"
-          @click="currentFolderId = folder.id; getFavoriteList()"
+          @click="
+            currentFolderId = folder.id
+            getFavoriteList()
+          "
         >
           <div class="folder-info">
             <el-icon><FolderOpened /></el-icon>
@@ -158,11 +158,7 @@ onMounted(() => {
           <div class="folder-meta">
             <span>{{ folder.audioCount }} 个音频</span>
             <span>{{ folder.createTime }}</span>
-            <el-button
-              link
-              type="danger"
-              @click.stop="handleDeleteFolder(folder.id)"
-            >
+            <el-button link type="danger" @click.stop="handleDeleteFolder(folder.id)">
               <el-icon><Delete /></el-icon>
             </el-button>
           </div>
@@ -179,19 +175,18 @@ onMounted(() => {
         </div>
         <div v-else>
           <div class="audio-grid">
-            <div
-              v-for="audio in audioList"
-              :key="audio.id"
-              class="audio-card"
-            >
-            
+            <div v-for="audio in audioList" :key="audio.id" class="audio-card">
               <img :src="audio.coverUrl" alt="封面" class="cover" />
               <div class="audio-info">
                 <h4>{{ audio.title }}</h4>
                 <p>{{ audio.creatorName }}</p>
                 <div class="stats">
-                  <span><el-icon><Headset /></el-icon> {{ audio.playCount }}</span>
-                  <span><el-icon><Star /></el-icon> {{ audio.collectCount }}</span>
+                  <span
+                    ><el-icon><Headset /></el-icon> {{ audio.playCount }}</span
+                  >
+                  <span
+                    ><el-icon><Star /></el-icon> {{ audio.collectCount }}</span
+                  >
                 </div>
               </div>
               <div class="actions">
@@ -204,13 +199,13 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          
+
           <!-- 分页组件 -->
           <div class="pagination" v-if="total > 0">
             <el-pagination
               v-model:current-page="pagination.pageNum"
               v-model:page-size="pagination.pageSize"
-              :page-sizes="[1,12, 24, 36]"
+              :page-sizes="[1, 12, 24, 36]"
               layout="total, sizes, prev, pager, next, jumper"
               :total="total"
               @size-change="handleSizeChange"
@@ -391,3 +386,4 @@ onMounted(() => {
   justify-content: center;
 }
 </style>
+

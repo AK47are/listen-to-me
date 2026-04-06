@@ -1,7 +1,7 @@
 <template>
   <div class="creator-consult">
     <h2>预约订单管理</h2>
-    
+
     <!-- 订单列表 -->
     <div class="consult-list">
       <div class="filter-bar">
@@ -14,8 +14,8 @@
           <option value="REFUND_PENDING">退款中</option>
           <option value="REFUNDED">已退款</option>
         </select>
-        <input type="date" v-model="searchParams.startDate" placeholder="开始日期">
-        <input type="date" v-model="searchParams.endDate" placeholder="结束日期">
+        <input type="date" v-model="searchParams.startDate" placeholder="开始日期" />
+        <input type="date" v-model="searchParams.endDate" placeholder="结束日期" />
         <button @click="getConsultOrders" class="btn btn-secondary">查询</button>
       </div>
       <table class="table">
@@ -40,15 +40,33 @@
             <td>{{ order.status }}</td>
             <td>
               <div class="user-info">
-                <img :src="order.userAvatar" alt="用户头像" class="avatar">
+                <img :src="order.userAvatar" alt="用户头像" class="avatar" />
                 <span>{{ order.userNickname }}</span>
               </div>
             </td>
             <td>{{ order.message }}</td>
             <td>
-              <button v-if="order.status === 'PENDING_CONFIRM'" @click="confirmConsult(order.id)" class="btn btn-success">确认</button>
-              <button v-if="order.status === 'PENDING_CONFIRM'" @click="rejectConsult(order.id)" class="btn btn-danger">拒绝</button>
-              <button v-if="order.status === 'CONFIRMED'" @click="completeConsult(order.id)" class="btn btn-primary">标记完成</button>
+              <button
+                v-if="order.status === 'PENDING_CONFIRM'"
+                @click="confirmConsult(order.id)"
+                class="btn btn-success"
+              >
+                确认
+              </button>
+              <button
+                v-if="order.status === 'PENDING_CONFIRM'"
+                @click="rejectConsult(order.id)"
+                class="btn btn-danger"
+              >
+                拒绝
+              </button>
+              <button
+                v-if="order.status === 'CONFIRMED'"
+                @click="completeConsult(order.id)"
+                class="btn btn-primary"
+              >
+                标记完成
+              </button>
             </td>
           </tr>
         </tbody>
@@ -57,109 +75,100 @@
         <button @click="changePage(1)" :disabled="currentPage === 1">首页</button>
         <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">上一页</button>
         <span>第 {{ currentPage }} 页，共 {{ totalPages }} 页</span>
-        <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">下一页</button>
+        <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">
+          下一页
+        </button>
         <button @click="changePage(totalPages)" :disabled="currentPage === totalPages">末页</button>
       </div>
     </div>
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref, computed, onMounted } from 'vue'
-import { creatorApi } from '@/api/creator'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { creatorConsultApi } from '@/api/creator/consult'
 
-export default {
-  name: 'CreatorConsult',
-  setup() {
-    const consultOrders = ref([])
-    const total = ref(0)
-    const currentPage = ref(1)
-    const pageSize = ref(10)
-    const searchParams = ref({
-      status: '',
-      startDate: '',
-      endDate: ''
+const consultOrders = ref([])
+const total = ref(0)
+const currentPage = ref(1)
+const pageSize = ref(10)
+const searchParams = ref({
+  status: '',
+  startDate: '',
+  endDate: '',
+})
+
+const totalPages = computed(() => Math.ceil(total.value / pageSize.value))
+
+const getConsultOrders = async () => {
+  try {
+    const params = {
+      pageNum: currentPage.value,
+      pageSize: pageSize.value,
+      status: searchParams.value.status,
+      startDate: searchParams.value.startDate,
+      endDate: searchParams.value.endDate,
+    }
+    const response = await creatorConsultApi.getConsultPage(params)
+    consultOrders.value = response.data.records || []
+    total.value = response.data.total || 0
+  } catch (error) {
+    console.error('获取预约订单列表失败:', error)
+    ElMessage.error('获取预约订单列表失败')
+  }
+}
+
+const confirmConsult = async (id) => {
+  try {
+    await creatorConsultApi.confirmConsult(id)
+    ElMessage.success('已确认预约')
+    getConsultOrders()
+  } catch (error) {
+    console.error('确认预约失败:', error)
+    ElMessage.error('确认预约失败')
+  }
+}
+
+const rejectConsult = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定要拒绝这个预约吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
     })
-
-    const totalPages = computed(() => {
-      return Math.ceil(total.value / pageSize.value)
-    })
-
-    const getConsultOrders = async () => {
-      try {
-        const params = {
-          pageNum: currentPage.value,
-          pageSize: pageSize.value,
-          status: searchParams.value.status,
-          startDate: searchParams.value.startDate,
-          endDate: searchParams.value.endDate
-        }
-        const response = await creatorApi.getConsultPage(params)
-        consultOrders.value = response.data.records || []
-        total.value = response.data.total || 0
-      } catch (error) {
-        console.error('获取预约订单列表失败:', error)
-      }
-    }
-
-    const confirmConsult = async (id) => {
-      try {
-        await creatorApi.confirmConsult(id)
-        getConsultOrders()
-      } catch (error) {
-        console.error('确认预约失败:', error)
-        alert('确认预约失败')
-      }
-    }
-
-    const rejectConsult = async (id) => {
-      if (confirm('确定要拒绝这个预约吗？')) {
-        try {
-          await creatorApi.rejectConsult(id)
-          alert('预约拒绝成功')
-          getConsultOrders()
-        } catch (error) {
-          console.error('拒绝预约失败:', error)
-          alert('拒绝预约失败')
-        }
-      }
-    }
-
-    const completeConsult = async (id) => {
-      try {
-        await creatorApi.completeConsult(id)
-        getConsultOrders()
-      } catch (error) {
-        console.error('标记完成失败:', error)
-      }
-    }
-
-    const changePage = (page) => {
-      if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page
-        getConsultOrders()
-      }
-    }
-
-    onMounted(() => {
-      getConsultOrders()
-    })
-
-    return {
-      consultOrders,
-      total,
-      currentPage,
-      pageSize,
-      totalPages,
-      searchParams,
-      getConsultOrders,
-      confirmConsult,
-      rejectConsult,
-      completeConsult,
-      changePage
+    await creatorConsultApi.rejectConsult(id)
+    ElMessage.success('预约拒绝成功')
+    getConsultOrders()
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('拒绝预约失败:', error)
+      ElMessage.error('拒绝预约失败')
     }
   }
 }
+
+const completeConsult = async (id) => {
+  try {
+    await creatorConsultApi.completeConsult(id)
+    ElMessage.success('已标记完成')
+    getConsultOrders()
+  } catch (error) {
+    console.error('标记完成失败:', error)
+    ElMessage.error('标记完成失败')
+  }
+}
+
+const changePage = (page) => {
+  if (page >= 1 && page <= totalPages.value) {
+    currentPage.value = page
+    getConsultOrders()
+  }
+}
+
+onMounted(() => {
+  getConsultOrders()
+})
 </script>
 
 <style scoped>
@@ -195,12 +204,12 @@ export default {
 }
 
 .btn-secondary {
-  background-color: #2196F3;
+  background-color: #2196f3;
   color: white;
 }
 
 .btn-success {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
 }
 
@@ -210,7 +219,7 @@ export default {
 }
 
 .btn-primary {
-  background-color: #2196F3;
+  background-color: #2196f3;
   color: white;
 }
 

@@ -2,7 +2,7 @@
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { authApi } from '@/api/user'
+import { authApi } from '@/api/common/auth'
 import { useUserStore } from '@/stores/user/user'
 
 const router = useRouter()
@@ -24,7 +24,6 @@ const handleLogin = async () => {
   loading.value = true
   try {
     const res = await authApi.login(loginForm)
-    // 适配后端返回结构
     userStore.setToken(res.data.token)
     userStore.setUserInfo(res.data.userInfo)
     ElMessage.success('欢迎回来')

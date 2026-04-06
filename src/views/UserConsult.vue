@@ -17,7 +17,13 @@
           我的预约记录
         </h3>
         <div class="filter-bar">
-          <el-select v-model="searchParams.status" placeholder="全部状态" clearable @change="getMyConsultOrders" style="min-width: 120px;">
+          <el-select
+            v-model="searchParams.status"
+            placeholder="全部状态"
+            clearable
+            @change="getMyConsultOrders"
+            style="min-width: 120px"
+          >
             <el-option label="全部状态" value="" />
             <el-option label="待确认" value="PENDING_CONFIRM" />
             <el-option label="已确认" value="CONFIRMED" />
@@ -109,12 +115,7 @@
     </div>
 
     <!-- 退款申请弹窗 -->
-    <el-dialog
-      v-model="showRefundModal"
-      title="申请退款"
-      width="500px"
-      destroy-on-close
-    >
+    <el-dialog v-model="showRefundModal" title="申请退款" width="500px" destroy-on-close>
       <el-form label-position="top">
         <el-form-item label="退款原因" required>
           <el-input
@@ -129,7 +130,12 @@
       </el-form>
       <template #footer>
         <el-button @click="showRefundModal = false">取消</el-button>
-        <el-button type="primary" @click="applyRefund" :loading="submitting" :disabled="!refundReason.trim()">
+        <el-button
+          type="primary"
+          @click="applyRefund"
+          :loading="submitting"
+          :disabled="!refundReason.trim()"
+        >
           提交申请
         </el-button>
       </template>
@@ -141,38 +147,39 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
-  Collection, Refresh, ChatDotRound, Clock, User, Coin, Location
+  Collection,
+  Refresh,
+  ChatDotRound,
+  Clock,
+  User,
+  Coin,
+  Location,
 } from '@element-plus/icons-vue'
-import { consultApi } from '@/api/consult'
+import { consultApi } from '@/api/user/consult'
 
-// 我的预约列表
 const consultOrders = ref([])
 const total = ref(0)
 const searchParams = ref({
-  status: ''
+  status: '',
 })
 
-// 分页参数
 const currentPage = ref(1)
 const pageSize = ref(8)
 
-// 退款相关
 const showRefundModal = ref(false)
 const currentOrderId = ref(null)
 const refundReason = ref('')
 
-// 加载状态
 const loading = ref(false)
 const submitting = ref(false)
 
-// 获取我的预约列表
 const getMyConsultOrders = async () => {
   loading.value = true
   try {
     const params = {
       pageNum: currentPage.value,
       pageSize: pageSize.value,
-      status: searchParams.value.status
+      status: searchParams.value.status,
     }
     const response = await consultApi.getMyConsultPage(params)
     consultOrders.value = response.data.records || []
@@ -185,13 +192,12 @@ const getMyConsultOrders = async () => {
   }
 }
 
-// 取消预约
 const cancelConsult = async (id) => {
   try {
     await ElMessageBox.confirm('确定要取消这个预约吗？取消后将全额退款。', '提示', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
-      type: 'warning'
+      type: 'warning',
     })
     await consultApi.cancelConsult(id)
     ElMessage.success('预约取消成功')
@@ -204,14 +210,12 @@ const cancelConsult = async (id) => {
   }
 }
 
-// 显示退款弹窗
 const showRefundDialog = (id) => {
   currentOrderId.value = id
   refundReason.value = ''
   showRefundModal.value = true
 }
 
-// 申请退款
 const applyRefund = async () => {
   if (!refundReason.value.trim()) {
     ElMessage.warning('请输入退款原因')
@@ -220,7 +224,7 @@ const applyRefund = async () => {
 
   submitting.value = true
   try {
-    await consultApi.applyRefund(currentOrderId.value, refundReason.value)
+    await consultApi.applyRefund(currentOrderId.value, { reason: refundReason.value })
     ElMessage.success('退款申请提交成功')
     showRefundModal.value = false
     getMyConsultOrders()
@@ -232,7 +236,6 @@ const applyRefund = async () => {
   }
 }
 
-// 分页处理
 const handleConsultSizeChange = (size) => {
   pageSize.value = size
   currentPage.value = 1
@@ -244,27 +247,26 @@ const handleConsultPageChange = (page) => {
   getMyConsultOrders()
 }
 
-// 状态相关
 const getStatusType = (status) => {
   const types = {
-    'PENDING_CONFIRM': 'warning',
-    'CONFIRMED': 'success',
-    'COMPLETED': 'info',
-    'CANCELLED': 'danger',
-    'REFUND_PENDING': 'warning',
-    'REFUNDED': 'info'
+    PENDING_CONFIRM: 'warning',
+    CONFIRMED: 'success',
+    COMPLETED: 'info',
+    CANCELLED: 'danger',
+    REFUND_PENDING: 'warning',
+    REFUNDED: 'info',
   }
   return types[status] || 'info'
 }
 
 const getStatusText = (status) => {
   const texts = {
-    'PENDING_CONFIRM': '待确认',
-    'CONFIRMED': '已确认',
-    'COMPLETED': '已完成',
-    'CANCELLED': '已取消',
-    'REFUND_PENDING': '退款中',
-    'REFUNDED': '已退款'
+    PENDING_CONFIRM: '待确认',
+    CONFIRMED: '已确认',
+    COMPLETED: '已完成',
+    CANCELLED: '已取消',
+    REFUND_PENDING: '退款中',
+    REFUNDED: '已退款',
   }
   return texts[status] || status
 }
@@ -275,5 +277,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
- @import '@/resource/css/userConsult.css';
+@import '@/resource/css/userConsult.css';
 </style>
+

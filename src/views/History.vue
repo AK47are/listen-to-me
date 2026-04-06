@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { audioApi } from '@/api/audio'
+import { historyApi } from '@/api/user/history'
 
 const router = useRouter()
 
@@ -17,7 +17,7 @@ const pagination = ref({
 const getHistoryList = async () => {
   loading.value = true
   try {
-    const res = await audioApi.getHistoryPage({
+    const res = await historyApi.getHistoryPage({
       pageNum: pagination.value.pageNum,
       pageSize: pagination.value.pageSize,
     })
@@ -65,18 +65,18 @@ onMounted(() => {
         <el-empty description="暂无播放历史" />
       </div>
       <div v-else class="audio-grid">
-        <div
-          v-for="audio in audioList"
-          :key="audio.id"
-          class="audio-card"
-        >
+        <div v-for="audio in audioList" :key="audio.id" class="audio-card">
           <img :src="audio.coverUrl" alt="封面" class="cover" />
           <div class="audio-info">
             <h4>{{ audio.title }}</h4>
             <p>{{ audio.creatorName }}</p>
             <div class="stats">
-              <span><el-icon><Headset /></el-icon> {{ audio.playCount }}</span>
-              <span><el-icon><Star /></el-icon> {{ audio.collectCount }}</span>
+              <span
+                ><el-icon><Headset /></el-icon> {{ audio.playCount }}</span
+              >
+              <span
+                ><el-icon><Star /></el-icon> {{ audio.collectCount }}</span
+              >
             </div>
           </div>
           <div class="actions">
@@ -200,3 +200,4 @@ onMounted(() => {
   margin-top: 20px;
 }
 </style>
+

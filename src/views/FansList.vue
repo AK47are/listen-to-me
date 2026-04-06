@@ -3,23 +3,19 @@
     <div class="page-header">
       <h2>我的粉丝</h2>
     </div>
-    
+
     <div class="content">
       <div v-if="loading" class="loading-state">
         <el-icon class="is-loading"><Loading /></el-icon>
         加载中...
       </div>
-      
+
       <div v-else-if="fansList.length === 0" class="empty-state">
         <el-empty description="暂无粉丝" />
       </div>
-      
+
       <div v-else class="fans-grid">
-        <div
-          v-for="fan in fansList"
-          :key="fan.userId"
-          class="fan-card"
-        >
+        <div v-for="fan in fansList" :key="fan.userId" class="fan-card">
           <div class="card-header">
             <div class="avatar-wrapper">
               <img :src="fan.avatar" :alt="fan.nickname" class="avatar" />
@@ -31,7 +27,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 分页 -->
       <div v-if="total > 0" class="pagination-wrapper">
         <el-pagination
@@ -51,7 +47,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { userApi } from '@/api/user'
+import { followApi } from '@/api/user/follow'
 import { useUserStore } from '@/stores/user/user'
 
 const userStore = useUserStore()
@@ -61,7 +57,7 @@ const total = ref(0)
 
 const pagination = ref({
   pageNum: 1,
-  pageSize: 12
+  pageSize: 12,
 })
 
 const getFansList = async () => {
@@ -70,12 +66,12 @@ const getFansList = async () => {
     ElMessage.error('用户未登录')
     return
   }
-  
+
   loading.value = true
   try {
-    const res = await userApi.getFansPage(creatorId, {
+    const res = await followApi.getFansPage(creatorId, {
       pageNum: pagination.value.pageNum,
-      pageSize: pagination.value.pageSize
+      pageSize: pagination.value.pageSize,
     })
     fansList.value = res.data.records || []
     total.value = res.data.total || 0

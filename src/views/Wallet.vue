@@ -2,7 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { paymentApi } from '@/api/payment'
+import { balanceApi } from '@/api/user/balance'
+import { orderApi } from '@/api/user/order'
 
 const router = useRouter()
 
@@ -17,7 +18,7 @@ const rechargeForm = ref({
 
 const getBalance = async () => {
   try {
-    const res = await paymentApi.getBalance()
+    const res = await balanceApi.getBalance()
     balance.value = res.balance
   } catch (error) {
     ElMessage.error('获取余额失败')
@@ -27,7 +28,7 @@ const getBalance = async () => {
 const getOrderList = async () => {
   loading.value = true
   try {
-    const res = await paymentApi.getOrderPage({
+    const res = await orderApi.getAudioOrderPage({
       pageNum: 1,
       pageSize: 20,
     })
@@ -41,7 +42,7 @@ const getOrderList = async () => {
 
 const handleRecharge = async () => {
   try {
-    const res = await paymentApi.recharge(rechargeForm.value)
+    const res = await balanceApi.recharge(rechargeForm.value)
     window.open(res.payUrl, '_blank')
     ElMessage.success('充值链接已打开，请在支付宝中完成支付')
     showRechargeDialog.value = false
@@ -95,7 +96,9 @@ onMounted(() => {
             <div class="order-time">{{ new Date(order.createTime).toLocaleString() }}</div>
           </div>
           <div class="order-status" :class="order.status.toLowerCase()">
-            {{ order.status === 'SUCCESS' ? '成功' : order.status === 'PENDING' ? '待支付' : '失败' }}
+            {{
+              order.status === 'SUCCESS' ? '成功' : order.status === 'PENDING' ? '待支付' : '失败'
+            }}
           </div>
         </div>
       </div>

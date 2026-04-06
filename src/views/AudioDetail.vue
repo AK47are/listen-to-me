@@ -2,10 +2,10 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { ElMessage, ElDialog } from 'element-plus'
-import { audioApi } from '@/api/audio'
-import { likeApi } from '@/api/like'
-import { favoriteApi } from '@/api/favorite'
-import { userApi } from '@/api/user'
+import { audioApi } from '@/api/user/audio'
+import { likeApi } from '@/api/user/like'
+import { favoriteApi } from '@/api/user/favorite'
+import { followApi } from '@/api/user/follow'
 import AudioPlayer from '@/components/AudioPlayer.vue'
 import CommentSection from '@/components/CommentSection.vue'
 
@@ -91,22 +91,21 @@ const handleCollect = async () => {
 
 // 关注/取消关注创作者
 const handleFollow = async () => {
-  // if (!audioDetail.value || !audioDetail.value.creator) {
-  //   return
-  // }
-  
-  //const creatorId = audioDetail.value.creator.id
-  const creatorId = 5
-  
+  // 注意：需要根据实际返回的数据结构获取 creatorId
+  // 假设 audioDetail.value.creator.id 存在，否则使用临时值
+  if (!audioDetail.value || !audioDetail.value.creator) {
+    return
+  }
+
+  const creatorId = audioDetail.value.creator.id
+
   try {
     if (isFollowing.value) {
-      // 取消关注
-      await userApi.unfollowCreator(creatorId)
+      await followApi.unfollowCreator(creatorId)
       isFollowing.value = false
       ElMessage.success('已取消关注')
     } else {
-      // 关注
-      await userApi.followCreator(creatorId)
+      await followApi.followCreator(creatorId)
       isFollowing.value = true
       ElMessage.success('关注成功')
     }
@@ -121,7 +120,7 @@ const confirmCollect = async () => {
     ElMessage.warning('请选择一个收藏夹')
     return
   }
-  
+
   try {
     await favoriteApi.saveAudioAction({
       audioId: audioId.value,
@@ -157,9 +156,15 @@ onMounted(() => {
             <span>{{ audioDetail.creator.nickname }}</span>
           </div>
           <div class="stats">
-            <span><el-icon><Headset /></el-icon> {{ audioDetail.stats.playCount }}</span>
-            <span><el-icon><Star /></el-icon> {{ audioDetail.stats.collectCount }}</span>
-            <span><el-icon><Pointer /></el-icon> {{ audioDetail.stats.likeCount }}</span>
+            <span
+              ><el-icon><Headset /></el-icon> {{ audioDetail.stats.playCount }}</span
+            >
+            <span
+              ><el-icon><Star /></el-icon> {{ audioDetail.stats.collectCount }}</span
+            >
+            <span
+              ><el-icon><Pointer /></el-icon> {{ audioDetail.stats.likeCount }}</span
+            >
           </div>
           <div class="meta">
             <span v-if="audioDetail.isPaid" class="price">¥{{ audioDetail.price }}</span>
@@ -189,11 +194,7 @@ onMounted(() => {
       </div>
 
       <!-- 收藏夹选择对话框 -->
-      <el-dialog
-        v-model="showFolderDialog"
-        title="选择收藏夹"
-        width="400px"
-      >
+      <el-dialog v-model="showFolderDialog" title="选择收藏夹" width="400px">
         <div v-if="folders.length === 0" class="empty-folders">
           <el-empty description="暂无收藏夹" />
           <el-button type="primary" style="margin-top: 20px" @click="showFolderDialog = false">
@@ -270,3 +271,4 @@ onMounted(() => {
   text-align: center;
 }
 </style>
+

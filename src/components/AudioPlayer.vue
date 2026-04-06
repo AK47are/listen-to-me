@@ -1,10 +1,13 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { audioApi } from '@/api/audio'
-import { likeApi } from '@/api/like'
-import { favoriteApi } from '@/api/favorite'
-import { paymentApi } from '@/api/payment'
+import { audioApi } from '@/api/user/audio'
+import { likeApi } from '@/api/user/like'
+import { favoriteApi } from '@/api/user/favorite'
+import { fileApi } from '@/api/common/file'
+import { balanceApi } from '@/api/user/balance'
+import { orderApi } from '@/api/user/order'
+import { historyApi } from '@/api/user/history'
 
 const props = defineProps({
   audioId: {
@@ -58,7 +61,7 @@ const getAudioDetail = async () => {
 
 const getStreamSign = async () => {
   try {
-    const res = await audioApi.getStreamSign(props.audioId)
+    const res = await fileApi.getStreamSign(props.audioId)
     audioUrl.value = res
   } catch (error) {
     if (error.response?.status === 403) {
@@ -72,7 +75,7 @@ const getStreamSign = async () => {
 
 const getBalance = async () => {
   try {
-    const res = await paymentApi.getBalance()
+    const res = await balanceApi.getBalance()
     balance.value = res.balance
   } catch (error) {
     ElMessage.error('获取余额失败')
@@ -109,7 +112,6 @@ const handleEnded = () => {
   currentTime.value = 0
 }
 
-// 进度条拖拽相关
 const handleProgressMouseDown = (e) => {
   isDragging.value = true
   updateDragPercent(e)
@@ -196,7 +198,7 @@ const toggleCollect = async () => {
 
 const handlePurchase = async () => {
   try {
-    const res = await paymentApi.createOrder(props.audioId)
+    const res = await orderApi.purchaseAudio(props.audioId)
     if (res.status === 'SUCCESS') {
       ElMessage.success('购买成功')
       showPurchaseDialog.value = false
@@ -213,9 +215,9 @@ const handlePurchase = async () => {
 const syncProgress = async () => {
   if (currentTime.value > 0) {
     try {
-      await audioApi.updateHistory({
+      await historyApi.saveProgress({
         audioId: props.audioId,
-        progress: Math.floor(currentTime.value),
+        lastPosition: Math.floor(currentTime.value),
       })
     } catch (error) {
       console.error('同步进度失败', error)
@@ -248,8 +250,8 @@ onUnmounted(() => {
   <!-- 迷你底部播放器 - 不遮挡页面内容 -->
   <div class="mini-player" :class="{ expanded: isExpanded }">
     <!-- 进度条（在播放器顶部） -->
-    <div 
-      class="progress-bar" 
+    <div
+      class="progress-bar"
       ref="progressBarRef"
       @click="handleProgressClick"
       @mousedown="handleProgressMouseDown"
@@ -264,9 +266,9 @@ onUnmounted(() => {
       <!-- 左侧：音频信息 -->
       <div class="audio-info-section" @click="isExpanded = !isExpanded">
         <div class="cover-wrapper">
-          <img 
-            :src="audioDetail?.coverUrl" 
-            alt="封面" 
+          <img
+            :src="audioDetail?.coverUrl"
+            alt="封面"
             class="cover"
             :class="{ 'is-playing': isPlaying }"
           />
@@ -284,11 +286,7 @@ onUnmounted(() => {
       <!-- 中间：播放控制 -->
       <div class="player-controls-section">
         <div class="control-buttons">
-          <button 
-            class="control-btn icon-btn" 
-            :class="{ active: isLiked }"
-            @click="toggleLike"
-          >
+          <button class="control-btn icon-btn" :class="{ active: isLiked }" @click="toggleLike">
             <el-icon><StarFilled v-if="isLiked" /><Star v-else /></el-icon>
           </button>
 
@@ -299,8 +297,8 @@ onUnmounted(() => {
             </el-icon>
           </button>
 
-          <button 
-            class="control-btn icon-btn" 
+          <button
+            class="control-btn icon-btn"
             :class="{ active: isCollected }"
             @click="toggleCollect"
           >
@@ -324,17 +322,17 @@ onUnmounted(() => {
             </el-icon>
           </button>
           <div class="volume-slider-wrapper">
-            <el-slider 
-              v-model="volume" 
-              :min="0" 
-              :max="100" 
-              :step="1" 
+            <el-slider
+              v-model="volume"
+              :min="0"
+              :max="100"
+              :step="1"
               @input="handleVolumeChange"
               size="small"
             />
           </div>
         </div>
-        
+
         <button class="control-btn icon-btn close-btn" @click="emit('close')">
           <el-icon><Close /></el-icon>
         </button>
@@ -344,7 +342,12 @@ onUnmounted(() => {
     <!-- 展开后的详细信息 -->
     <div v-if="isExpanded" class="expanded-content">
       <div class="expanded-info">
-        <img :src="audioDetail?.coverUrl" alt="封面" class="expanded-cover" :class="{ 'is-playing': isPlaying }" />
+        <img
+          :src="audioDetail?.coverUrl"
+          alt="封面"
+          class="expanded-cover"
+          :class="{ 'is-playing': isPlaying }"
+        />
         <div class="expanded-details">
           <h2 class="expanded-title">{{ audioDetail?.title }}</h2>
           <p class="expanded-creator">
@@ -379,9 +382,9 @@ onUnmounted(() => {
     ></audio>
 
     <!-- 购买弹窗 -->
-    <el-dialog 
-      v-model="showPurchaseDialog" 
-      title="购买音频" 
+    <el-dialog
+      v-model="showPurchaseDialog"
+      title="购买音频"
       width="420px"
       class="purchase-dialog"
       align-center
@@ -413,11 +416,7 @@ onUnmounted(() => {
       </div>
       <template #footer>
         <el-button @click="showPurchaseDialog = false">取消</el-button>
-        <el-button 
-          type="primary" 
-          @click="handlePurchase"
-          :disabled="balance < audioDetail?.price"
-        >
+        <el-button type="primary" @click="handlePurchase" :disabled="balance < audioDetail?.price">
           立即购买
         </el-button>
       </template>

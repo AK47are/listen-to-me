@@ -3,17 +3,17 @@
     <div class="page-header">
       <h2>我的关注</h2>
     </div>
-    
+
     <div class="content">
       <div v-if="loading" class="loading-state">
         <el-icon class="is-loading"><Loading /></el-icon>
         加载中...
       </div>
-      
+
       <div v-else-if="creatorList.length === 0" class="empty-state">
         <el-empty description="暂无关注的创作者" />
       </div>
-      
+
       <div v-else class="creator-grid">
         <div
           v-for="creator in creatorList"
@@ -29,11 +29,11 @@
               <h3 class="creator-name">{{ creator.nickname }}</h3>
             </div>
           </div>
-          
+
           <div class="card-body">
             <p class="creator-bio">{{ creator.intro }}</p>
           </div>
-          
+
           <div class="card-footer">
             <div class="stats">
               <span class="stat-item">
@@ -54,11 +54,7 @@
                 <span class="price-label">咨询价格</span>
                 <span class="price-value">¥{{ creator.minPrice }} 起</span>
               </div>
-              <el-button
-                type="default"
-                size="small"
-                @click="handleFollow(creator, $event)"
-              >
+              <el-button type="default" size="small" @click="handleFollow(creator, $event)">
                 <el-icon><UserFilled /></el-icon>
                 已关注
               </el-button>
@@ -66,7 +62,7 @@
           </div>
         </div>
       </div>
-      
+
       <!-- 分页 -->
       <div v-if="total > 0" class="pagination-wrapper">
         <el-pagination
@@ -87,7 +83,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { userApi } from '@/api/user'
+import { followApi } from '@/api/user/follow'
 
 const router = useRouter()
 const loading = ref(false)
@@ -96,15 +92,15 @@ const total = ref(0)
 
 const pagination = ref({
   pageNum: 1,
-  pageSize: 12
+  pageSize: 12,
 })
 
 const getFollowList = async () => {
   loading.value = true
   try {
-    const res = await userApi.getFollowPage({
+    const res = await followApi.getFollowPage({
       pageNum: pagination.value.pageNum,
-      pageSize: pagination.value.pageSize
+      pageSize: pagination.value.pageSize,
     })
     creatorList.value = res.data.records || []
     total.value = res.data.total || 0
@@ -123,7 +119,7 @@ const handleCreatorClick = (creator) => {
 const handleFollow = async (creator, event) => {
   event.stopPropagation()
   try {
-    await userApi.unfollowCreator(creator.creatorId)
+    await followApi.unfollowCreator(creator.creatorId)
     ElMessage.success('已取消关注')
     getFollowList()
   } catch (error) {
@@ -297,3 +293,4 @@ onMounted(() => {
   margin-top: 30px;
 }
 </style>
+

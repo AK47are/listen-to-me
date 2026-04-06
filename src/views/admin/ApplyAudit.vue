@@ -1,7 +1,7 @@
 <template>
   <div class="admin-dashboard">
     <h1>申请审核</h1>
-    
+
     <div class="audit-section">
       <table class="data-table">
         <thead>
@@ -21,7 +21,9 @@
             <td>{{ apply.realName }}</td>
             <td>{{ apply.phone }}</td>
             <td>{{ apply.intro }}</td>
-            <td><a :href="apply.attachment" target="_blank">{{ apply.attachment }}</a></td>
+            <td>
+              <a :href="apply.attachment" target="_blank">{{ apply.attachment }}</a>
+            </td>
             <td>{{ formatDate(apply.applyTime) }}</td>
             <td>
               <button class="btn approve" @click="auditApply(apply.id, 'APPROVED')">通过</button>
@@ -31,7 +33,7 @@
         </tbody>
       </table>
     </div>
-    
+
     <!-- 分页 -->
     <div class="pagination" v-if="auditApplyList.total > 0">
       <el-pagination
@@ -50,24 +52,24 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-import { adminApi } from '@/api/admin'
-import { ElMessage,ElMessageBox } from 'element-plus'
+import { auditApi } from '@/api/admin/audit'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const auditApplyList = ref({
   records: [],
-  total: 0
+  total: 0,
 })
 
 const pagination = ref({
   pageNum: 1,
-  pageSize: 10
+  pageSize: 10,
 })
 
 const loadAuditApplyList = async () => {
   try {
-    const response = await adminApi.getAuditApplyPage({
+    const response = await auditApi.getAuditApplyPage({
       pageNum: pagination.value.pageNum,
-      pageSize: pagination.value.pageSize
+      pageSize: pagination.value.pageSize,
     })
     auditApplyList.value = response.data
   } catch (error) {
@@ -99,25 +101,27 @@ const auditApply = async (applyId, status) => {
             return '拒绝原因不能为空'
           }
           return true
-        }
-      }).then(async (result) => {
-        rejectReason = result.value
-        
-        await adminApi.auditApply({
-          applyId,
-          status,
-          rejectReason
-        })
-        await loadAuditApplyList()
-        ElMessage.success('审核操作已完成')
-      }).catch(() => {
-        // 用户取消输入
+        },
       })
+        .then(async (result) => {
+          rejectReason = result.value
+
+          await auditApi.auditApply({
+            applyId,
+            status,
+            rejectReason,
+          })
+          await loadAuditApplyList()
+          ElMessage.success('审核操作已完成')
+        })
+        .catch(() => {
+          // 用户取消输入
+        })
     } else {
-      await adminApi.auditApply({
+      await auditApi.auditApply({
         applyId,
         status,
-        rejectReason
+        rejectReason,
       })
       await loadAuditApplyList()
       ElMessage.success('审核操作已完成')

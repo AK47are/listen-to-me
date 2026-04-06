@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { commentApi } from '@/api/comment'
+import { commentApi } from '@/api/user/comment'
 
 const props = defineProps({
   audioId: {
@@ -26,26 +26,24 @@ const commentQuery = ref({
 const getCommentList = async () => {
   loading.value = true
   try {
-    const res = await commentApi.getCommentList(commentQuery.value)
-    
-    // 处理评论数据，组织成两级结构：顶级评论 + 其下的回复
+    // 使用 getCommentPage 替代 getCommentList
+    const res = await commentApi.getCommentPage(commentQuery.value)
+
     const comments = res.data.records || []
     const structuredComments = []
-    
-    comments.forEach(comment => {
-      // 添加顶级评论
+
+    comments.forEach((comment) => {
       const topLevelComment = {
         ...comment,
-        replies: [] // 用于存储挂在该顶级评论下的所有回复
+        replies: [],
       }
       structuredComments.push(topLevelComment)
-      
-      // 处理回复，包括嵌套的回复，都挂在顶级评论下
+
       if (comment.replyList && comment.replyList.length > 0) {
         collectReplies(comment.replyList, topLevelComment.replies)
       }
     })
-    
+
     commentList.value = structuredComments
   } catch (error) {
     ElMessage.error('获取评论列表失败')
@@ -55,12 +53,9 @@ const getCommentList = async () => {
   }
 }
 
-// 递归收集回复，都挂在顶级评论下
 const collectReplies = (replies, replyList) => {
-  replies.forEach(reply => {
+  replies.forEach((reply) => {
     replyList.push(reply)
-    
-    // 处理嵌套的回复
     if (reply.replyList && reply.replyList.length > 0) {
       collectReplies(reply.replyList, replyList)
     }
@@ -97,11 +92,10 @@ const handleReply = (comment) => {
   commentForm.value.content = `@${comment.nickname} `
 }
 
-
-
 const handleLikeComment = async (comment) => {
   try {
-    await commentApi.saveCommentLike({
+    // 使用 likeComment 替代 saveCommentLike
+    await commentApi.likeComment({
       commentId: comment.id,
       action: comment.likedByCurrentUser ? 'UNLIKE' : 'LIKE',
     })
@@ -115,31 +109,6 @@ const handleLikeComment = async (comment) => {
 onMounted(() => {
   getCommentList()
 })
-
-const CommentItem = {
-  name: 'CommentItem',
-  props: {
-    comment: {
-      type: Object,
-      required: true
-    }
-  },
-  emits: ['reply', 'like'],
-  setup(props, { emit }) {
-    const handleReply = () => {
-      emit('reply', props.comment)
-    }
-    
-    const handleLike = () => {
-      emit('like', props.comment)
-    }
-    
-    return {
-      handleReply,
-      handleLike
-    }
-  }
-}
 </script>
 
 <template>
@@ -196,7 +165,6 @@ const CommentItem = {
             <el-icon><ChatDotRound /></el-icon>
             回复
           </el-button>
-
         </div>
 
         <!-- 回复评论，挂在顶级评论下面 -->
@@ -361,20 +329,20 @@ const CommentItem = {
   .comment-section {
     padding: 20px;
   }
-  
+
   .comment-actions,
   .reply-actions {
     flex-wrap: wrap;
   }
-  
+
   .comment-item {
     padding: 15px;
   }
-  
+
   .replies {
     padding-left: 10px;
   }
-  
+
   .reply-item {
     padding: 12px;
   }
