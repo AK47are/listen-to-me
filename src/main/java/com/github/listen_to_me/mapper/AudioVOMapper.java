@@ -18,4 +18,10 @@ public interface AudioVOMapper {
     IPage<AudioVO> selectHistoryByUserId(Page<AudioVO> page, Long userId);
 
     List<AudioVO> selectByIds(List<Long> ids);
+
+    IPage<AudioVO> selectByTitle(Page<AudioVO> page, String title);
+
+    IPage<AudioVO> selectByCreator(Page<AudioVO> page, String creatorName);
+
+    IPage<AudioVO> selectByTranscript(Page<AudioVO> page, String transcript);
 }

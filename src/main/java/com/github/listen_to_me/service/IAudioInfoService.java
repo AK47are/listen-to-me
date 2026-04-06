@@ -6,6 +6,7 @@ import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
 import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.github.listen_to_me.domain.query.AudioSearchQuery;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioPublishVO;
@@ -48,4 +49,6 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     void removeAudioInfo(Long id);
 
     List<AudioVO> getHotList();
+
+    IPage<AudioVO> searchAudio(AudioSearchQuery audioSearchQuery);
 }

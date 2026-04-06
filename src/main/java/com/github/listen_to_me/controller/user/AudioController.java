@@ -2,6 +2,10 @@ package com.github.listen_to_me.controller.user;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.github.listen_to_me.domain.query.AudioSearchQuery;
+import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,5 +54,11 @@ public class AudioController {
     @Operation(summary = "热榜")
     public Result<List<AudioVO>> getHotList() {
         return Result.success(audioInfoService.getHotList());
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "音频搜索")
+    public Result<IPage<AudioVO>> searchAudio(@Valid @ParameterObject AudioSearchQuery audioSearchQuery) {
+        return Result.success(audioInfoService.searchAudio(audioSearchQuery));
     }
 }
