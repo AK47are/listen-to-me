@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.github.listen_to_me.domain.query.AudioSearchQuery;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -284,5 +285,21 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
                 .map(idToVo::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public IPage<AudioVO> searchAudio(AudioSearchQuery audioSearchQuery) {
+        Page<AudioVO> page = new
+                Page<>(audioSearchQuery.getPageNum(), audioSearchQuery.getPageSize());
+        if("TITLE".equals(audioSearchQuery.getSearchType())) {
+            return audioVOMapper.selectByTitle(page, audioSearchQuery.getKeyword());
+        }
+        if("CREATOR".equals(audioSearchQuery.getSearchType())){
+            return audioVOMapper.selectByCreator(page, audioSearchQuery.getKeyword());
+        }
+        if("TRANSCRIPT".equals(audioSearchQuery.getSearchType())){
+            return audioVOMapper.selectByTranscript(page, audioSearchQuery.getKeyword());
+        }
+        throw new BaseException(400, "搜索类型无效，仅支持 TITLE、CREATOR、TRANSCRIPT");
     }
 }

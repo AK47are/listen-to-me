@@ -48,4 +48,23 @@
             #{id}
         </foreach>
     </select>
+    <select id="selectByTitle" resultType="com.github.listen_to_me.domain.vo.AudioVO">
+        <include refid="baseAudioVOFields"/>
+        AND ai.title LIKE CONCAT('%', #{title}, '%')
+        ORDER BY ai.create_time DESC
+    </select>
+    <select id="selectByCreator" resultType="com.github.listen_to_me.domain.vo.AudioVO">
+        <include refid="baseAudioVOFields"/>
+        AND u.nickname LIKE CONCAT('%', #{creatorName}, '%')
+        ORDER BY ai.create_time DESC
+    </select>
+    <select id="selectByTranscript" resultType="com.github.listen_to_me.domain.vo.AudioVO">
+        <include refid="baseAudioVOFields"/>
+        AND EXISTS (
+            SELECT 1 FROM audio_transcript at
+            WHERE at.full_text LIKE CONCAT('%', #{transcript}, '%')
+            AND at.audio_id = ai.id
+        )
+        ORDER BY ai.create_time DESC
+    </select>
 </mapper>
