@@ -1,8 +1,51 @@
+<template>
+  <div class="history-page">
+    <div class="page-header">
+      <h1 class="page-title">播放历史</h1>
+      <p class="page-subtitle">你曾经听过的音频</p>
+    </div>
+
+    <div class="history-content">
+      <div v-if="loading" class="loading-state">
+        <el-skeleton :rows="3" animated />
+        <el-skeleton :rows="3" animated />
+      </div>
+
+      <div v-else-if="audioList.length === 0" class="empty-state">
+        <el-empty description="暂无播放历史" />
+      </div>
+
+      <div v-else class="audio-grid">
+        <AudioCard
+          v-for="audio in audioList"
+          :key="audio.id"
+          :audio="audio"
+          @click="handlePlayAudio"
+        />
+      </div>
+
+      <div v-if="pagination.total > 0" class="pagination-wrapper">
+        <el-pagination
+          v-model:current-page="pagination.pageNum"
+          v-model:page-size="pagination.pageSize"
+          :page-sizes="[12, 24, 36]"
+          :total="pagination.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @current-change="handlePageChange"
+          @size-change="handleSizeChange"
+        />
+      </div>
+    </div>
+  </div>
+</template>
+
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { CaretRight } from '@element-plus/icons-vue'
 import { historyApi } from '@/api/user/history'
+import AudioCard from '@/components/AudioCard.vue'
 
 const router = useRouter()
 
@@ -41,8 +84,8 @@ const handleSizeChange = (size) => {
   getHistoryList()
 }
 
-const handlePlayAudio = (audioId) => {
-  router.push(`/audio/${audioId}`)
+const handlePlayAudio = (audio) => {
+  router.push(`/audio/${audio.id}`)
 }
 
 onMounted(() => {
@@ -50,154 +93,126 @@ onMounted(() => {
 })
 </script>
 
-<template>
-  <div class="history-container">
-    <div class="header">
-      <h2>播放历史</h2>
-    </div>
-
-    <div class="content">
-      <div v-if="loading" class="loading">
-        <el-icon class="is-loading"><Loading /></el-icon>
-        加载中...
-      </div>
-      <div v-else-if="audioList.length === 0" class="empty">
-        <el-empty description="暂无播放历史" />
-      </div>
-      <div v-else class="audio-grid">
-        <div v-for="audio in audioList" :key="audio.id" class="audio-card">
-          <img :src="audio.coverUrl" alt="封面" class="cover" />
-          <div class="audio-info">
-            <h4>{{ audio.title }}</h4>
-            <p>{{ audio.creatorName }}</p>
-            <div class="stats">
-              <span
-                ><el-icon><Headset /></el-icon> {{ audio.playCount }}</span
-              >
-              <span
-                ><el-icon><Star /></el-icon> {{ audio.collectCount }}</span
-              >
-            </div>
-          </div>
-          <div class="actions">
-            <el-button type="primary" size="small" @click="handlePlayAudio(audio.id)">
-              继续播放
-            </el-button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="pagination.total > 0" class="pagination">
-      <el-pagination
-        v-model:current-page="pagination.pageNum"
-        v-model:page-size="pagination.pageSize"
-        :page-sizes="[12, 24, 36]"
-        :total="pagination.total"
-        layout="total, sizes, prev, pager, next, jumper"
-        @current-change="handlePageChange"
-        @size-change="handleSizeChange"
-      />
-    </div>
-  </div>
-</template>
-
 <style scoped>
-.history-container {
+/* 页面样式保持不变，删除了自定义按钮样式 */
+.history-page {
+  min-height: 100vh;
+  background: #fcfbf7;
+  padding: 40px 0 60px;
+}
+
+.page-header {
+  max-width: 1400px;
+  margin: 0 auto 40px;
+  padding: 0 30px;
+  text-align: center;
+}
+
+.page-title {
+  font-family: 'Noto Serif SC', serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.page-subtitle {
+  font-size: 0.95rem;
+  color: #8e8c84;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.history-content {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 0 30px;
 }
 
-.header {
-  margin-bottom: 20px;
-}
-
-.content {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 20px;
-  min-height: 500px;
-}
-
-.loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 400px;
-  gap: 10px;
-  color: #999;
+.loading-state,
+.empty-state {
+  padding: 80px 0;
+  text-align: center;
 }
 
 .audio-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 28px;
 }
 
-.audio-card {
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: all 0.3s;
-}
-
-.audio-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transform: translateY(-2px);
-}
-
-.cover {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-}
-
-.audio-info {
-  padding: 15px;
-}
-
-.audio-info h4 {
-  margin: 0 0 8px 0;
-  font-size: 16px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.audio-info p {
-  margin: 0 0 10px 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.stats {
-  display: flex;
-  gap: 15px;
-  color: #999;
-  font-size: 12px;
-}
-
-.stats span {
-  display: flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.actions {
-  padding: 10px 15px;
-  border-top: 1px solid #e0e0e0;
-}
-
-.actions .el-button {
-  width: 100%;
-}
-
-.pagination {
+.pagination-wrapper {
+  margin-top: 56px;
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+}
+
+.pagination-wrapper :deep(.el-pagination) {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-button-bg-color: transparent;
+  --el-pagination-hover-color: #1a1a1a;
+  --el-pagination-button-disabled-bg-color: transparent;
+  font-weight: 400;
+}
+
+.pagination-wrapper :deep(.btn-prev),
+.pagination-wrapper :deep(.btn-next),
+.pagination-wrapper :deep(.el-pager li) {
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  margin: 0 4px;
+  font-size: 14px;
+  min-width: 36px;
+  height: 36px;
+  line-height: 36px;
+  transition: all 0.2s;
+  color: #8e8c84;
+}
+
+.pagination-wrapper :deep(.btn-prev:hover),
+.pagination-wrapper :deep(.btn-next:hover),
+.pagination-wrapper :deep(.el-pager li:hover) {
+  background: #f0efeb;
+  color: #1a1a1a;
+}
+
+.pagination-wrapper :deep(.el-pager li.is-active) {
+  background: #1a1a1a;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.pagination-wrapper :deep(.el-pagination__total) {
+  color: #b0aea3;
+  font-size: 13px;
+  margin-right: 16px;
+}
+
+.pagination-wrapper :deep(.el-pagination__sizes) {
+  margin: 0 12px;
+}
+
+.pagination-wrapper :deep(.el-select .el-input__wrapper) {
+  background: transparent;
+  border: 1px solid #e8e6df;
+  border-radius: 20px;
+  box-shadow: none;
+}
+
+.pagination-wrapper :deep(.el-pagination__jump) {
+  color: #b0aea3;
+  font-size: 13px;
+  margin-left: 12px;
+}
+
+@media (max-width: 768px) {
+  .audio-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .page-title {
+    font-size: 1.8rem;
+  }
 }
 </style>
-
