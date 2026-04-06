@@ -54,4 +54,5 @@ public class AudioInfo implements Serializable {
     private Byte isDeleted;
     @Schema(description = "可见性：PUBLIC-公开可见 PRIVATE-仅自己/管理员可见")
     private String visibility;
+    private String rejectReason;
 }
