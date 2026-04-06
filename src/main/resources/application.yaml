@@ -86,4 +86,6 @@ minio:
   access-key: ${MINIO_ACCESS_KEY}
   secret-key: ${MINIO_SECRET_KEY}
   bucket-name: ${MINIO_BUCKET}
-  expiration: 15 # 默认临时 URL 过期时间
+  expiration: 24 # 默认临时 URL 过期时间 (头像+封面, 24小时)
+  raw-expiration: 1 # 原始文件临时 URL 过期时间 (1 小时)
+  clip-expiration: 15 # 剪辑文件临时 URL 过期时间 (15 分钟)
