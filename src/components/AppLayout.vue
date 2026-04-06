@@ -1,63 +1,6 @@
-<script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useUserStore } from '@/stores/user/user'
-import {
-  Collection,
-  User,
-  Setting,
-  Bell,
-  Wallet,
-  Search,
-  CaretBottom,
-  SwitchButton,
-  Headset,
-} from '@element-plus/icons-vue'
-
-const router = useRouter()
-const route = useRoute()
-const userStore = useUserStore()
-
-const isLogin = computed(() => userStore.isLogin)
-const userInfo = computed(() => userStore.userInfo)
-const isCreator = computed(() => userInfo.value?.isCreator === true)
-
-const formattedBalance = computed(() => {
-  const balance = userInfo.value?.balance || 0
-  return new Intl.NumberFormat('zh-CN', {
-    style: 'currency',
-    currency: 'CNY',
-    minimumFractionDigits: 2,
-  }).format(balance)
-})
-
-const searchQuery = ref('')
-const handleSearch = () => {
-  const keyword = searchQuery.value.trim()
-  if (!keyword) return
-  router.push({ path: '/search', query: { q: keyword } })
-}
-
-const handleNavigation = (path) => router.push(path)
-const handleLogout = () => {
-  userStore.logout()
-  router.push('/login')
-}
-
-onMounted(async () => {
-  if (isLogin.value) {
-    try {
-      await userStore.getUserInfo()
-    } catch (error) {
-      console.error('Account sync failed')
-    }
-  }
-})
-</script>
-
 <template>
   <div class="app-shell">
-    <nav class="top-navbar">
+    <nav class="top-navbar" :class="{ 'navbar-hidden': !isNavbarVisible }">
       <div class="nav-container">
         <div class="logo-area" @click="handleNavigation('/')">
           <el-icon class="logo-icon"><Headset /></el-icon>
@@ -198,6 +141,129 @@ onMounted(async () => {
   </div>
 </template>
 
+<script setup>
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { useUserStore } from '@/stores/user/user'
+import {
+  Collection,
+  User,
+  Setting,
+  Bell,
+  Wallet,
+  Search,
+  CaretBottom,
+  SwitchButton,
+  Headset,
+} from '@element-plus/icons-vue'
+
+const router = useRouter()
+const route = useRoute()
+const userStore = useUserStore()
+
+const isLogin = computed(() => userStore.isLogin)
+const userInfo = computed(() => userStore.userInfo)
+const isCreator = computed(() => userInfo.value?.isCreator === true)
+
+const formattedBalance = computed(() => {
+  const balance = userInfo.value?.balance || 0
+  return new Intl.NumberFormat('zh-CN', {
+    style: 'currency',
+    currency: 'CNY',
+    minimumFractionDigits: 2,
+  }).format(balance)
+})
+
+const searchQuery = ref('')
+const handleSearch = () => {
+  const keyword = searchQuery.value.trim()
+  if (!keyword) return
+  router.push({ path: '/search', query: { q: keyword } })
+}
+
+const handleNavigation = (path) => router.push(path)
+const handleLogout = () => {
+  userStore.logout()
+  router.push('/login')
+}
+
+const isNavbarVisible = ref(true)
+let lastScrollTop = 0
+let ticking = false
+let scrollBasedVisible = true
+let isHoveringTop = false
+
+const updateScrollBasedVisibility = () => {
+  const currentScroll = window.scrollY || document.documentElement.scrollTop
+  const delta = currentScroll - lastScrollTop
+  const minDelta = 8
+
+  if (Math.abs(delta) < minDelta) {
+    lastScrollTop = currentScroll
+    return
+  }
+
+  if (currentScroll <= 10) {
+    scrollBasedVisible = true
+  } else if (delta > 0) {
+    scrollBasedVisible = false
+  } else if (delta < 0) {
+    scrollBasedVisible = true
+  }
+
+  lastScrollTop = currentScroll
+
+  if (!isHoveringTop) {
+    isNavbarVisible.value = scrollBasedVisible
+  }
+}
+
+const handleScroll = () => {
+  if (!ticking) {
+    requestAnimationFrame(() => {
+      updateScrollBasedVisibility()
+      ticking = false
+    })
+    ticking = true
+  }
+}
+
+let hoverTimer = null
+const handleMouseMove = (e) => {
+  const isTop = e.clientY <= 50
+  if (isTop && !isHoveringTop) {
+    isHoveringTop = true
+    isNavbarVisible.value = true
+    if (hoverTimer) clearTimeout(hoverTimer)
+  } else if (!isTop && isHoveringTop) {
+    if (hoverTimer) clearTimeout(hoverTimer)
+    hoverTimer = setTimeout(() => {
+      isHoveringTop = false
+      isNavbarVisible.value = scrollBasedVisible
+    }, 100)
+  }
+}
+
+onMounted(async () => {
+  if (isLogin.value) {
+    try {
+      await userStore.getUserInfo()
+    } catch (error) {
+      console.error('Account sync failed')
+    }
+  }
+  window.addEventListener('scroll', handleScroll)
+  document.addEventListener('mousemove', handleMouseMove)
+  updateScrollBasedVisibility()
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll)
+  document.removeEventListener('mousemove', handleMouseMove)
+  if (hoverTimer) clearTimeout(hoverTimer)
+})
+</script>
+
 <style>
 .nav-dropdown.el-dropdown__popper {
   border: 1px solid rgba(232, 230, 223, 0.5) !important;
@@ -249,14 +315,29 @@ onMounted(async () => {
   background-color: #fcfbf7;
 }
 .top-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 72px;
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid #e8e6df;
-  position: sticky;
-  top: 0;
   z-index: 1000;
+  transition: transform 0.25s ease-in-out;
+  transform: translateY(0);
 }
+
+.top-navbar.navbar-hidden {
+  transform: translateY(-100%);
+}
+
+.main-viewport {
+  min-height: 100vh;
+  background-color: #fcfbf7;
+  padding-top: 72px;
+}
+
 .nav-container {
   max-width: 1400px;
   margin: 0 auto;
