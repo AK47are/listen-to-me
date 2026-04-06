@@ -44,4 +44,11 @@ public class CreatorController {
             @ParameterObject SlotPageQuery slotPageQuery) {
         return Result.success(iConsultSlotService.getCreatorSlotPage(creatorId, slotPageQuery));
     }
+
+    @GetMapping("/{creatorId}")
+    @Operation(summary = "获取创作者详情")
+    public Result<CreatorVO> getCreatorDetail(@PathVariable Long creatorId,
+            @AuthenticationPrincipal Long userId) {
+        return Result.success(creatorProfileService.getCreatorDetail(creatorId, userId));
+    }
 }

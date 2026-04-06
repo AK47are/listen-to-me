@@ -13,4 +13,6 @@ import com.github.listen_to_me.domain.vo.CreatorVO;
 public interface CreatorProfileMapper extends BaseMapper<CreatorProfile> {
 
     IPage<CreatorVO> selectCreatorPage(Page<?> page, Long userId, CreatorPageQuery query);
+
+    CreatorVO selectCreatorById(Long creatorId, Long userId);
 }

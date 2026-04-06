@@ -19,4 +19,13 @@ public interface ICreatorProfileService extends IService<CreatorProfile> {
      * @return 分页结果
      */
     IPage<CreatorVO> getCreatorPage(Long userId, CreatorPageQuery query);
+
+    /**
+     * 获取创作者详情
+     *
+     * @param creatorId 创作者ID
+     * @param userId    当前登录用户ID
+     * @return 创作者详情VO
+     */
+    CreatorVO getCreatorDetail(Long creatorId, Long userId);
 }
