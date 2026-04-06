@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
+import com.github.listen_to_me.common.enumeration.RedisKey;
 import io.minio.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,8 @@ public class MinioUtils {
     private static MinioClient CLIENT;
     private static String BUCKET;
     private static Integer EXPIRATION;
+    private static Integer EXPIRATION_RAW;
+    private static Integer EXPIRATION_CLIP;
 
     @Autowired
     public void setCLIENT(MinioClient minioClient) {
@@ -42,6 +45,16 @@ public class MinioUtils {
         MinioUtils.EXPIRATION = expiration;
     }
 
+    @Value("${minio.raw-expiration}")
+    public void setEXPIRATION_RAW(Integer expirationRaw) {
+        MinioUtils.EXPIRATION_RAW = expirationRaw;
+    }
+
+    @Value("${minio.clip-expiration}")
+    public void setEXPIRATION_CLIP(Integer expirationClip) {
+        MinioUtils.EXPIRATION_CLIP = expirationClip;
+    }
+
     /**
      * 生成规范化的存储路径
      * 模块名/日期/子模块/文件名
@@ -53,24 +66,50 @@ public class MinioUtils {
     }
 
     /**
-     * 生成临时访问链接
+     *生成临时访问链接
      */
-    public static String getPresignedUrl(String fullPath) {
-        if (!StrUtil.hasBlank(fullPath)) {
-            try {
-                log.info("生成临时链接 - 完整路径: {}", fullPath);
-                return CLIENT.getPresignedObjectUrl(
-                        GetPresignedObjectUrlArgs.builder()
-                                .method(Method.GET)
-                                .bucket(BUCKET)
-                                .object(fullPath)
-                                .expiry(EXPIRATION, TimeUnit.MINUTES)
-                                .build());
-            } catch (Exception e) {
-                log.warn("生成临时链接失败", e);
-            }
+    public static String generatePresignedUrl(RedisKey redisKey, String fullPath,
+                                              Integer expiration, TimeUnit unit){
+        String presignedUrl = RedisUtils.get(redisKey, fullPath);
+        if(StrUtil.isNotBlank(presignedUrl)){
+            return presignedUrl;
+        }
+        try {
+            presignedUrl = CLIENT.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET)
+                            .bucket(BUCKET)
+                            .object(fullPath)
+                            .expiry(expiration, unit)
+                            .build());
+            RedisUtils.set(redisKey, fullPath, presignedUrl);
+            return presignedUrl;
+        } catch (Exception e) {
+            log.warn("生成临时链接失败", e);
         }
         return null;
+    }
+
+    /**
+     * 获取临时访问链接
+     */
+    public static String getPresignedUrl(String fullPath) {
+        if(StrUtil.isBlank(fullPath)){
+            return null;
+        }
+        if(StrUtil.contains(fullPath, "/audio/clip/")){
+            log.info("生成临时音频资源临时链接 - 完整路径: {}", fullPath);
+            return generatePresignedUrl(RedisKey.ONLINE_CLIP_URL, fullPath,
+                    EXPIRATION_CLIP, TimeUnit.MINUTES);
+        }else if(StrUtil.contains(fullPath, "/audio/")){
+            log.info("生成完整音频资源临时链接 - 完整路径: {}", fullPath);
+            return generatePresignedUrl(RedisKey.ONLINE_RAW_URL, fullPath,
+                    EXPIRATION_RAW, TimeUnit.HOURS);
+        }else{
+            log.info("生成图片资源临时链接 - 完整路径: {}", fullPath);
+            return generatePresignedUrl(RedisKey.ONLINE_IMG_URL, fullPath,
+                    EXPIRATION, TimeUnit.HOURS);
+        }
     }
 
     /**
