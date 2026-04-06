@@ -75,6 +75,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     private final SysUserMapper sysUserMapper;
     private final AudioLikeMapper audioLikeMapper;
     private final AudioFolderRelationMapper audioFolderRelationMapper;
+    private final AudioTranscriptMapper transcriptMapper;
 
     @Override
     public IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery) {
@@ -202,14 +203,24 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         CreatorAudioDetailVO creatorAudioDetailVO = new CreatorAudioDetailVO();
         BeanUtil.copyProperties(audioInfo, creatorAudioDetailVO);
         creatorAudioDetailVO.setCoverUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath()));
-        // TODO: 音频文字内容获取
+        AudioTranscript transcript = transcriptMapper.selectOne(
+                Wrappers.<AudioTranscript>lambdaQuery()
+                .eq(AudioTranscript::getAudioId, id));
+        if(transcript != null) {
+            creatorAudioDetailVO.setTranscript(transcript.getFullText());
+        }
+        creatorAudioDetailVO.setPlayCount(audioInfo.getPlayCount());
         creatorAudioDetailVO.setPlayCount(audioInfo.getPlayCount());
 
-        // TODO: 等添加 Like 统计字段后再启用
-        // creatorAudioDetailVO.setLikeCount(audioInfo.getLikeCount());
+        Long likeCount = audioLikeMapper.selectCount(
+                Wrappers.<AudioLike>lambdaQuery()
+                        .eq(AudioLike::getAudioId, id));
+        creatorAudioDetailVO.setLikeCount(likeCount);
 
-        // TODO: 等添加 Collect 统计字段后再启用
-        // creatorAudioDetailVO.setCollectCount(audioInfo.getCollectCount());
+        Long collectCount = audioFolderRelationMapper.selectCount(
+                Wrappers.<AudioFolderRelation>lambdaQuery()
+                        .eq(AudioFolderRelation::getAudioId, id));
+        creatorAudioDetailVO.setCollectCount(collectCount);
 
         return creatorAudioDetailVO;
     }

@@ -18,9 +18,9 @@ public class CreatorAudioDetailVO {
     private String visibility;
     private String status;
     private Integer playCount;
-    private Integer likeCount;
-    private Integer collectCount;
+    private Long likeCount;
+    private Long collectCount;
     private LocalDateTime createTime;
-    //TODO: 音频文字内容获取
     private Long transcriptId;
-}
+    private String transcript;
+   }
