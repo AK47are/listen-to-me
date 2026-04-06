@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.github.listen_to_me.domain.dto.AudioAuditDTO;
 import com.github.listen_to_me.domain.query.AudioSearchQuery;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -398,5 +399,26 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         IPage<AuditAudioVO> pageResult = audioInfoMapper.selectAuditAudioPage(page, auditQuery.getStatus());
         pageResult.getRecords().forEach(vo -> vo.setCoverUrl(MinioUtils.getPresignedUrl(vo.getCoverUrl())));
         return pageResult;
+    }
+
+    @Override
+    public void auditAudio(AudioAuditDTO audioAuditDTO) {
+        AudioInfo audioInfo = this.getById(audioAuditDTO.getAudioId());
+        if(audioInfo == null
+                || audioInfo.getAuditStatus() != 0
+                || audioInfo.getIsDeleted() == 1) {
+            throw new BaseException(400, "音频不存在或已处理");
+        }
+        if("APPROVED".equals(audioAuditDTO.getStatus())) {
+            audioInfo.setAuditStatus(1);
+            // TODO 触发上线通知、推荐索引更新等
+        }else if("REJECTED".equals(audioAuditDTO.getStatus())) {
+            // TODO 通知创作者驳回原因
+            audioInfo.setAuditStatus(2);
+            audioInfo.setRejectReason(audioAuditDTO.getRejectReason());
+        }else {
+            throw new BaseException(400, "审核状态无效，仅支持 APPROVED、REJECTED");
+        }
+        audioInfoMapper.updateById(audioInfo);
     }
 }
