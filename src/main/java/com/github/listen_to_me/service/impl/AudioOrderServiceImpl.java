@@ -6,6 +6,7 @@ import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.entity.AudioInfo;
+import com.github.listen_to_me.domain.vo.AudioOrderDetailVO;
 import com.github.listen_to_me.domain.vo.AudioOrderVO;
 import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.mapper.CoinTransactionMapper;
@@ -76,6 +77,26 @@ public class AudioOrderServiceImpl extends ServiceImpl<AudioOrderMapper, AudioOr
         vo.setPayAmount(audioInfo.getPrice());
         vo.setStatus("SUCCESS");
         vo.setCreateTime(order.getPayTime());
+        return vo;
+    }
+
+    @Override
+    public AudioOrderDetailVO queryAudioOrderDetail(String sn) {
+        LambdaQueryWrapper<AudioOrder> queryWrapper = Wrappers.lambdaQuery(AudioOrder.class)
+                .eq(AudioOrder::getOrderSn, sn);
+        AudioOrder order = audioOrderMapper.selectOne(queryWrapper);
+        AudioInfo audioInfo = audioInfoMapper.selectById(order.getAudioId());
+        if(order == null) {
+            throw new BaseException(404, "订单不存在");
+        }
+        AudioOrderDetailVO vo = new AudioOrderDetailVO();
+        vo.setOrderSn(order.getOrderSn());
+        vo.setAudioTitle(audioInfo.getTitle());
+        vo.setCoverUrl(MinioUtils.getPresignedUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath())));
+        vo.setPayAmount(order.getPayAmount());
+        vo.setStatus(order.getPayStatus() == 1 ? "SUCCESS" : "FAILED");
+        vo.setCreateTime(order.getCreateTime());
+        vo.setPayTime(order.getPayTime());
         return vo;
     }
 }

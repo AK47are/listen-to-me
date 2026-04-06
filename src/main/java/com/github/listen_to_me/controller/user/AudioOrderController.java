@@ -1,16 +1,14 @@
 package com.github.listen_to_me.controller.user;
 
 import com.github.listen_to_me.common.Result;
+import com.github.listen_to_me.domain.vo.AudioOrderDetailVO;
 import com.github.listen_to_me.domain.vo.AudioOrderVO;
 import com.github.listen_to_me.service.IAudioOrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @AllArgsConstructor
@@ -23,5 +21,11 @@ public class AudioOrderController {
     @Operation(summary = "购买音频")
     public Result<AudioOrderVO> purchaseAudio(@PathVariable Long audioId) {
         return Result.success(audioOrderService.purchaseAudio(audioId));
+    }
+
+    @GetMapping("/order/{sn}")
+    @Operation(summary = "查询音频订单")
+    public Result<AudioOrderDetailVO> queryAudioOrder(@PathVariable String sn) {
+        return Result.success(audioOrderService.queryAudioOrderDetail(sn));
     }
 }
