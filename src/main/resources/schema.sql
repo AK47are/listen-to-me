@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS `audio_info` (
   `duration` int DEFAULT 0 COMMENT '总时长',
   `trial_duration` int DEFAULT 0 COMMENT '试听秒数',
   `audit_status` int DEFAULT 0 COMMENT '0-待审, 1-通过, 2-违规',
+  `reject_reason` varchar(255) DEFAULT NULL COMMENT '拒绝原因',
   `status` varchar(100) DEFAULT 'PENDING_TRANSCODE' COMMENT '发布状态',
   `play_count` int DEFAULT 0 COMMENT '播放量',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
