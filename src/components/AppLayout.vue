@@ -23,12 +23,6 @@
           >
             咨询预约
           </div>
-          <div
-            :class="['nav-link', { active: route.path === '/history' }]"
-            @click="handleNavigation('/history')"
-          >
-            历史
-          </div>
         </div>
 
         <div class="search-wrapper">
@@ -46,18 +40,53 @@
 
         <div class="action-area">
           <template v-if="isLogin">
-            <div class="nav-asset-entry" @click="handleNavigation('/wallet')">
-              <div class="balance-visual">
-                <div class="icon-orbit">
-                  <el-icon><Wallet /></el-icon>
-                </div>
-                <span class="amount-display">{{ formattedBalance }}</span>
+            <!-- 创作中心下拉菜单（仅创作者可见） -->
+            <el-dropdown
+              v-if="isCreator"
+              trigger="hover"
+              popper-class="creator-dropdown-enhanced"
+              placement="bottom-start"
+            >
+              <div class="creator-center-btn-enhanced">
+                <el-icon><Collection /></el-icon>
+                <span>创作中心</span>
+                <el-icon class="arrow-icon"><CaretBottom /></el-icon>
               </div>
-              <div class="ui-divider"></div>
+              <template #dropdown>
+                <el-dropdown-menu class="creator-menu-enhanced">
+                  <div class="creator-menu-header">内容管理</div>
+                  <el-dropdown-item @click="handleNavigation('/creator/audio')">
+                    <el-icon><Collection /></el-icon>我的稿件
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="handleNavigation('/creator/create')">
+                    <el-icon><Edit /></el-icon>发布音频
+                  </el-dropdown-item>
+                  <div class="creator-menu-divider"></div>
+                  <div class="creator-menu-header">预约管理</div>
+                  <el-dropdown-item @click="handleNavigation('/creator/slots')">
+                    <el-icon><Clock /></el-icon>时间槽管理
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="handleNavigation('/creator/consult')">
+                    <el-icon><ChatDotRound /></el-icon>预约订单
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+
+            <div class="balance-hover" @click="handleNavigation('/wallet')">
+              <div class="balance-wrapper">
+                <el-icon><Wallet /></el-icon>
+                <span class="balance-amount">{{ formattedBalance }}</span>
+              </div>
+              <div class="balance-tooltip">点击查看钱包详情</div>
             </div>
 
-            <el-dropdown trigger="click" popper-class="nav-dropdown" placement="bottom-end">
-              <div class="user-profile-trigger">
+            <el-dropdown
+              trigger="hover"
+              popper-class="user-dropdown-enhanced"
+              placement="bottom-end"
+            >
+              <div class="user-profile-trigger" @click="handleNavigation('/profile')">
                 <div class="avatar-wrapper">
                   <img
                     v-if="userInfo?.avatar"
@@ -81,43 +110,27 @@
                 </div>
               </div>
               <template #dropdown>
-                <el-dropdown-menu class="custom-menu">
-                  <div class="menu-group">
-                    <div class="group-title">个人中心</div>
-                    <el-dropdown-item @click="handleNavigation('/profile')">
-                      <el-icon><User /></el-icon>我的主页
-                    </el-dropdown-item>
-                    <el-dropdown-item @click="handleNavigation('/wallet')">
-                      <el-icon><Wallet /></el-icon>钱包账户
-                    </el-dropdown-item>
-                    <el-dropdown-item @click="handleNavigation('/notifications')">
-                      <el-icon><Bell /></el-icon>消息通知
-                    </el-dropdown-item>
-                  </div>
-
-                  <template v-if="isCreator">
-                    <div class="menu-group border-top">
-                      <div class="group-title">创作者工具</div>
-                      <el-dropdown-item @click="handleNavigation('/creator/audio')">
-                        <el-icon><Collection /></el-icon>内容管理
-                      </el-dropdown-item>
-                    </div>
-                  </template>
-
-                  <div class="menu-group border-top">
-                    <div class="group-title">系统</div>
-                    <div class="menu-item-wrapper">
-                      <el-dropdown-item @click="handleNavigation('/settings')">
-                        <el-icon><Setting /></el-icon>账号设置
-                      </el-dropdown-item>
-                    </div>
-                  </div>
-
-                  <div class="menu-group border-top logout-section">
-                    <el-dropdown-item @click="handleLogout" class="logout-item">
-                      <el-icon><SwitchButton /></el-icon>退出登录
-                    </el-dropdown-item>
-                  </div>
+                <el-dropdown-menu class="user-menu-enhanced">
+                  <div class="user-menu-header">个人中心</div>
+                  <el-dropdown-item @click="handleNavigation('/follow')">
+                    <el-icon><Star /></el-icon>我的关注
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="handleNavigation('/user/consult')">
+                    <el-icon><ChatDotRound /></el-icon>我的预约
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="handleNavigation('/favorite')">
+                    <el-icon><Star /></el-icon>我的收藏
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="handleNavigation('/like')">
+                    <el-icon><Collection /></el-icon>我喜欢
+                  </el-dropdown-item>
+                  <el-dropdown-item @click="handleNavigation('/history')">
+                    <el-icon><Clock /></el-icon>播放历史
+                  </el-dropdown-item>
+                  <div class="user-menu-divider"></div>
+                  <el-dropdown-item @click="handleLogout" class="logout-item">
+                    <el-icon><SwitchButton /></el-icon>退出登录
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -155,6 +168,10 @@ import {
   CaretBottom,
   SwitchButton,
   Headset,
+  Clock,
+  Star,
+  ChatDotRound,
+  Edit,
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -265,47 +282,108 @@ onBeforeUnmount(() => {
 </script>
 
 <style>
-.nav-dropdown.el-dropdown__popper {
-  border: 1px solid rgba(232, 230, 223, 0.5) !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08) !important;
-  border-radius: 16px !important;
+/* 创作中心下拉菜单增强 */
+.creator-dropdown-enhanced.el-dropdown__popper {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
   margin-top: 12px !important;
-  transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
-.nav-dropdown .custom-menu {
-  padding: 6px !important;
-  background-color: #ffffff;
+.creator-menu-enhanced {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 12px 8px;
   min-width: 180px;
+  box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e8e6df;
 }
-.nav-dropdown .group-title {
-  padding: 10px 14px 6px;
-  font-size: 10px;
+.creator-menu-header {
+  font-size: 11px;
   font-weight: 800;
   color: #c4c2ba;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 1px;
+  padding: 8px 16px 4px;
+}
+.creator-menu-divider {
+  height: 1px;
+  background: #efeee8;
+  margin: 8px 12px;
+}
+.creator-menu-enhanced .el-dropdown-menu__item {
+  margin: 4px 8px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  transition: all 0.2s;
+}
+.creator-menu-enhanced .el-dropdown-menu__item:hover {
+  background: #fcfbf7;
+  transform: translateX(4px);
+}
+.creator-menu-enhanced .el-dropdown-menu__item .el-icon {
+  margin-right: 12px;
+  font-size: 16px;
+  color: #8e8c84;
 }
 
-.nav-dropdown .el-dropdown-menu__item {
-  margin: 2px 4px !important;
-  padding: 10px 12px !important;
-  border-radius: 8px !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  font-size: 13.5px !important;
-  font-weight: 500 !important;
-  transition: all 0.2s ease !important;
+/* 用户下拉菜单增强 */
+.user-dropdown-enhanced.el-dropdown__popper {
+  border: none !important;
+  background: transparent !important;
+  margin-top: 12px !important;
+}
+.user-menu-enhanced {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 12px 8px;
+  min-width: 200px;
+  box-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e8e6df;
+}
+.user-menu-header {
+  font-size: 11px;
+  font-weight: 800;
+  color: #c4c2ba;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 8px 16px 4px;
+}
+.user-menu-divider {
+  height: 1px;
+  background: #efeee8;
+  margin: 8px 12px;
+}
+.user-menu-enhanced .el-dropdown-menu__item {
+  margin: 4px 8px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+  transition: all 0.2s;
+}
+.user-menu-enhanced .el-dropdown-menu__item:hover {
+  background: #fcfbf7;
+  transform: translateX(4px);
+}
+.user-menu-enhanced .el-dropdown-menu__item .el-icon {
+  margin-right: 12px;
+  font-size: 16px;
+  color: #8e8c84;
+}
+.user-menu-enhanced .logout-item {
+  color: #e5484d;
+}
+.user-menu-enhanced .logout-item .el-icon {
+  color: #e5484d;
 }
 
-.nav-dropdown .el-dropdown-menu__item:hover {
-  background-color: #fcfbf7 !important;
-  color: #1a1a1a !important;
-  transform: translateX(4px) !important;
-}
-
-.nav-dropdown .el-popper__arrow::before {
-  display: none !important;
+.creator-dropdown-enhanced .el-popper__arrow,
+.user-dropdown-enhanced .el-popper__arrow {
+  display: none;
 }
 </style>
 
@@ -327,17 +405,14 @@ onBeforeUnmount(() => {
   transition: transform 0.25s ease-in-out;
   transform: translateY(0);
 }
-
 .top-navbar.navbar-hidden {
   transform: translateY(-100%);
 }
-
 .main-viewport {
   min-height: 100vh;
   background-color: #fcfbf7;
   padding-top: 72px;
 }
-
 .nav-container {
   max-width: 1400px;
   margin: 0 auto;
@@ -346,7 +421,6 @@ onBeforeUnmount(() => {
   align-items: center;
   padding: 0 30px;
 }
-
 .logo-area {
   display: flex;
   align-items: center;
@@ -364,7 +438,6 @@ onBeforeUnmount(() => {
   font-weight: 700;
   color: #1a1a1a;
 }
-
 .main-nav {
   display: flex;
   gap: 28px;
@@ -382,7 +455,6 @@ onBeforeUnmount(() => {
   color: #1a1a1a;
   font-weight: 600;
 }
-
 .search-wrapper {
   flex: 1;
   display: flex;
@@ -420,7 +492,6 @@ onBeforeUnmount(() => {
 .search-capsule:focus-within .search-prefix {
   color: #1a1a1a;
 }
-
 .inner-input {
   flex: 1;
   background: none;
@@ -433,54 +504,78 @@ onBeforeUnmount(() => {
 .inner-input::placeholder {
   color: #c4c2ba;
 }
-
 .action-area {
   display: flex;
   align-items: center;
+  gap: 20px;
 }
-
-.nav-asset-entry {
+.creator-center-btn-enhanced {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  background: #1a1a1a;
+  border-radius: 48px;
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.creator-center-btn-enhanced:hover {
+  background: #2c2c2c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+.creator-center-btn-enhanced .el-icon {
+  font-size: 18px;
+}
+.creator-center-btn-enhanced .arrow-icon {
+  font-size: 12px;
+  margin-left: 4px;
+}
+.balance-hover {
+  position: relative;
   display: flex;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.2s;
+  padding: 8px 12px;
+  border-radius: 32px;
+  transition: background 0.2s;
 }
-.nav-asset-entry:hover {
-  transform: translateY(-1px);
+.balance-hover:hover {
+  background: #f0efeb;
 }
-.balance-visual {
+.balance-wrapper {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-.icon-orbit {
-  width: 38px;
-  height: 38px;
-  background: #fff;
-  border: 1px solid #e8e6df;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s;
-}
-.nav-asset-entry:hover .icon-orbit {
-  border-color: #1a1a1a;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
-
-.amount-display {
-  font-size: 14px;
-  font-weight: 700;
+  gap: 8px;
+  font-weight: 600;
   color: #1a1a1a;
 }
-.ui-divider {
-  width: 1px;
-  height: 24px;
-  background: #e8e6df;
-  margin: 0 15px;
+.balance-amount {
+  font-size: 0.9rem;
 }
-
+.balance-tooltip {
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  color: white;
+  font-size: 0.7rem;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  z-index: 1001;
+}
+.balance-hover:hover .balance-tooltip {
+  opacity: 1;
+}
 .user-profile-trigger {
   display: flex;
   align-items: center;
@@ -515,7 +610,6 @@ onBeforeUnmount(() => {
 .user-profile-trigger:active .dropdown-arrow {
   transform: scale(0.9);
 }
-
 .auth-box {
   display: flex;
   gap: 20px;
@@ -540,7 +634,6 @@ onBeforeUnmount(() => {
 .join-btn:hover {
   transform: scale(1.02);
 }
-
 .page-fade-enter-active,
 .page-fade-leave-active {
   transition: opacity 0.2s ease;
@@ -548,5 +641,16 @@ onBeforeUnmount(() => {
 .page-fade-enter-from,
 .page-fade-leave-to {
   opacity: 0;
+}
+@media (max-width: 768px) {
+  .creator-center-btn-enhanced span {
+    display: none;
+  }
+  .creator-center-btn-enhanced {
+    padding: 8px 12px;
+  }
+  .balance-amount {
+    display: none;
+  }
 }
 </style>
