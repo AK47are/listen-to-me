@@ -15,6 +15,7 @@ import com.github.listen_to_me.domain.query.AudioSearchQuery;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.listen_to_me.domain.entity.AudioOrder;
+import com.github.listen_to_me.domain.query.AuditQuery;
 import com.github.listen_to_me.mapper.AudioOrderMapper;
 import cn.hutool.core.bean.BeanUtil;
 import com.github.listen_to_me.domain.entity.*;
@@ -385,5 +386,17 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
                 .eq(AudioFolderRelation::getAudioId, id))));
         audioDetailVO.setStats(statsInfo);
         return audioDetailVO;
+    }
+
+    @Override
+    public IPage<AuditAudioVO> getAuditAudioPage(AuditQuery auditQuery) {
+        if(!"ALL".equals(auditQuery.getStatus()) && !"PENDING".equals(auditQuery.getStatus())
+                && !"APPROVED".equals(auditQuery.getStatus()) && !"REJECTED".equals(auditQuery.getStatus())){
+            throw new BaseException(400, "审核状态无效，仅支持 PENDING、ALL、APPROVED、REJECTED");
+        }
+        Page<AuditAudioVO> page = new Page<>(auditQuery.getPageNum(), auditQuery.getPageSize());
+        IPage<AuditAudioVO> pageResult = audioInfoMapper.selectAuditAudioPage(page, auditQuery.getStatus());
+        pageResult.getRecords().forEach(vo -> vo.setCoverUrl(MinioUtils.getPresignedUrl(vo.getCoverUrl())));
+        return pageResult;
     }
 }

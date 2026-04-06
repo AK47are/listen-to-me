@@ -7,6 +7,7 @@ import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.query.AudioSearchQuery;
+import com.github.listen_to_me.domain.query.AuditQuery;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.*;
@@ -52,4 +53,6 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     String getStreamSign(Long audioId);
 
     AudioDetailVO getAudioDetail(Long id);
+
+    IPage<AuditAudioVO> getAuditAudioPage(AuditQuery auditQuery);
 }
