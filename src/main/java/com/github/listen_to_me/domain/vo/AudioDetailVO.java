@@ -14,7 +14,6 @@ public class AudioDetailVO {
     private Integer trialDuration;
     private BigDecimal price;
     private Boolean isPaid;
-    private String audioUrl;
     private String description;
     private Boolean isPurchased;
     private Integer progress;
