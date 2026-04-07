@@ -43,7 +43,6 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { CaretRight } from '@element-plus/icons-vue'
 import { historyApi } from '@/api/user/history'
 import AudioCard from '@/components/AudioCard.vue'
 

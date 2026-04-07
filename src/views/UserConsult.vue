@@ -146,15 +146,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Collection,
-  Refresh,
-  ChatDotRound,
-  Clock,
-  User,
-  Coin,
-  Location,
-} from '@element-plus/icons-vue'
+import { Collection, Refresh, ChatDotRound, Clock, Coin, Location } from '@element-plus/icons-vue'
 import { consultApi } from '@/api/user/consult'
 
 const consultOrders = ref([])
@@ -279,4 +271,3 @@ onMounted(() => {
 <style scoped>
 @import '@/resource/css/userConsult.css';
 </style>
-

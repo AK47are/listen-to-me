@@ -1,12 +1,10 @@
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElDialog } from 'element-plus'
-import { profileApi } from '@/api/user/profile'
 import { authApi } from '@/api/common/auth'
 import { applyApi } from '@/api/user/apply'
+import { profileApi } from '@/api/user/profile'
 import { useUserStore } from '@/stores/user/user'
-
-const userStore = useUserStore()
+import { ElDialog, ElMessage } from 'element-plus'
+import { onMounted, reactive, ref } from 'vue'
 
 const profileForm = reactive({
   nickname: '',
@@ -463,4 +461,3 @@ onMounted(() => {
 <style scoped>
 @import '@/resource/css/profile.css';
 </style>
-
