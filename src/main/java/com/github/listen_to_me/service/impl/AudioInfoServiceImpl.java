@@ -205,8 +205,8 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         creatorAudioDetailVO.setCoverUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath()));
         AudioTranscript transcript = transcriptMapper.selectOne(
                 Wrappers.<AudioTranscript>lambdaQuery()
-                .eq(AudioTranscript::getAudioId, id));
-        if(transcript != null) {
+                        .eq(AudioTranscript::getAudioId, id));
+        if (transcript != null) {
             creatorAudioDetailVO.setTranscript(transcript.getFullText());
         }
         creatorAudioDetailVO.setPlayCount(audioInfo.getPlayCount());
@@ -307,8 +307,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
 
     @Override
     public IPage<AudioVO> searchAudio(AudioSearchQuery audioSearchQuery) {
-        Page<AudioVO> page = new
-                Page<>(audioSearchQuery.getPageNum(), audioSearchQuery.getPageSize());
+        Page<AudioVO> page = new Page<>(audioSearchQuery.getPageNum(), audioSearchQuery.getPageSize());
         if ("TITLE".equals(audioSearchQuery.getSearchType())) {
             return audioVOMapper.selectByTitle(page, audioSearchQuery.getKeyword());
         }
@@ -320,17 +319,18 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         }
         throw new BaseException(400, "搜索类型无效，仅支持 TITLE、CREATOR、TRANSCRIPT");
     }
+
     @Transactional
     @Override
     public String getStreamSign(Long audioId) {
-        if(audioId == null) {
+        if (audioId == null) {
             throw new BaseException(400, "音频ID不能为空");
         }
 
         Long userId = SecurityUtils.getCurrentUserId();
 
         AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
-        if(audioInfo == null ) {
+        if (audioInfo == null) {
             throw new BaseException(404, "音频不存在");
         }
         String suffix = userId + ":" + audioId;
@@ -345,11 +345,11 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
                 .eq(AudioOrder::getUserId, userId);
 
         AudioOrder audioOrder = audioOrderMapper.selectOne(wrapper);
-        if(audioInfo.getIsPaid() == false || (audioOrder != null && audioOrder.getPayStatus() == 1)) {
+        if (audioInfo.getIsPaid() == false || (audioOrder != null && audioOrder.getPayStatus() == 1)) {
             return MinioUtils.getPresignedUrl(audioInfo.getRawPath());
-        }else if(audioInfo.getTrialDuration() != null && audioInfo.getStatus().equals("ONLINE")) {
+        } else if (audioInfo.getTrialDuration() != null && audioInfo.getStatus().equals("ONLINE")) {
             return MinioUtils.getPresignedUrl(audioInfo.getClipPath());
-        }else {
+        } else {
             throw new BaseException(403, "请购买后收听完整版");
         }
     }
@@ -367,9 +367,9 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
 
         PlayHistory playHistory = playHistoryMapper.selectOne(playHistoryWrapper);
 
-        if(playHistory != null) {
+        if (playHistory != null) {
             audioDetailVO.setProgress(playHistory.getLastPosition());
-        }else {
+        } else {
             audioDetailVO.setProgress(0);
         }
 
@@ -378,9 +378,9 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
                 .eq(AudioOrder::getUserId, SecurityUtils.getCurrentUserId());
 
         AudioOrder audioOrder = audioOrderMapper.selectOne(wrapper);
-        if(audioInfo.getIsPaid() == false && (audioOrder == null || audioOrder.getPayStatus() != 1)) {
+        if (audioInfo.getIsPaid() == false && (audioOrder == null || audioOrder.getPayStatus() != 1)) {
             audioDetailVO.setIsPurchased(false);
-        }else {
+        } else {
             audioDetailVO.setIsPurchased(true);
         }
         AudioDetailVO.CreatorInfo creatorInfo = new AudioDetailVO.CreatorInfo();
@@ -394,16 +394,17 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         statsInfo.setPlayCount(Long.valueOf(audioInfo.getPlayCount()));
         statsInfo.setLikeCount(Long.valueOf(audioLikeMapper.selectCount(Wrappers.lambdaQuery(AudioLike.class)
                 .eq(AudioLike::getAudioId, id))));
-        statsInfo.setCollectCount(Long.valueOf(audioFolderRelationMapper.selectCount(Wrappers.lambdaQuery(AudioFolderRelation.class)
-                .eq(AudioFolderRelation::getAudioId, id))));
+        statsInfo.setCollectCount(
+                Long.valueOf(audioFolderRelationMapper.selectCount(Wrappers.lambdaQuery(AudioFolderRelation.class)
+                        .eq(AudioFolderRelation::getAudioId, id))));
         audioDetailVO.setStats(statsInfo);
         return audioDetailVO;
     }
 
     @Override
     public IPage<AuditAudioVO> getAuditAudioPage(AuditQuery auditQuery) {
-        if(!"ALL".equals(auditQuery.getStatus()) && !"PENDING".equals(auditQuery.getStatus())
-                && !"APPROVED".equals(auditQuery.getStatus()) && !"REJECTED".equals(auditQuery.getStatus())){
+        if (!"ALL".equals(auditQuery.getStatus()) && !"PENDING".equals(auditQuery.getStatus())
+                && !"APPROVED".equals(auditQuery.getStatus()) && !"REJECTED".equals(auditQuery.getStatus())) {
             throw new BaseException(400, "审核状态无效，仅支持 PENDING、ALL、APPROVED、REJECTED");
         }
         Page<AuditAudioVO> page = new Page<>(auditQuery.getPageNum(), auditQuery.getPageSize());
@@ -415,21 +416,32 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     @Override
     public void auditAudio(AudioAuditDTO audioAuditDTO) {
         AudioInfo audioInfo = this.getById(audioAuditDTO.getAudioId());
-        if(audioInfo == null
+        if (audioInfo == null
                 || audioInfo.getAuditStatus() != 0
                 || audioInfo.getIsDeleted() == 1) {
             throw new BaseException(400, "音频不存在或已处理");
         }
-        if("APPROVED".equals(audioAuditDTO.getStatus())) {
+        if ("APPROVED".equals(audioAuditDTO.getStatus())) {
             audioInfo.setAuditStatus(1);
             // TODO 触发上线通知、推荐索引更新等
-        }else if("REJECTED".equals(audioAuditDTO.getStatus())) {
+        } else if ("REJECTED".equals(audioAuditDTO.getStatus())) {
             // TODO 通知创作者驳回原因
             audioInfo.setAuditStatus(2);
             audioInfo.setRejectReason(audioAuditDTO.getRejectReason());
-        }else {
+        } else {
             throw new BaseException(400, "审核状态无效，仅支持 APPROVED、REJECTED");
         }
         audioInfoMapper.updateById(audioInfo);
+    }
+
+    @Override
+    public IPage<AudioVO> getCreatorAudioPage(Long creatorId, PageQuery pageQuery) {
+        log.debug("分页查询创作者作品 - 创作者ID: {}", creatorId);
+        Page<AudioVO> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
+        IPage<AudioVO> result = audioVOMapper.selectByCreatorId(page, creatorId);
+
+        result.getRecords().forEach(vo -> vo.setCoverUrl(MinioUtils.getPresignedUrl(vo.getCoverUrl())));
+
+        return result;
     }
 }

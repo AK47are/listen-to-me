@@ -73,4 +73,10 @@
         )
         ORDER BY ai.create_time DESC
     </select>
+
+    <select id="selectByCreatorId" resultType="com.github.listen_to_me.domain.vo.AudioVO">
+        <include refid="baseAudioVOFields"/>
+        AND ai.creator_id = #{creatorId}
+        ORDER BY ai.create_time DESC
+    </select>
 </mapper>

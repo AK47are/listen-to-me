@@ -24,4 +24,6 @@ public interface AudioVOMapper {
     IPage<AudioVO> selectByCreator(Page<AudioVO> page, String creatorName);
 
     IPage<AudioVO> selectByTranscript(Page<AudioVO> page, String transcript);
+
+    IPage<AudioVO> selectByCreatorId(Page<AudioVO> page, Long creatorId);
 }

@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.domain.query.AudioSearchQuery;
+import com.github.listen_to_me.domain.query.PageQuery;
+
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,9 +65,17 @@ public class AudioController {
     public Result<IPage<AudioVO>> searchAudio(@Valid @ParameterObject AudioSearchQuery audioSearchQuery) {
         return Result.success(audioInfoService.searchAudio(audioSearchQuery));
     }
+
     @GetMapping("/{id}")
     @Operation(summary = "获取音频详情")
     public Result<AudioDetailVO> getAudioDetail(@PathVariable Long id) {
         return Result.success(audioInfoService.getAudioDetail(id));
+    }
+
+    @GetMapping("/creator/{creatorId}/page")
+    @Operation(summary = "分页查询创作者作品")
+    public Result<IPage<AudioVO>> getCreatorAudioPage(@PathVariable Long creatorId,
+            @ParameterObject PageQuery pageQuery) {
+        return Result.success(audioInfoService.getCreatorAudioPage(creatorId, pageQuery));
     }
 }
