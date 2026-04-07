@@ -2,4 +2,25 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.github.listen_to_me.mapper.AudioOrderMapper">
 
+    <select id="selectPageByUserId" resultType="com.github.listen_to_me.domain.vo.AudioOrderVO">
+        SELECT
+        ao.order_sn,
+        ai.title AS audio_title,
+        ai.cover_path AS cover_url,
+        ao.pay_amount,
+        CASE ao.pay_status
+        WHEN 0 THEN '待支付'
+        WHEN 2 THEN '已支付'
+        WHEN 3 THEN '已取消'
+        ELSE '未知状态'
+        END AS status,
+        ao.create_time
+        FROM audio_order ao
+        INNER JOIN audio_info ai
+        ON ao.audio_id = ai.id
+        WHERE
+        ao.user_id = #{userId}
+        ORDER BY ao.create_time DESC
+
+    </select>
 </mapper>

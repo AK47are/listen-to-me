@@ -1,7 +1,9 @@
 package com.github.listen_to_me.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.entity.AudioOrder;
+import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioOrderDetailVO;
 import com.github.listen_to_me.domain.vo.AudioOrderVO;
 
@@ -18,4 +20,6 @@ public interface IAudioOrderService extends IService<AudioOrder> {
     AudioOrderVO purchaseAudio(Long audioId);
 
     AudioOrderDetailVO queryAudioOrderDetail(String sn);
+
+    IPage<AudioOrderVO> queryAudioOrderPage(PageQuery query);
 }

@@ -1,11 +1,14 @@
 package com.github.listen_to_me.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.entity.AudioInfo;
+import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioOrderDetailVO;
 import com.github.listen_to_me.domain.vo.AudioOrderVO;
 import com.github.listen_to_me.mapper.AudioInfoMapper;
@@ -98,5 +101,16 @@ public class AudioOrderServiceImpl extends ServiceImpl<AudioOrderMapper, AudioOr
         vo.setCreateTime(order.getCreateTime());
         vo.setPayTime(order.getPayTime());
         return vo;
+    }
+
+    @Override
+    public IPage<AudioOrderVO> queryAudioOrderPage(PageQuery query) {
+        Long userId = SecurityUtils.getCurrentUserId();
+        IPage<AudioOrderVO> page = new Page<>(query.getPageNum(), query.getPageSize());
+        IPage<AudioOrderVO> audioOrderPage = audioOrderMapper.selectPageByUserId(page, userId);
+        audioOrderPage.getRecords().forEach(vo -> {
+            vo.setCoverUrl(MinioUtils.getPresignedUrl(vo.getCoverUrl()));
+        });
+        return audioOrderPage;
     }
 }
