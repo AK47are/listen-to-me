@@ -3,11 +3,7 @@ package com.github.listen_to_me.service.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -443,5 +439,36 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         result.getRecords().forEach(vo -> vo.setCoverUrl(MinioUtils.getPresignedUrl(vo.getCoverUrl())));
 
         return result;
+    }
+
+    @Override
+    public IPage<AudioVO> getRecommendList(PageQuery pageQuery) {
+        Long currId = SecurityUtils.getCurrentUserId();
+        List<AudioVO> recommendList = audioVOMapper.selectLikedRecommendByUserId(currId);
+        if (recommendList == null) {
+            recommendList = new ArrayList<>();
+        }
+        recommendList.addAll(this.getHotList());
+
+        Map<Long, AudioVO> map = new LinkedHashMap<>();
+        for (AudioVO vo : recommendList) {
+            map.putIfAbsent(vo.getId(), vo);
+        }
+        List<AudioVO> distinctList = new ArrayList<>(map.values());
+        Collections.shuffle(distinctList);
+
+        Integer current = pageQuery.getPageNum();
+        Integer size = pageQuery.getPageSize();
+        int start = (current - 1) * size;
+        int end = Math.min(start + size, distinctList.size());
+        Page<AudioVO> page = new Page<>(current, size);
+        if (start < end) {
+            page.setRecords(distinctList.subList(start, end));
+        } else {
+            page.setRecords(Collections.emptyList());
+        }
+        page.setTotal(distinctList.size());
+
+        return page;
     }
 }

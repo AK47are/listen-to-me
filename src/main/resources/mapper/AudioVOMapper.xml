@@ -79,4 +79,32 @@
         AND ai.creator_id = #{creatorId}
         ORDER BY ai.create_time DESC
     </select>
+
+    <select id="selectLikedRecommendByUserId" resultType="com.github.listen_to_me.domain.vo.AudioVO">
+        SELECT
+            ai.id,
+            ai.title,
+            ai.cover_path AS coverUrl,
+            u.nickname AS creatorName,
+            ai.play_count AS playCount,
+            (SELECT COUNT(*) FROM audio_folder_relation WHERE audio_id = ai.id) AS collectCount
+        FROM audio_info ai
+        INNER JOIN sys_user u ON ai.creator_id = u.id
+        INNER JOIN (
+            SELECT aif.creator_id
+            FROM audio_info aif
+            INNER JOIN audio_like al ON al.audio_id = aif.id AND al.user_id = #{userId}
+            GROUP BY aif.creator_id
+            ORDER BY MAX(al.create_time) DESC
+            LIMIT 5
+        ) recent ON ai.creator_id = recent.creator_id
+        WHERE ai.is_deleted = 0
+        AND ai.audit_status = 1
+        AND NOT EXISTS (
+            SELECT 1 FROM audio_like al2
+            WHERE al2.user_id = #{userId}
+            AND al2.audio_id = ai.id
+        )
+        ORDER BY ai.play_count DESC
+    </select>
 </mapper>
