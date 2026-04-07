@@ -383,7 +383,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         creatorInfo.setId(audioInfo.getCreatorId());
         SysUser user = sysUserMapper.selectById(audioInfo.getCreatorId());
         creatorInfo.setNickname(user.getNickname());
-        creatorInfo.setAvatar(user.getAvatar());
+        creatorInfo.setAvatar(MinioUtils.getPresignedUrl(user.getAvatar()));
         audioDetailVO.setCreator(creatorInfo);
 
         AudioDetailVO.StatsInfo statsInfo = new AudioDetailVO.StatsInfo();
