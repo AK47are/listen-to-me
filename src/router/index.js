@@ -63,6 +63,11 @@ const router = createRouter({
           component: () => import('@/views/SlotsDashboard.vue'),
         },
         {
+          path: 'creator/:id',
+          name: 'CreatorProfile',
+          component: () => import('@/views/CreatorProfile.vue'),
+        },
+        {
           path: 'creator/consult',
           name: 'CreatorConsult',
           component: () => import('@/views/CreatorConsult.vue'),
