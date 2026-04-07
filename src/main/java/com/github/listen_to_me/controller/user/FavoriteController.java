@@ -40,9 +40,9 @@ public class FavoriteController {
 
     @PostMapping("/folder")
     @Operation(summary = "创建收藏夹")
-    public Result<String> saveFavoriteFolder(@RequestBody FolderDTO folderDTO) {
+    public Result<Void> saveFavoriteFolder(@RequestBody FolderDTO folderDTO) {
         sysUserFolderService.createFolder(folderDTO);
-        return Result.success("创建收藏夹成功");
+        return Result.success();
     }
 
     @GetMapping("/folder/list")
