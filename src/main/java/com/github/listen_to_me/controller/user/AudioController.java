@@ -78,4 +78,10 @@ public class AudioController {
             @ParameterObject PageQuery pageQuery) {
         return Result.success(audioInfoService.getCreatorAudioPage(creatorId, pageQuery));
     }
+
+    @GetMapping("/recommend")
+    @Operation(summary = "推荐音频")
+    public Result<IPage<AudioVO>> getRecommendList(@ParameterObject PageQuery pageQuery) {
+        return Result.success(audioInfoService.getRecommendList(pageQuery));
+    }
 }

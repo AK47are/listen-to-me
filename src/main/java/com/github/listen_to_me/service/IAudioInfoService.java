@@ -68,4 +68,5 @@ public interface IAudioInfoService extends IService<AudioInfo> {
      */
     IPage<AudioVO> getCreatorAudioPage(Long creatorId, PageQuery pageQuery);
 
+    IPage<AudioVO> getRecommendList(PageQuery pageQuery);
 }

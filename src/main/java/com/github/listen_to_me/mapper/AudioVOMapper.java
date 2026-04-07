@@ -26,4 +26,6 @@ public interface AudioVOMapper {
     IPage<AudioVO> selectByTranscript(Page<AudioVO> page, String transcript);
 
     IPage<AudioVO> selectByCreatorId(Page<AudioVO> page, Long creatorId);
+
+    List<AudioVO> selectLikedRecommendByUserId(Long userId);
 }
