@@ -58,4 +58,14 @@ public interface IAudioInfoService extends IService<AudioInfo> {
     IPage<AuditAudioVO> getAuditAudioPage(AuditQuery auditQuery);
 
     void auditAudio(AudioAuditDTO audioAuditDTO);
+
+    /**
+     * 分页查询指定创作者的音频作品
+     *
+     * @param creatorId 创作者ID
+     * @param pageQuery 分页参数
+     * @return 音频分页列表
+     */
+    IPage<AudioVO> getCreatorAudioPage(Long creatorId, PageQuery pageQuery);
+
 }
