@@ -7,8 +7,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.dto.RechargeResultDTO;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.entity.SysUser;
+import com.github.listen_to_me.domain.query.RechargeOrderQuery;
 import com.github.listen_to_me.domain.query.UserPageQuery;
 import com.github.listen_to_me.domain.vo.BalanceVO;
+import com.github.listen_to_me.domain.vo.RechargeOrderVO;
 import com.github.listen_to_me.domain.vo.RechargeResultVO;
 import com.github.listen_to_me.domain.vo.UserVO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -89,4 +91,6 @@ public interface ISysUserService extends IService<SysUser> {
     RechargeResultVO recharge(RechargeResultDTO rechargeResultDTO) throws Exception;
 
     String alipayNotify(HttpServletRequest request) throws Exception;
+
+    IPage<RechargeOrderVO> getRechargePage(RechargeOrderQuery query);
 }

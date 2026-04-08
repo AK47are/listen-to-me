@@ -7,15 +7,17 @@ import java.util.List;
 import java.util.UUID;
 import java.util.Map;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.listen_to_me.domain.query.RechargeOrderQuery;
 import com.github.listen_to_me.domain.query.UserPageQuery;
 import com.alipay.easysdk.factory.Factory;
 import com.github.listen_to_me.common.config.AlipayConfig;
 import com.github.listen_to_me.domain.dto.RechargeResultDTO;
 import com.github.listen_to_me.domain.entity.UserRechargeOrder;
+import com.github.listen_to_me.domain.vo.RechargeOrderVO;
 import com.github.listen_to_me.domain.vo.RechargeResultVO;
-import com.github.listen_to_me.mapper.CoinTransactionMapper;
 import com.github.listen_to_me.mapper.UserRechargeOrderMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -369,5 +371,28 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
 
         return "fail";
+    }
+
+    @Override
+    public IPage<RechargeOrderVO> getRechargePage(RechargeOrderQuery query) {
+        Long currId = SecurityUtils.getCurrentUserId();
+        Page<UserRechargeOrder> page = new Page<>(query.getPageNum(), query.getPageSize());
+        Wrapper<UserRechargeOrder> wrapper = Wrappers.<UserRechargeOrder>lambdaQuery()
+                .eq(UserRechargeOrder::getUserId, currId)
+                .eq(query.getStatus() != null,
+                        UserRechargeOrder::getPayStatus,
+                        query.getStatus())
+                .orderByDesc(UserRechargeOrder::getCreateTime);
+        IPage<UserRechargeOrder> pageResult = userRechargeOrderMapper.selectPage(page, wrapper);
+        return pageResult.convert(order -> {
+            RechargeOrderVO vo = new RechargeOrderVO();
+            vo.setOrderSn(order.getRechargeSn());
+            vo.setAmount(order.getRechargeAmount());
+            vo.setStatus(order.getPayStatus());
+            vo.setPayChannel(order.getPayChannel());
+            vo.setPayTime(order.getPayTime());
+            vo.setCreateTime(order.getCreateTime());
+            return vo;
+        });
     }
 }
