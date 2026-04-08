@@ -13,10 +13,10 @@ export const favoriteApi = {
   getFavoritePage(params) {
     return request({ url: '/user/favorite/page', method: 'get', params })
   },
-  deleteFavorite(data) {
-    return request({ url: '/user/favorite', method: 'delete', data })
-  },
   deleteFavoriteFolder(folderId) {
     return request({ url: `/user/favorite/folder/${folderId}`, method: 'delete' })
+  },
+  getAudioFolders(audioId) {
+    return request({ url: `/user/audio/${audioId}/folders`, method: 'get' })
   },
 }
