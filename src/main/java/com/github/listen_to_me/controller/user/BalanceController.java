@@ -3,6 +3,8 @@ package com.github.listen_to_me.controller.user;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.domain.dto.RechargeResultDTO;
 import com.github.listen_to_me.domain.query.RechargeOrderQuery;
+import com.github.listen_to_me.domain.query.TransactionPageQuery;
+import com.github.listen_to_me.domain.vo.CoinTransactionVO;
 import com.github.listen_to_me.domain.vo.RechargeOrderVO;
 import com.github.listen_to_me.domain.vo.RechargeResultVO;
 import jakarta.servlet.http.HttpServletRequest;
@@ -52,5 +54,11 @@ public class BalanceController {
     @Operation(summary = "分页查询充值订单")
     public Result<IPage<RechargeOrderVO>> getRechargePage(@ParameterObject RechargeOrderQuery query) {
         return Result.success(sysUserService.getRechargePage(query));
+    }
+
+    @GetMapping("/transaction/page")
+    @Operation(summary = "分页查询虚拟币流水")
+    public Result<IPage<CoinTransactionVO>> getTransactionPage(@ParameterObject TransactionPageQuery query) {
+        return Result.success(sysUserService.getTransactionPage(query));
     }
 }

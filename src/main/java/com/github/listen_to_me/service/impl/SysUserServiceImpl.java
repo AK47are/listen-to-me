@@ -11,13 +11,14 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.listen_to_me.domain.query.RechargeOrderQuery;
+import com.github.listen_to_me.domain.query.TransactionPageQuery;
 import com.github.listen_to_me.domain.query.UserPageQuery;
 import com.alipay.easysdk.factory.Factory;
 import com.github.listen_to_me.common.config.AlipayConfig;
 import com.github.listen_to_me.domain.dto.RechargeResultDTO;
 import com.github.listen_to_me.domain.entity.UserRechargeOrder;
-import com.github.listen_to_me.domain.vo.RechargeOrderVO;
-import com.github.listen_to_me.domain.vo.RechargeResultVO;
+import com.github.listen_to_me.domain.vo.*;
+import com.github.listen_to_me.mapper.CoinTransactionMapper;
 import com.github.listen_to_me.mapper.UserRechargeOrderMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,8 +37,6 @@ import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.entity.CoinTransaction;
 import com.github.listen_to_me.domain.entity.SysUser;
-import com.github.listen_to_me.domain.vo.BalanceVO;
-import com.github.listen_to_me.domain.vo.UserVO;
 import com.github.listen_to_me.mapper.SysUserMapper;
 import com.github.listen_to_me.service.ICoinTransactionService;
 import com.github.listen_to_me.service.ISysUserService;
@@ -57,6 +56,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private final ICoinTransactionService iCoinTransactionService;
     private final AlipayConfig alipayConfig;
     private final UserRechargeOrderMapper userRechargeOrderMapper;
+    private final CoinTransactionMapper coinTransactionMapper;
 
     @Override
     public UserVO findProfile() {
@@ -394,5 +394,23 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             vo.setCreateTime(order.getCreateTime());
             return vo;
         });
+    }
+
+    @Override
+    public IPage<CoinTransactionVO> getTransactionPage(TransactionPageQuery query) {
+        Long currId = SecurityUtils.getCurrentUserId();
+        Page<CoinTransaction> page = new Page<>(query.getPageNum(), query.getPageSize());
+        Wrapper<CoinTransaction> wrapper = Wrappers.<CoinTransaction>lambdaQuery()
+                .eq(CoinTransaction::getUserId, currId)
+                .eq(query.getType() != null,
+                        CoinTransaction::getType,
+                        query.getType())
+                .eq(query.getBizType() != null,
+                        CoinTransaction::getBizType,
+                        query.getBizType())
+                .orderByDesc(CoinTransaction::getCreateTime);
+        IPage<CoinTransaction> pageResult = coinTransactionMapper.selectPage(page, wrapper);
+        return pageResult.convert(
+                transaction -> BeanUtil.copyProperties(transaction, CoinTransactionVO.class));
     }
 }

@@ -8,11 +8,9 @@ import com.github.listen_to_me.domain.dto.RechargeResultDTO;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.query.RechargeOrderQuery;
+import com.github.listen_to_me.domain.query.TransactionPageQuery;
 import com.github.listen_to_me.domain.query.UserPageQuery;
-import com.github.listen_to_me.domain.vo.BalanceVO;
-import com.github.listen_to_me.domain.vo.RechargeOrderVO;
-import com.github.listen_to_me.domain.vo.RechargeResultVO;
-import com.github.listen_to_me.domain.vo.UserVO;
+import com.github.listen_to_me.domain.vo.*;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface ISysUserService extends IService<SysUser> {
@@ -93,4 +91,6 @@ public interface ISysUserService extends IService<SysUser> {
     String alipayNotify(HttpServletRequest request) throws Exception;
 
     IPage<RechargeOrderVO> getRechargePage(RechargeOrderQuery query);
+
+    IPage<CoinTransactionVO> getTransactionPage(TransactionPageQuery query);
 }
