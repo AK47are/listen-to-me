@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.domain.query.AudioSearchQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
 
+import com.github.listen_to_me.domain.vo.FolderVO;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -83,5 +84,12 @@ public class AudioController {
     @Operation(summary = "推荐音频")
     public Result<IPage<AudioVO>> getRecommendList(@ParameterObject PageQuery pageQuery) {
         return Result.success(audioInfoService.getRecommendList(pageQuery));
+    }
+
+
+    @GetMapping("/{audioId}/folders")
+    @Operation(summary = "获取音频收藏文件夹列表")
+    public Result<List<FolderVO>> getAudioFolders(@PathVariable Long audioId) {
+        return Result.success(audioFolderRelationService.getAudioFolders(audioId));
     }
 }

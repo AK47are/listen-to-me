@@ -5,13 +5,17 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.ConflictException;
+import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
 import com.github.listen_to_me.domain.dto.FavoriteDeleteDTO;
 import com.github.listen_to_me.domain.entity.AudioFolderRelation;
+import com.github.listen_to_me.domain.vo.FolderVO;
 import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
 import com.github.listen_to_me.service.IAudioFolderRelationService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -53,5 +57,11 @@ public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelat
             throw new BaseException(404, "音频不存在收藏");
         }
         audioFolderRelationMapper.delete(wrapper);
+    }
+
+    @Override
+    public List<FolderVO> getAudioFolders(Long audioId) {
+        Long currId = SecurityUtils.getCurrentUserId();
+        return audioFolderRelationMapper.selectAudioFolders(currId, audioId);
     }
 }
