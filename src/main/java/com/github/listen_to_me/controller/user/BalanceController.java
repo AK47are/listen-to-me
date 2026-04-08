@@ -1,9 +1,13 @@
 package com.github.listen_to_me.controller.user;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.domain.dto.RechargeResultDTO;
+import com.github.listen_to_me.domain.query.RechargeOrderQuery;
+import com.github.listen_to_me.domain.vo.RechargeOrderVO;
 import com.github.listen_to_me.domain.vo.RechargeResultVO;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,5 +46,11 @@ public class BalanceController {
     @Operation(summary = "支付宝回调")
     public String alipayCallback(HttpServletRequest request) throws Exception {
         return sysUserService.alipayNotify(request);
-       }
+    }
+
+    @GetMapping("/recharge/page")
+    @Operation(summary = "分页查询充值订单")
+    public Result<IPage<RechargeOrderVO>> getRechargePage(@ParameterObject RechargeOrderQuery query) {
+        return Result.success(sysUserService.getRechargePage(query));
+    }
 }
