@@ -22,7 +22,7 @@
               <span class="stat-value">{{ creatorInfo.audioCount || 0 }}</span>
               <span class="stat-label">作品</span>
             </div>
-            <div class="stat-item">
+            <div class="stat-item fans-stat" @click="openFansDialog">
               <span class="stat-value">{{ creatorInfo.fansCount || 0 }}</span>
               <span class="stat-label">粉丝</span>
             </div>
@@ -33,14 +33,6 @@
           </div>
           <div class="creator-bio">{{ creatorInfo.intro || '这个人很懒，还没有填写简介' }}</div>
           <div class="creator-actions">
-            <el-button
-              v-if="creatorInfo.isFollowing"
-              class="followed-btn"
-              :icon="Check"
-              @click="handleUnfollow"
-            >
-              已关注
-            </el-button>
             <el-button
               v-if="creatorInfo.isFollowing"
               class="followed-btn"
@@ -110,6 +102,41 @@
         </div>
       </div>
     </div>
+
+    <!-- 粉丝列表弹窗 -->
+    <el-dialog
+      v-model="showFansDialog"
+      title="粉丝列表"
+      width="500px"
+      class="fans-dialog"
+      destroy-on-close
+    >
+      <div v-if="fansLoading" class="fans-loading">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        <span>加载中...</span>
+      </div>
+      <div v-else-if="fansList.length === 0" class="fans-empty">
+        <el-empty description="暂无粉丝" />
+      </div>
+      <div v-else class="fans-list">
+        <div v-for="fan in fansList" :key="fan.userId" class="fans-item">
+          <img :src="fan.avatar || defaultAvatar" class="fans-avatar" />
+          <div class="fans-info">
+            <div class="fans-nickname">{{ fan.nickname }}</div>
+            <div class="fans-time">{{ fan.followTime }}</div>
+          </div>
+        </div>
+      </div>
+      <div v-if="fansTotal > fansPageSize" class="fans-pagination">
+        <el-pagination
+          v-model:current-page="fansPageNum"
+          :total="fansTotal"
+          :page-size="fansPageSize"
+          layout="prev, pager, next"
+          @current-change="loadFansList"
+        />
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -117,7 +144,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Check, Plus, ChatDotRound } from '@element-plus/icons-vue'
+import { Check, Plus, ChatDotRound, Loading } from '@element-plus/icons-vue'
 import { creatorApi } from '@/api/user/creator'
 import { followApi } from '@/api/user/follow'
 import { audioApi } from '@/api/user/audio'
@@ -148,6 +175,14 @@ const audioTotal = ref(0)
 const audioPageNum = ref(1)
 const audioPageSize = ref(12)
 const audioFilter = ref('all')
+
+// 粉丝弹窗相关
+const showFansDialog = ref(false)
+const fansLoading = ref(false)
+const fansList = ref([])
+const fansTotal = ref(0)
+const fansPageNum = ref(1)
+const fansPageSize = ref(20)
 
 const getCreatorInfo = async () => {
   try {
@@ -195,36 +230,64 @@ const setFilter = (filter) => {
   updateDisplayList()
 }
 
-const handleFilterChange = () => {
-  audioPageNum.value = 1
-  updateDisplayList()
-}
-
 const handleAudioPageChange = (page) => {
   audioPageNum.value = page
   updateDisplayList()
 }
 
+const openFansDialog = () => {
+  showFansDialog.value = true
+  fansPageNum.value = 1
+  loadFansList()
+}
+
+const loadFansList = async () => {
+  fansLoading.value = true
+  try {
+    const res = await followApi.getFansPage(creatorId.value, {
+      pageNum: fansPageNum.value,
+      pageSize: fansPageSize.value,
+    })
+    fansList.value = res.data.records || []
+    fansTotal.value = res.data.total || 0
+  } catch (error) {
+    console.error('获取粉丝列表失败', error)
+    ElMessage.error('获取粉丝列表失败')
+  } finally {
+    fansLoading.value = false
+  }
+}
+
 const handleFollow = async () => {
+  const originalState = creatorInfo.value.isFollowing
+  const originalFansCount = creatorInfo.value.fansCount
+
+  creatorInfo.value.isFollowing = true
+  creatorInfo.value.fansCount++
+
   try {
     await followApi.followCreator(creatorId.value)
     ElMessage.success('关注成功')
-    creatorInfo.value.isFollowing = true
-    creatorInfo.value.fansCount++
   } catch (error) {
-    console.error('关注失败', error)
+    creatorInfo.value.isFollowing = originalState
+    creatorInfo.value.fansCount = originalFansCount
     ElMessage.error('关注失败')
   }
 }
 
 const handleUnfollow = async () => {
+  const originalState = creatorInfo.value.isFollowing
+  const originalFansCount = creatorInfo.value.fansCount
+
+  creatorInfo.value.isFollowing = false
+  creatorInfo.value.fansCount--
+
   try {
     await followApi.unfollowCreator(creatorId.value)
     ElMessage.success('已取消关注')
-    creatorInfo.value.isFollowing = false
-    creatorInfo.value.fansCount--
   } catch (error) {
-    console.error('取消关注失败', error)
+    creatorInfo.value.isFollowing = originalState
+    creatorInfo.value.fansCount = originalFansCount
     ElMessage.error('取消关注失败')
   }
 }
@@ -323,7 +386,7 @@ onMounted(() => {
 
 .creator-stats {
   display: flex;
-  gap: 32px;
+  gap: 48px;
   margin-bottom: 20px;
 }
 
@@ -331,18 +394,28 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  min-width: 80px;
 }
 
 .stat-value {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: #1a1a1a;
 }
 
 .stat-label {
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   color: #b0aea3;
   margin-top: 4px;
+}
+
+.fans-stat {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.fans-stat:hover {
+  opacity: 0.7;
 }
 
 .creator-bio {
@@ -434,7 +507,7 @@ onMounted(() => {
 
 .section-filters {
   display: flex;
-  gap: 1px;
+  gap: 12px;
 }
 
 .section-filters .el-button {
@@ -528,6 +601,84 @@ onMounted(() => {
   margin-right: 16px;
 }
 
+/* 粉丝弹窗样式 */
+.fans-dialog :deep(.el-dialog) {
+  border-radius: 28px;
+  background: #ffffff;
+}
+
+.fans-dialog :deep(.el-dialog__header) {
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid #f0efeb;
+}
+
+.fans-dialog :deep(.el-dialog__title) {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.fans-dialog :deep(.el-dialog__body) {
+  padding: 20px 24px;
+}
+
+.fans-loading,
+.fans-empty {
+  padding: 40px 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  color: #b0aea3;
+}
+
+.fans-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.fans-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0efeb;
+}
+
+.fans-item:last-child {
+  border-bottom: none;
+}
+
+.fans-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.fans-info {
+  flex: 1;
+}
+
+.fans-nickname {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.fans-time {
+  font-size: 0.7rem;
+  color: #b0aea3;
+}
+
+.fans-pagination {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
 @media (max-width: 768px) {
   .creator-card {
     flex-direction: column;
@@ -552,6 +703,9 @@ onMounted(() => {
   }
   .audio-grid {
     grid-template-columns: 1fr;
+  }
+  .fans-dialog :deep(.el-dialog) {
+    width: calc(100% - 40px) !important;
   }
 }
 </style>
