@@ -8,7 +8,8 @@ import com.github.listen_to_me.domain.vo.FolderVO;
 import java.util.List;
 
 public interface ISysUserFolderService extends IService<SysUserFolder> {
-    void createFolder(FolderDTO folderDTO);
+
+    void createFolder(Long userId, FolderDTO folderDTO);
 
     List<FolderVO> getFolderList();
 

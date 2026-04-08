@@ -3,6 +3,7 @@ package com.github.listen_to_me.controller.user;
 import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +25,7 @@ import com.github.listen_to_me.service.ISysUserFolderService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,8 +42,10 @@ public class FavoriteController {
 
     @PostMapping("/folder")
     @Operation(summary = "创建收藏夹")
-    public Result<Void> saveFavoriteFolder(@RequestBody FolderDTO folderDTO) {
-        sysUserFolderService.createFolder(folderDTO);
+    public Result<Void> saveFavoriteFolder(
+            @AuthenticationPrincipal Long userId,
+            @Valid @RequestBody FolderDTO folderDTO) {
+        sysUserFolderService.createFolder(userId, folderDTO);
         return Result.success();
     }
 
