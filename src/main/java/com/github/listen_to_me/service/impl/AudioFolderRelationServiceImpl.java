@@ -1,5 +1,10 @@
 package com.github.listen_to_me.service.impl;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -7,22 +12,19 @@ import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.ConflictException;
 import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
-import com.github.listen_to_me.domain.dto.FavoriteDeleteDTO;
 import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.domain.vo.FolderVO;
 import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
 import com.github.listen_to_me.mapper.FolderMapper;
 import com.github.listen_to_me.service.IAudioFolderRelationService;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
 public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelationMapper, AudioFolderRelation>
         implements IAudioFolderRelationService {
+
     private final AudioFolderRelationMapper audioFolderRelationMapper;
     private final FolderMapper folderMapper;
 
@@ -50,17 +52,6 @@ public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelat
         } else {
             throw new BaseException("前端操作错误");
         }
-    }
-
-    @Override
-    public void deleteFavorite(FavoriteDeleteDTO favoriteDeleteDTO) {
-        Wrapper<AudioFolderRelation> wrapper = Wrappers.lambdaQuery(AudioFolderRelation.class)
-                .eq(AudioFolderRelation::getAudioId, favoriteDeleteDTO.getAudioId())
-                .eq(AudioFolderRelation::getFolderId, favoriteDeleteDTO.getFolderId());
-        if (audioFolderRelationMapper.selectOne(wrapper) == null) {
-            throw new BaseException(404, "音频不存在收藏");
-        }
-        audioFolderRelationMapper.delete(wrapper);
     }
 
     @Override

@@ -14,12 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
-import com.github.listen_to_me.domain.dto.FavoriteDeleteDTO;
 import com.github.listen_to_me.domain.dto.FolderDTO;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.FolderVO;
-import com.github.listen_to_me.service.IAudioFolderRelationService;
 import com.github.listen_to_me.service.IAudioInfoService;
 import com.github.listen_to_me.service.ISysUserFolderService;
 
@@ -38,7 +36,6 @@ public class FavoriteController {
 
     private final ISysUserFolderService sysUserFolderService;
     private final IAudioInfoService audioInfoService;
-    private final IAudioFolderRelationService audioFolderRelationService;
 
     @PostMapping("/folder")
     @Operation(summary = "创建收藏夹")
@@ -59,13 +56,6 @@ public class FavoriteController {
     @Operation(summary = "获取收藏音频列表")
     public Result<IPage<AudioVO>> getFavoritePage(@ParameterObject FavoriteQuery favoriteQuery) {
         return Result.success(audioInfoService.getFavoriteAudioPage(favoriteQuery));
-    }
-
-    @DeleteMapping
-    @Operation(summary = "删除收藏音频")
-    public Result<String> deleteFavorite(@RequestBody FavoriteDeleteDTO favoriteDeleteDTO) {
-        audioFolderRelationService.deleteFavorite(favoriteDeleteDTO);
-        return Result.success("删除收藏音频成功");
     }
 
     @DeleteMapping("/folder/{folderId}")
