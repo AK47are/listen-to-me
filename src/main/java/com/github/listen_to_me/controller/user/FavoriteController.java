@@ -60,8 +60,10 @@ public class FavoriteController {
 
     @DeleteMapping("/folder/{folderId}")
     @Operation(summary = "删除收藏夹")
-    public Result<Void> deleteFavoriteFolder(@PathVariable Long folderId) {
-        sysUserFolderService.deleteFolder(folderId);
+    public Result<Void> deleteFavoriteFolder(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long folderId) {
+        sysUserFolderService.deleteFolder(userId, folderId);
         return Result.success();
     }
 

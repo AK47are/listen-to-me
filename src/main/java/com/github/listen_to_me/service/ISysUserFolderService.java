@@ -13,5 +13,5 @@ public interface ISysUserFolderService extends IService<SysUserFolder> {
 
     List<FolderVO> getFolderList();
 
-    void deleteFolder(Long folderId);
+    void deleteFolder(Long userId, Long folderId);
 }
