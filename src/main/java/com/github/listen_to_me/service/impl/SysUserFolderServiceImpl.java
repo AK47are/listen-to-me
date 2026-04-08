@@ -12,22 +12,27 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.FolderDTO;
+import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.domain.entity.Folder;
 import com.github.listen_to_me.domain.entity.SysUserFolder;
 import com.github.listen_to_me.domain.vo.FolderVO;
+import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
 import com.github.listen_to_me.mapper.FolderMapper;
 import com.github.listen_to_me.mapper.SysUserFolderMapper;
 import com.github.listen_to_me.service.ISysUserFolderService;
 
 import cn.hutool.core.bean.BeanUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, SysUserFolder>
         implements ISysUserFolderService {
     private final FolderMapper folderMapper;
     private final SysUserFolderMapper sysUserFolderMapper;
+    private final AudioFolderRelationMapper audioFolderRelationMapper;
 
     @Override
     @Transactional
@@ -57,14 +62,18 @@ public class SysUserFolderServiceImpl extends ServiceImpl<SysUserFolderMapper, S
 
     @Override
     @Transactional
-    public void deleteFolder(Long folderId) {
+    public void deleteFolder(Long userId, Long folderId) {
         LambdaQueryWrapper<SysUserFolder> wrapper = Wrappers.lambdaQuery(SysUserFolder.class)
                 .eq(SysUserFolder::getFolderId, folderId)
-                .eq(SysUserFolder::getUserId, SecurityUtils.getCurrentUserId());
+                .eq(SysUserFolder::getUserId, userId);
         if (!sysUserFolderMapper.exists(wrapper)) {
             throw new BaseException(404, "收藏夹不存在");
         }
+
         sysUserFolderMapper.delete(wrapper);
+        audioFolderRelationMapper.delete(Wrappers.lambdaQuery(AudioFolderRelation.class)
+                .eq(AudioFolderRelation::getFolderId, folderId));
         folderMapper.deleteById(folderId);
+        log.debug("删除收藏夹成功 - 收藏夹ID: {}, 用户ID: {}", folderId, userId);
     }
 }
