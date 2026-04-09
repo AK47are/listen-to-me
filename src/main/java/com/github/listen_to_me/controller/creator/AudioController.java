@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,8 +51,11 @@ public class AudioController {
     }
 
     @GetMapping("/page")
-    public Result<IPage<CreatorAudioVO>> getAudioPage(@ParameterObject PageQuery pageQuery) {
-        return Result.success(audioInfoService.getAudioPage(pageQuery));
+    @Operation(summary = "分页查询我的稿件")
+    public Result<IPage<CreatorAudioVO>> getAudioPage(
+            @AuthenticationPrincipal Long userId,
+            @ParameterObject PageQuery pageQuery) {
+        return Result.success(audioInfoService.getAudioPage(userId, pageQuery));
     }
 
     @GetMapping("/{id}")

@@ -55,7 +55,6 @@ import com.github.listen_to_me.mapper.AudioLikeMapper;
 import com.github.listen_to_me.mapper.AudioOrderMapper;
 import com.github.listen_to_me.mapper.AudioTranscriptMapper;
 import com.github.listen_to_me.mapper.AudioVOMapper;
-import com.github.listen_to_me.mapper.PlayHistoryMapper;
 import com.github.listen_to_me.mapper.SysUserMapper;
 import com.github.listen_to_me.mapper.UserFollowMapper;
 import com.github.listen_to_me.service.HotRankService;
@@ -200,17 +199,11 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     }
 
     @Override
-    public IPage<CreatorAudioVO> getAudioPage(PageQuery pageQuery) {
-        Page<AudioInfo> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
-        Long userId = SecurityUtils.getCurrentUserId();
-        IPage<AudioInfo> audioInfoPage = audioInfoMapper.selectByCreatorId(userId, page);
-        return audioInfoPage.convert(audio -> {
-            CreatorAudioVO creatorAudioVO = new CreatorAudioVO();
-            BeanUtil.copyProperties(audio, creatorAudioVO);
-            creatorAudioVO.setCoverUrl(MinioUtils.getPresignedUrl(audio.getCoverPath()));
-            return creatorAudioVO;
-        });
-
+    public IPage<CreatorAudioVO> getAudioPage(Long userId, PageQuery pageQuery) {
+        Page<CreatorAudioVO> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
+        IPage<CreatorAudioVO> result = audioInfoMapper.selectCreatorAudioPage(page, userId);
+        result.getRecords().forEach(vo -> vo.setCoverUrl(MinioUtils.getPresignedUrl(vo.getCoverUrl())));
+        return result;
     }
 
     @Override

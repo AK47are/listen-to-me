@@ -34,5 +34,26 @@
         ORDER BY ai.create_time DESC
     </select>
 
-
+    <select id="selectCreatorAudioPage" resultType="com.github.listen_to_me.domain.vo.CreatorAudioVO">
+        SELECT 
+            ai.id,
+            ai.title,
+            ai.cover_path AS coverUrl,
+            u.nickname AS creatorName,
+            ai.play_count AS playCount,
+            (SELECT COUNT(*) FROM audio_folder_relation WHERE audio_id = ai.id) AS collectCount,
+            (SELECT COUNT(*) FROM audio_like WHERE audio_id = ai.id) AS likeCount,
+            ai.duration,
+            ai.price,
+            ai.is_paid AS isPaid,
+            ai.visibility,
+            ai.status,
+            ai.reject_reason AS rejectReason,
+            ai.create_time AS createTime
+        FROM audio_info ai
+        INNER JOIN sys_user u ON ai.creator_id = u.id
+        WHERE ai.creator_id = #{userId}
+        AND ai.is_deleted = 0
+        ORDER BY ai.create_time DESC
+    </select>
 </mapper>

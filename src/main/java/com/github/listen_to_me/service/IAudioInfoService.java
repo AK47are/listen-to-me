@@ -37,7 +37,7 @@ public interface IAudioInfoService extends IService<AudioInfo> {
 
     void MoveAudioToOnline(Long audioId) throws Exception;
 
-    IPage<CreatorAudioVO> getAudioPage(PageQuery pageQuery);
+    IPage<CreatorAudioVO> getAudioPage(Long userId, PageQuery pageQuery);
 
     CreatorAudioDetailVO getCreatorAudioDetail(Long id);
 

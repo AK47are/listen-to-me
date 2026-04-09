@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.github.listen_to_me.domain.vo.AuditAudioVO;
+import com.github.listen_to_me.domain.vo.CreatorAudioVO;
+
 import org.apache.ibatis.annotations.Select;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -42,4 +44,6 @@ public interface AudioInfoMapper extends BaseMapper<AudioInfo> {
     List<AudioStatsDTO> selectAudioStatsForHotRank(LocalDateTime oneMonthAgo);
 
     IPage<AuditAudioVO> selectAuditAudioPage(Page<AuditAudioVO> page, String status);
+
+    IPage<CreatorAudioVO> selectCreatorAudioPage(Page<CreatorAudioVO> page, Long userId);
 }
