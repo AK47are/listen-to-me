@@ -207,34 +207,23 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     }
 
     @Override
-    public CreatorAudioDetailVO getCreatorAudioDetail(Long id) {
-        Long userId = SecurityUtils.getCurrentUserId();
-        AudioInfo audioInfo = audioInfoMapper.selectById(id);
-        if (audioInfo == null || !audioInfo.getCreatorId().equals(userId)) {
+    public CreatorAudioDetailVO getCreatorAudioDetail(Long creatorId, Long audioId) {
+        AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
+        if (audioInfo == null || !audioInfo.getCreatorId().equals(creatorId)) {
             throw new BaseException(404, "稿件不存在");
         }
-        CreatorAudioDetailVO creatorAudioDetailVO = new CreatorAudioDetailVO();
-        BeanUtil.copyProperties(audioInfo, creatorAudioDetailVO);
-        creatorAudioDetailVO.setCoverUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath()));
-        AudioTranscript transcript = audioTranscriptMapper.selectOne(
-                Wrappers.<AudioTranscript>lambdaQuery()
-                        .eq(AudioTranscript::getAudioId, id));
-        if (transcript != null) {
-            creatorAudioDetailVO.setTranscript(transcript.getFullText());
-        }
-        creatorAudioDetailVO.setPlayCount(audioInfo.getPlayCount());
 
-        Long likeCount = audioLikeMapper.selectCount(
-                Wrappers.<AudioLike>lambdaQuery()
-                        .eq(AudioLike::getAudioId, id));
-        creatorAudioDetailVO.setLikeCount(likeCount);
+        CreatorAudioDetailVO vo = new CreatorAudioDetailVO();
+        vo.setId(audioInfo.getId());
+        vo.setTitle(audioInfo.getTitle());
+        vo.setCoverUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath()));
+        vo.setDescription(audioInfo.getDescription());
+        vo.setTrialDuration(audioInfo.getTrialDuration());
+        vo.setIsPaid(audioInfo.getIsPaid());
+        vo.setPrice(audioInfo.getPrice());
+        vo.setVisibility(audioInfo.getVisibility());
 
-        Long collectCount = audioFolderRelationMapper.selectCount(
-                Wrappers.<AudioFolderRelation>lambdaQuery()
-                        .eq(AudioFolderRelation::getAudioId, id));
-        creatorAudioDetailVO.setCollectCount(collectCount);
-
-        return creatorAudioDetailVO;
+        return vo;
     }
 
     @Override
