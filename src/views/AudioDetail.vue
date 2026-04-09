@@ -42,8 +42,27 @@
           </div>
 
           <div class="meta-row">
-            <span v-if="audioDetail.isPaid" class="price">¥{{ audioDetail.price }}</span>
-            <span class="duration">{{ formatDuration(audioDetail.duration) }}</span>
+            <div
+              v-if="audioDetail.isPaid"
+              class="price-wrapper"
+              :class="{ purchasable: !audioDetail.isPurchased }"
+              @click="!audioDetail.isPurchased && (showPurchaseDialog = true)"
+            >
+              <span class="price-label">价格</span>
+              <div class="price-content">
+                <span class="price-value">¥{{ audioDetail.price }}</span>
+                <span v-if="!audioDetail.isPurchased" class="purchase-hint">
+                  <el-icon><ShoppingCart /></el-icon> 点击购买
+                </span>
+                <span v-else class="purchased-badge">
+                  <el-icon><Check /></el-icon> 已购买
+                </span>
+              </div>
+            </div>
+            <div class="duration">
+              <el-icon><Clock /></el-icon>
+              {{ formatDuration(audioDetail.duration) }}
+            </div>
           </div>
 
           <div class="action-buttons">
@@ -159,6 +178,34 @@
         </div>
       </template>
     </el-dialog>
+
+    <!-- 购买弹窗 -->
+    <el-dialog
+      v-model="showPurchaseDialog"
+      title="购买音频"
+      width="420px"
+      class="purchase-dialog"
+      align-center
+    >
+      <div class="purchase-content">
+        <div class="purchase-icon">
+          <el-icon :size="48" color="#f7ba2a"><Lock /></el-icon>
+        </div>
+        <p class="purchase-title">购买后即可收听完整版</p>
+        <div class="purchase-info">
+          <div class="info-row">
+            <span class="label">音频价格</span>
+            <span class="value price">{{ audioDetail?.price }} 虚拟币</span>
+          </div>
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="showPurchaseDialog = false">取消</el-button>
+          <el-button type="primary" @click="handlePurchase"> 立即购买 </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -166,11 +213,24 @@
 import { ref, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { Headset, Star, Pointer, VideoPlay, FolderOpened, Plus } from '@element-plus/icons-vue'
+import {
+  Headset,
+  Star,
+  Pointer,
+  VideoPlay,
+  FolderOpened,
+  Plus,
+  ShoppingCart,
+  Check,
+  Clock,
+} from '@element-plus/icons-vue'
 import { audioApi } from '@/api/user/audio'
 import { likeApi } from '@/api/user/like'
 import { favoriteApi } from '@/api/user/favorite'
 import { followApi } from '@/api/user/follow'
+import { orderApi } from '@/api/user/order'
+import { profileApi } from '@/api/user/profile'
+import { useUserStore } from '@/stores/user/user'
 import AudioPlayer from '@/components/AudioPlayer.vue'
 import CommentSection from '@/components/CommentSection.vue'
 
@@ -182,6 +242,7 @@ const audioDetail = ref(null)
 const showPlayer = ref(false)
 const isLiked = ref(false)
 const isFollowing = ref(false)
+const showPurchaseDialog = ref(false)
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
 
 const allFolders = ref([])
@@ -218,6 +279,23 @@ const getAudioDetail = async () => {
   } catch (error) {
     console.error('获取音频详情失败:', error)
     ElMessage.error('获取音频详情失败')
+  }
+}
+
+const userStore = useUserStore()
+
+const handlePurchase = async () => {
+  try {
+    await orderApi.purchaseAudio(audioId.value)
+    ElMessage.success('购买成功')
+    showPurchaseDialog.value = false
+    await getAudioDetail()
+    // 刷新用户信息（更新余额）
+    const profileRes = await profileApi.getProfile()
+    userStore.setUserInfo(profileRes.data)
+  } catch (error) {
+    console.error('购买失败', error)
+    ElMessage.error(error.response?.data?.msg || '购买失败')
   }
 }
 
@@ -541,30 +619,84 @@ onMounted(() => {
 
 .meta-row {
   display: flex;
-  gap: 16px;
+  justify-content: space-between;
+  align-items: flex-end;
   margin-bottom: 28px;
   padding-bottom: 20px;
   border-bottom: 1px solid #f0efeb;
 }
 
-.price {
+.price-wrapper {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.price-label {
+  font-size: 0.85rem;
+  color: #b0aea3;
+}
+
+.price-content {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.price-value {
   font-size: 1.5rem;
   font-weight: 700;
   color: #1a1a1a;
-  display: flex;
-  align-items: baseline;
 }
 
-.currency {
-  font-size: 1.2rem;
-  margin-right: 2px;
+.purchase-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #ff5a5f;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 4px 8px;
+  border-radius: 20px;
+  background: rgba(255, 90, 95, 0.1);
+}
+
+.purchase-hint:hover {
+  background: #ff5a5f;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.purchased-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #67c23a;
+  background: rgba(103, 194, 58, 0.1);
+  padding: 4px 8px;
+  border-radius: 20px;
+}
+
+.price-wrapper.purchasable {
+  cursor: pointer;
+}
+
+.price-wrapper.purchasable .price-value {
+  transition: color 0.2s;
+}
+
+.price-wrapper.purchasable:hover .price-value {
+  color: #ff5a5f;
 }
 
 .duration {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   font-size: 0.9rem;
   color: #b0aea3;
-  align-self: flex-end;
-  margin-bottom: 4px;
 }
 
 .action-buttons {
@@ -821,6 +953,54 @@ onMounted(() => {
   cursor: not-allowed;
 }
 
+.purchase-dialog :deep(.el-dialog) {
+  border-radius: 24px;
+}
+
+.purchase-content {
+  text-align: center;
+  padding: 20px;
+}
+
+.purchase-icon {
+  margin-bottom: 16px;
+}
+
+.purchase-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 20px;
+}
+
+.purchase-info {
+  background: #fcfbf7;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.info-row .label {
+  color: #b0aea3;
+  font-size: 0.85rem;
+}
+
+.info-row .value {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.info-row .value.price {
+  color: #1a1a1a;
+  font-size: 1.1rem;
+}
+
 @media (max-width: 768px) {
   .audio-detail-card {
     flex-direction: column;
@@ -840,7 +1020,9 @@ onMounted(() => {
     justify-content: center;
   }
   .meta-row {
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
   }
   .action-buttons {
     justify-content: center;
@@ -860,6 +1042,9 @@ onMounted(() => {
     width: calc(100% - 40px) !important;
   }
   .folder-create-dialog :deep(.el-dialog) {
+    width: calc(100% - 40px) !important;
+  }
+  .purchase-dialog :deep(.el-dialog) {
     width: calc(100% - 40px) !important;
   }
 }
