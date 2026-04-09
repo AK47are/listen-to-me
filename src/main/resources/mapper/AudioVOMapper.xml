@@ -13,7 +13,8 @@
         FROM audio_info ai
         INNER JOIN sys_user u ON ai.creator_id = u.id
         WHERE ai.is_deleted = 0
-          AND ai.audit_status = 1
+            AND ai.audit_status = 1
+            AND ai.visibility = 'PUBLIC'
     </sql>
 
     <select id="selectByFolderId" resultType="com.github.listen_to_me.domain.vo.AudioVO">
