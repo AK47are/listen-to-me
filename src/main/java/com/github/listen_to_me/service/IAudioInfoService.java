@@ -39,7 +39,7 @@ public interface IAudioInfoService extends IService<AudioInfo> {
 
     IPage<CreatorAudioVO> getAudioPage(Long userId, PageQuery pageQuery);
 
-    CreatorAudioDetailVO getCreatorAudioDetail(Long id);
+    CreatorAudioDetailVO getCreatorAudioDetail(Long creatorId, Long audioId);
 
     AudioStatusVO getAudioStatus(Long id);
 

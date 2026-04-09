@@ -58,9 +58,12 @@ public class AudioController {
         return Result.success(audioInfoService.getAudioPage(userId, pageQuery));
     }
 
-    @GetMapping("/{id}")
-    public Result<CreatorAudioDetailVO> getAudio(@PathVariable Long id) {
-        return Result.success(audioInfoService.getCreatorAudioDetail(id));
+    @GetMapping("/{audioId}")
+    @Operation(summary = "获取稿件详情（用于修改）")
+    public Result<CreatorAudioDetailVO> getAudio(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long audioId) {
+        return Result.success(audioInfoService.getCreatorAudioDetail(userId, audioId));
     }
 
     @GetMapping("/{id}/status")
