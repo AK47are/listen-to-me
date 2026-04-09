@@ -76,7 +76,18 @@
       <CommentSection v-if="audioDetail" :audio-id="audioId" />
     </div>
 
-    <AudioPlayer v-if="showPlayer" :audio-id="audioId" @close="showPlayer = false" />
+    <AudioPlayer
+      v-if="showPlayer"
+      :audio-id="audioId"
+      :title="audioDetail.title"
+      :creator-name="audioDetail.creator?.nickname || '未知创作者'"
+      :cover-url="audioDetail.coverUrl"
+      :duration="audioDetail.duration"
+      :progress="audioDetail.progress || 0"
+      :is-paid="audioDetail.isPaid"
+      :is-purchased="audioDetail.isPurchased"
+      @close="showPlayer = false"
+    />
 
     <!-- 收藏夹管理弹窗 -->
     <el-dialog
