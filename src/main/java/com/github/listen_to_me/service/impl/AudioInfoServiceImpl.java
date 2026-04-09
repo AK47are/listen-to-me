@@ -3,26 +3,23 @@ package com.github.listen_to_me.service.impl;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.github.listen_to_me.domain.dto.AudioAuditDTO;
-import com.github.listen_to_me.domain.query.AudioSearchQuery;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
-import com.github.listen_to_me.domain.entity.AudioOrder;
-import com.github.listen_to_me.domain.query.AuditQuery;
-import com.github.listen_to_me.mapper.AudioOrderMapper;
-import cn.hutool.core.bean.BeanUtil;
-import com.github.listen_to_me.domain.entity.*;
-import com.github.listen_to_me.domain.vo.*;
-import com.github.listen_to_me.mapper.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.enumeration.RedisKey;
@@ -31,13 +28,40 @@ import com.github.listen_to_me.common.producer.AudioTranscodeProducer;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.common.util.SecurityUtils;
+import com.github.listen_to_me.domain.dto.AudioAuditDTO;
 import com.github.listen_to_me.domain.dto.AudioDTO;
 import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
 import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
+import com.github.listen_to_me.domain.entity.AudioFolderRelation;
+import com.github.listen_to_me.domain.entity.AudioInfo;
+import com.github.listen_to_me.domain.entity.AudioLike;
+import com.github.listen_to_me.domain.entity.AudioOrder;
+import com.github.listen_to_me.domain.entity.AudioTranscript;
+import com.github.listen_to_me.domain.entity.SysUser;
+import com.github.listen_to_me.domain.entity.UserFollow;
+import com.github.listen_to_me.domain.query.AudioSearchQuery;
+import com.github.listen_to_me.domain.query.AuditQuery;
 import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
+import com.github.listen_to_me.domain.vo.AudioDetailVO;
+import com.github.listen_to_me.domain.vo.AudioPublishVO;
+import com.github.listen_to_me.domain.vo.AudioStatusVO;
+import com.github.listen_to_me.domain.vo.AudioVO;
+import com.github.listen_to_me.domain.vo.AuditAudioVO;
+import com.github.listen_to_me.domain.vo.CreatorAudioVO;
+import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
+import com.github.listen_to_me.mapper.AudioInfoMapper;
+import com.github.listen_to_me.mapper.AudioLikeMapper;
+import com.github.listen_to_me.mapper.AudioOrderMapper;
+import com.github.listen_to_me.mapper.AudioTranscriptMapper;
+import com.github.listen_to_me.mapper.AudioVOMapper;
+import com.github.listen_to_me.mapper.PlayHistoryMapper;
+import com.github.listen_to_me.mapper.SysUserMapper;
+import com.github.listen_to_me.mapper.UserFollowMapper;
 import com.github.listen_to_me.service.HotRankService;
 import com.github.listen_to_me.service.IAudioInfoService;
+
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.io.FileUtil;
@@ -67,11 +91,11 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     private final AudioVOMapper audioVOMapper;
     private final HotRankService hotRankService;
     private final AudioOrderMapper audioOrderMapper;
-    private final PlayHistoryMapper playHistoryMapper;
     private final SysUserMapper sysUserMapper;
     private final AudioLikeMapper audioLikeMapper;
     private final AudioFolderRelationMapper audioFolderRelationMapper;
-    private final AudioTranscriptMapper transcriptMapper;
+    private final AudioTranscriptMapper audioTranscriptMapper;
+    private final UserFollowMapper userFollowMapper;
 
     @Override
     public IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery) {
@@ -199,13 +223,12 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         CreatorAudioDetailVO creatorAudioDetailVO = new CreatorAudioDetailVO();
         BeanUtil.copyProperties(audioInfo, creatorAudioDetailVO);
         creatorAudioDetailVO.setCoverUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath()));
-        AudioTranscript transcript = transcriptMapper.selectOne(
+        AudioTranscript transcript = audioTranscriptMapper.selectOne(
                 Wrappers.<AudioTranscript>lambdaQuery()
                         .eq(AudioTranscript::getAudioId, id));
         if (transcript != null) {
             creatorAudioDetailVO.setTranscript(transcript.getFullText());
         }
-        creatorAudioDetailVO.setPlayCount(audioInfo.getPlayCount());
         creatorAudioDetailVO.setPlayCount(audioInfo.getPlayCount());
 
         Long likeCount = audioLikeMapper.selectCount(
@@ -351,49 +374,65 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     }
 
     @Override
-    public AudioDetailVO getAudioDetail(Long id) {
+    public AudioDetailVO getAudioDetail(Long userId, Long audioId) {
+        AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
+        if (audioInfo == null) {
+            throw new BaseException(404, "音频不存在");
+        }
+
         AudioDetailVO audioDetailVO = new AudioDetailVO();
-        AudioInfo audioInfo = audioInfoMapper.selectById(id);
         BeanUtil.copyProperties(audioInfo, audioDetailVO);
         audioDetailVO.setCoverUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath()));
 
-        Wrapper<PlayHistory> playHistoryWrapper = Wrappers.lambdaQuery(PlayHistory.class)
-                .eq(PlayHistory::getAudioId, id)
-                .eq(PlayHistory::getUserId, SecurityUtils.getCurrentUserId());
-
-        PlayHistory playHistory = playHistoryMapper.selectOne(playHistoryWrapper);
-
-        if (playHistory != null) {
-            audioDetailVO.setProgress(playHistory.getLastPosition());
-        } else {
-            audioDetailVO.setProgress(0);
-        }
-
-        Wrapper<AudioOrder> wrapper = Wrappers.lambdaQuery(AudioOrder.class)
-                .eq(AudioOrder::getAudioId, id)
-                .eq(AudioOrder::getUserId, SecurityUtils.getCurrentUserId());
-
-        AudioOrder audioOrder = audioOrderMapper.selectOne(wrapper);
-        if (audioInfo.getIsPaid() == false && (audioOrder == null || audioOrder.getPayStatus() != 1)) {
-            audioDetailVO.setIsPurchased(false);
-        } else {
+        // 是否已购买
+        if (!audioInfo.getIsPaid()) {
             audioDetailVO.setIsPurchased(true);
+        } else {
+            Wrapper<AudioOrder> orderWrapper = Wrappers.lambdaQuery(AudioOrder.class)
+                    .eq(AudioOrder::getAudioId, audioId)
+                    .eq(AudioOrder::getUserId, userId)
+                    .eq(AudioOrder::getPayStatus, 1);
+            audioDetailVO.setIsPurchased(audioOrderMapper.selectCount(orderWrapper) > 0);
         }
+
+        // 是否已喜欢
+        Wrapper<AudioLike> likeWrapper = Wrappers.lambdaQuery(AudioLike.class)
+                .eq(AudioLike::getAudioId, audioId)
+                .eq(AudioLike::getUserId, userId);
+        audioDetailVO.setIsLike(audioLikeMapper.selectCount(likeWrapper) > 0);
+
+        // 创作者信息
         AudioDetailVO.CreatorInfo creatorInfo = new AudioDetailVO.CreatorInfo();
         creatorInfo.setId(audioInfo.getCreatorId());
         SysUser user = sysUserMapper.selectById(audioInfo.getCreatorId());
-        creatorInfo.setNickname(user.getNickname());
-        creatorInfo.setAvatar(MinioUtils.getPresignedUrl(user.getAvatar()));
+        if (user != null) {
+            creatorInfo.setNickname(user.getNickname());
+            creatorInfo.setAvatar(MinioUtils.getPresignedUrl(user.getAvatar()));
+        }
+
+        // 是否关注创作者
+        Wrapper<UserFollow> followWrapper = Wrappers.lambdaQuery(UserFollow.class)
+                .eq(UserFollow::getCreatorId, audioInfo.getCreatorId())
+                .eq(UserFollow::getUserId, userId);
+        creatorInfo.setIsFollow(userFollowMapper.selectCount(followWrapper) > 0);
         audioDetailVO.setCreator(creatorInfo);
 
+        // 统计数据
         AudioDetailVO.StatsInfo statsInfo = new AudioDetailVO.StatsInfo();
         statsInfo.setPlayCount(Long.valueOf(audioInfo.getPlayCount()));
-        statsInfo.setLikeCount(Long.valueOf(audioLikeMapper.selectCount(Wrappers.lambdaQuery(AudioLike.class)
-                .eq(AudioLike::getAudioId, id))));
-        statsInfo.setCollectCount(
-                Long.valueOf(audioFolderRelationMapper.selectCount(Wrappers.lambdaQuery(AudioFolderRelation.class)
-                        .eq(AudioFolderRelation::getAudioId, id))));
+        statsInfo.setLikeCount(Long.valueOf(audioLikeMapper.selectCount(
+                Wrappers.lambdaQuery(AudioLike.class).eq(AudioLike::getAudioId, audioId))));
+        statsInfo.setCollectCount(Long.valueOf(audioFolderRelationMapper.selectCount(
+                Wrappers.lambdaQuery(AudioFolderRelation.class).eq(AudioFolderRelation::getAudioId, audioId))));
         audioDetailVO.setStats(statsInfo);
+
+        // 转写和摘要
+        AudioTranscript transcript = audioTranscriptMapper.selectOne(
+                Wrappers.lambdaQuery(AudioTranscript.class).eq(AudioTranscript::getAudioId, audioId));
+        if (transcript != null) {
+            audioDetailVO.setTranscript(transcript.getFullText());
+        }
+
         return audioDetailVO;
     }
 

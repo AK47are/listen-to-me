@@ -16,7 +16,7 @@ public class AudioDetailVO {
     private Boolean isPaid;
     private String description;
     private Boolean isPurchased;
-    private Integer progress;
+    private Boolean isLike;
 
     private CreatorInfo creator;
     private StatsInfo stats;
@@ -28,6 +28,7 @@ public class AudioDetailVO {
         private Long id;
         private String nickname;
         private String avatar;
+        private Boolean isFollow;
     }
 
     @Data

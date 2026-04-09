@@ -53,7 +53,7 @@ public interface IAudioInfoService extends IService<AudioInfo> {
 
     String getStreamSign(Long audioId);
 
-    AudioDetailVO getAudioDetail(Long id);
+    AudioDetailVO getAudioDetail(Long userId, Long audioId);
 
     IPage<AuditAudioVO> getAuditAudioPage(AuditQuery auditQuery);
 

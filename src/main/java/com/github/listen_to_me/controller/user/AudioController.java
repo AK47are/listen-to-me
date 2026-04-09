@@ -2,31 +2,31 @@ package com.github.listen_to_me.controller.user;
 
 import java.util.List;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.github.listen_to_me.domain.query.AudioSearchQuery;
-import com.github.listen_to_me.domain.query.PageQuery;
-
-import com.github.listen_to_me.domain.vo.FolderVO;
-import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.github.listen_to_me.domain.vo.AudioDetailVO;
-import org.springframework.web.bind.annotation.*;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
 import com.github.listen_to_me.domain.dto.LikeActionDTO;
+import com.github.listen_to_me.domain.query.AudioSearchQuery;
+import com.github.listen_to_me.domain.query.PageQuery;
+import com.github.listen_to_me.domain.vo.AudioDetailVO;
 import com.github.listen_to_me.domain.vo.AudioVO;
+import com.github.listen_to_me.domain.vo.FolderVO;
 import com.github.listen_to_me.service.IAudioFolderRelationService;
 import com.github.listen_to_me.service.IAudioInfoService;
 import com.github.listen_to_me.service.IAudioLikeService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,10 +67,12 @@ public class AudioController {
         return Result.success(audioInfoService.searchAudio(audioSearchQuery));
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{audioId}")
     @Operation(summary = "获取音频详情")
-    public Result<AudioDetailVO> getAudioDetail(@PathVariable Long id) {
-        return Result.success(audioInfoService.getAudioDetail(id));
+    public Result<AudioDetailVO> getAudioDetail(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long audioId) {
+        return Result.success(audioInfoService.getAudioDetail(userId, audioId));
     }
 
     @GetMapping("/creator/{creatorId}/page")
@@ -85,7 +87,6 @@ public class AudioController {
     public Result<IPage<AudioVO>> getRecommendList(@ParameterObject PageQuery pageQuery) {
         return Result.success(audioInfoService.getRecommendList(pageQuery));
     }
-
 
     @GetMapping("/{audioId}/folders")
     @Operation(summary = "获取音频收藏文件夹列表")
