@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `audio_info` (
   `trial_duration` int DEFAULT 0 COMMENT '试听秒数',
   `audit_status` int DEFAULT 0 COMMENT '0-待审, 1-通过, 2-违规',
   `reject_reason` varchar(255) DEFAULT NULL COMMENT '拒绝原因',
-  `status` varchar(100) DEFAULT 'PENDING_TRANSCODE' COMMENT '发布状态',
+  `status` ENUM('PENDING_TRANSCODE', 'TRANSCODING', 'ONLINE', 'FAILED') NOT NULL DEFAULT 'PENDING_TRANSCODE' COMMENT '发布状态: 待转码, 转码中, 已上线, 转码失败',
   `play_count` int DEFAULT 0 COMMENT '播放量',
   `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   `is_deleted` tinyint DEFAULT 0 COMMENT '逻辑删除：0-未删除 1-已删除',

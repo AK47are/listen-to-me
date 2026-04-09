@@ -44,7 +44,7 @@ public class AudioInfo implements Serializable {
     private Integer duration;
     @Schema(description = "0-待审, 1-通过, 2-违规")
     private Integer auditStatus;
-    @Schema(description = "0-草稿/下架, 1-转码中, 2-已发布")
+    @Schema(description = "发布状态: PENDING_TRANSCODE(待转码), TRANSCODING(转码中), ONLINE(已上线), FAILED(转码失败)")
     private String status;
     @Schema(description = "点击量/热度基数")
     private Integer playCount;
