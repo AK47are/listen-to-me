@@ -112,9 +112,6 @@
               <template #dropdown>
                 <el-dropdown-menu class="user-menu-enhanced">
                   <div class="user-menu-header">个人中心</div>
-                  <el-dropdown-item @click="handleNavigation('/follow')">
-                    <el-icon><Star /></el-icon>我的关注
-                  </el-dropdown-item>
                   <el-dropdown-item @click="handleNavigation('/user/consult')">
                     <el-icon><ChatDotRound /></el-icon>我的预约
                   </el-dropdown-item>
