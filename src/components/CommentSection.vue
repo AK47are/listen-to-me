@@ -19,8 +19,7 @@
     </div>
 
     <div v-if="loading" class="loading">
-      <el-icon class="is-loading"><Loading /></el-icon>
-      加载中...
+      <el-icon class="is-loading"><Loading /></el-icon> 加载中...
     </div>
     <div v-else-if="commentList.length === 0" class="empty">
       <el-empty description="暂无评论，快来抢沙发吧！" />
@@ -36,13 +35,14 @@
         </div>
         <div class="comment-content">{{ comment.content }}</div>
         <div class="comment-actions">
-          <el-button link @click="handleLikeComment(comment)">
+          <el-button class="action-btn" @click="handleLikeComment(comment)">
             <el-icon><Pointer /></el-icon>
-            <span :class="{ liked: comment.likedByCurrentUser }">{{ comment.likeCount || 0 }}</span>
+            <span class="like-count" :class="{ liked: comment.likedByCurrentUser }">{{
+              comment.likeCount || 0
+            }}</span>
           </el-button>
-          <el-button link @click="toggleReplyForm(comment)">
-            <el-icon><ChatDotRound /></el-icon>
-            回复
+          <el-button class="action-btn" @click="toggleReplyForm(comment)">
+            <el-icon><ChatDotRound /></el-icon> 回复
           </el-button>
         </div>
 
@@ -57,18 +57,13 @@
             show-word-limit
           />
           <div class="inline-reply-actions">
-            <el-button
-              type="primary"
-              size="default"
-              :loading="submittingReply"
-              @click="submitInlineReply(comment)"
-            >
+            <el-button type="primary" :loading="submittingReply" @click="submitInlineReply">
               发表回复
             </el-button>
           </div>
         </div>
 
-        <!-- 回复列表 -->
+        <!-- 回复列表（所有回复扁平化显示在顶级评论下，按时间升序） -->
         <div v-if="comment.replies && comment.replies.length > 0" class="replies">
           <div v-for="reply in comment.replies" :key="reply.id" class="reply-item">
             <div class="reply-header">
@@ -79,21 +74,24 @@
               </div>
             </div>
             <div class="reply-content">
-              <span class="reply-to">@{{ reply.replyToNickname || reply.nickname }}</span>
+              <span class="reply-to" v-if="reply.replyToNickname"
+                >@{{ reply.replyToNickname }}</span
+              >
               {{ reply.content }}
             </div>
             <div class="reply-actions">
-              <el-button link @click="handleLikeComment(reply)">
+              <el-button class="action-btn" @click="handleLikeComment(reply)">
                 <el-icon><Pointer /></el-icon>
-                <span :class="{ liked: reply.likedByCurrentUser }">{{ reply.likeCount || 0 }}</span>
+                <span class="like-count" :class="{ liked: reply.likedByCurrentUser }">{{
+                  reply.likeCount || 0
+                }}</span>
               </el-button>
-              <el-button link @click="toggleReplyForm(reply)">
-                <el-icon><ChatDotRound /></el-icon>
-                回复
+              <el-button class="action-btn" @click="toggleReplyForm(reply)">
+                <el-icon><ChatDotRound /></el-icon> 回复
               </el-button>
             </div>
 
-            <!-- 二级回复的内联回复表单 -->
+            <!-- 回复二级评论时的内联表单 -->
             <div v-if="activeReplyId === reply.id" class="inline-reply-form">
               <el-input
                 v-model="replyContent"
@@ -104,12 +102,7 @@
                 show-word-limit
               />
               <div class="inline-reply-actions">
-                <el-button
-                  type="primary"
-                  size="default"
-                  :loading="submittingReply"
-                  @click="submitInlineReply(reply)"
-                >
+                <el-button type="primary" :loading="submittingReply" @click="submitInlineReply">
                   发表回复
                 </el-button>
               </div>
@@ -150,12 +143,28 @@ const currentPage = ref(1)
 const pageSize = ref(20)
 const activeReplyId = ref(null)
 const replyContent = ref('')
+const replyTarget = ref(null)
 
 const hasMore = computed(() => commentList.value.length < commentTotal.value)
 
 const commentForm = ref({
   content: '',
 })
+
+const flattenAndSortReplies = (replies) => {
+  const flat = []
+  const collect = (items) => {
+    for (const item of items) {
+      flat.push(item)
+      if (item.replyList && item.replyList.length) {
+        collect(item.replyList)
+      }
+    }
+  }
+  collect(replies)
+  flat.sort((a, b) => new Date(a.createTime) - new Date(b.createTime))
+  return flat
+}
 
 const getCommentList = async (isLoadMore = false) => {
   if (isLoadMore) {
@@ -180,11 +189,10 @@ const getCommentList = async (isLoadMore = false) => {
         ...comment,
         replies: [],
       }
-      structuredComments.push(topLevelComment)
-
       if (comment.replyList && comment.replyList.length > 0) {
-        collectReplies(comment.replyList, topLevelComment.replies)
+        topLevelComment.replies = flattenAndSortReplies(comment.replyList)
       }
+      structuredComments.push(topLevelComment)
     })
 
     if (isLoadMore) {
@@ -199,15 +207,6 @@ const getCommentList = async (isLoadMore = false) => {
     loading.value = false
     loadingMore.value = false
   }
-}
-
-const collectReplies = (replies, replyList) => {
-  replies.forEach((reply) => {
-    replyList.push(reply)
-    if (reply.replyList && reply.replyList.length > 0) {
-      collectReplies(reply.replyList, replyList)
-    }
-  })
 }
 
 const loadMore = () => {
@@ -270,7 +269,7 @@ const handleSubmitComment = async () => {
     commentList.value = commentList.value.filter((c) => c.id !== tempComment.id)
     commentTotal.value--
     console.error('评论失败:', error)
-    ElMessage.error('评论失败，请重试')
+    ElMessage.error(error.response?.data?.msg || '评论失败，请重试')
   } finally {
     submitting.value = false
   }
@@ -280,21 +279,43 @@ const toggleReplyForm = (comment) => {
   if (activeReplyId.value === comment.id) {
     activeReplyId.value = null
     replyContent.value = ''
+    replyTarget.value = null
   } else {
     activeReplyId.value = comment.id
-    replyContent.value = ''
+    replyTarget.value = comment
+    // 根据是否为顶级评论决定是否添加 @前缀
+    if (comment.parentId === 0) {
+      replyContent.value = ''
+    } else {
+      replyContent.value = `@${comment.nickname} `
+    }
   }
 }
 
-const submitInlineReply = async (parentComment) => {
+const submitInlineReply = async () => {
   if (!replyContent.value.trim()) {
     ElMessage.warning('请输入回复内容')
     return
   }
+  if (!replyTarget.value) return
+
+  const targetComment = replyTarget.value
+  const content = replyContent.value
+  const parentId = targetComment.id
 
   submittingReply.value = true
-  const content = replyContent.value
-  const parentId = parentComment.id
+
+  let topLevelComment = null
+  for (const comment of commentList.value) {
+    if (comment.id === targetComment.id) {
+      topLevelComment = comment
+      break
+    }
+    if (comment.replies && comment.replies.find((r) => r.id === targetComment.id)) {
+      topLevelComment = comment
+      break
+    }
+  }
 
   const tempReply = {
     id: Date.now(),
@@ -305,12 +326,21 @@ const submitInlineReply = async (parentComment) => {
     likedByCurrentUser: false,
     createTime: new Date().toISOString(),
     parentId: parentId,
-    replyToNickname: parentComment.nickname,
+    replyToNickname: targetComment.nickname,
   }
 
-  if (!parentComment.replies) parentComment.replies = []
-  parentComment.replies.unshift(tempReply)
-  commentTotal.value++
+  if (topLevelComment) {
+    if (!topLevelComment.replies) topLevelComment.replies = []
+    const index = topLevelComment.replies.findIndex(
+      (r) => new Date(r.createTime) > new Date(tempReply.createTime),
+    )
+    if (index === -1) {
+      topLevelComment.replies.push(tempReply)
+    } else {
+      topLevelComment.replies.splice(index, 0, tempReply)
+    }
+    commentTotal.value++
+  }
 
   try {
     await commentApi.saveComment({
@@ -321,13 +351,16 @@ const submitInlineReply = async (parentComment) => {
     ElMessage.success('回复成功')
     activeReplyId.value = null
     replyContent.value = ''
+    replyTarget.value = null
     currentPage.value = 1
     await getCommentList()
   } catch (error) {
-    parentComment.replies = parentComment.replies.filter((r) => r.id !== tempReply.id)
-    commentTotal.value--
+    if (topLevelComment) {
+      topLevelComment.replies = topLevelComment.replies.filter((r) => r.id !== tempReply.id)
+      commentTotal.value--
+    }
     console.error('回复失败:', error)
-    ElMessage.error('回复失败，请重试')
+    ElMessage.error(error.response?.data?.msg || '回复失败，请重试')
   } finally {
     submittingReply.value = false
   }
@@ -495,25 +528,35 @@ onMounted(() => {
   display: flex;
   gap: 20px;
   padding-left: 52px;
+  margin-top: 8px;
 }
 
-.comment-actions .el-button,
-.reply-actions .el-button {
-  font-size: 0.75rem;
-  color: #b0aea3;
+.action-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #8e8c84;
+  background: transparent;
+  border: none;
+  border-radius: 40px;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.comment-actions .el-button:hover,
-.reply-actions .el-button:hover {
+.action-btn:hover {
+  background: #f7f6f2;
   color: #1a1a1a;
 }
 
-.comment-actions .liked,
-.reply-actions .liked {
-  color: #1a1a1a;
+.like-count {
+  font-weight: 600;
+}
+
+.like-count.liked {
+  color: #e5484d;
 }
 
 .inline-reply-form {
@@ -619,11 +662,9 @@ onMounted(() => {
     width: 28px;
     height: 28px;
   }
-  .form-actions .el-button {
-    padding: 8px 20px;
-  }
-  .inline-reply-actions .el-button {
-    padding: 6px 20px;
+  .action-btn {
+    padding: 4px 10px;
+    font-size: 0.75rem;
   }
 }
 </style>
