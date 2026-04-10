@@ -7,4 +7,10 @@ export const balanceApi = {
   recharge(data) {
     return request({ url: '/user/recharge', method: 'post', data })
   },
+  getRechargePage(params) {
+    return request({ url: '/user/recharge/page', method: 'get', params })
+  },
+  getTransactionPage(params) {
+    return request({ url: '/user/transaction/page', method: 'get', params })
+  },
 }
