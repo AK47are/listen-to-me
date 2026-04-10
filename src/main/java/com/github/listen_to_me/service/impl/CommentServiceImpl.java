@@ -14,7 +14,6 @@ import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.CommentDTO;
-import com.github.listen_to_me.domain.dto.CommentReplyDTO;
 import com.github.listen_to_me.domain.entity.Comment;
 import com.github.listen_to_me.domain.query.CommentQuery;
 import com.github.listen_to_me.domain.vo.CommentVO;
@@ -24,9 +23,11 @@ import com.github.listen_to_me.mapper.CommentMapper;
 import com.github.listen_to_me.service.CommentService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-@RequiredArgsConstructor
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> implements CommentService {
     private final CommentMapper commentMapper;
     private final AudioInfoMapper audioInfoMapper;
@@ -42,6 +43,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 commentMapper.selectById(commentDTO.getParentId()) == null) {
             throw new BaseException(404, "父评论不存在");
         }
+        log.debug("回复评论 - 内容: {}", commentDTO.getContent());
         if (SensitiveWordHelper.contains(commentDTO.getContent())) {
             throw new BaseException(400, "评论内容包含敏感词");
         }
@@ -89,26 +91,5 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             }
         }
         return topPageResult;
-    }
-
-    @Override
-    public void replyComment(CommentReplyDTO commentReplyDTO) {
-        Long currId = SecurityUtils.getCurrentUserId();
-        Comment replayComment = commentMapper.selectById(commentReplyDTO.getCommentId());
-        if (replayComment == null) {
-            throw new BaseException(404, "评论不存在");
-        }
-        if (commentReplyDTO.getContent().isBlank()) {
-            throw new BaseException(400, "回复内容不能为空");
-        }
-        if (SensitiveWordHelper.contains(commentReplyDTO.getContent())) {
-            throw new BaseException(400, "回复内容包含敏感词");
-        }
-        Comment comment = new Comment();
-        comment.setUserId(currId);
-        comment.setAudioId(replayComment.getAudioId());
-        comment.setParentId(commentReplyDTO.getCommentId());
-        comment.setContent(commentReplyDTO.getContent());
-        commentMapper.insert(comment);
     }
 }

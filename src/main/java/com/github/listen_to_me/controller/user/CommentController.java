@@ -49,11 +49,4 @@ public class CommentController {
         commentLikeService.likeComment(commentLikeDTO);
         return Result.success();
     }
-
-    @Operation(summary = "回复评论")
-    @PostMapping("/reply")
-    public Result<Void> replyComment(@Valid @RequestBody CommentReplyDTO commentReplyDTO) {
-        commentService.replyComment(commentReplyDTO);
-        return Result.success();
-    }
 }
