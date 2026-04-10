@@ -59,7 +59,7 @@ public class ConsultController {
         return Result.success();
     }
 
-    @PutMapping("/consult/{id}/refund")
+    @PutMapping("/{id}/refund")
     @Operation(summary = "申请退款")
     public Result<Void> applyRefund(
             @AuthenticationPrincipal Long userId,
