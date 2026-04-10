@@ -12,5 +12,5 @@ public class RechargeOrderQuery extends PageQuery {
      * 枚举值: PENDING / SUCCESS / FAILED
      * 默认值 null 查询所有订单
      */
-    private String status ;
+    private String status;
 }

@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "音频搜索查询参数")
-public class AudioSearchQuery extends PageQuery{
+public class AudioSearchQuery extends PageQuery {
     @NotBlank(message = "搜索关键词不能为空")
     private String keyword;
 

@@ -1,7 +1,8 @@
 package com.github.listen_to_me.common.enumeration;
 
-import lombok.Getter;
 import java.util.concurrent.TimeUnit;
+
+import lombok.Getter;
 
 @Getter
 public enum RedisKey {
@@ -16,6 +17,7 @@ public enum RedisKey {
     ONLINE_CLIP_URL("online:audio:clip:", 7L, TimeUnit.MINUTES),
     ONLINE_IMG_URL("online:img:", 18L, TimeUnit.HOURS),
     USER_PLAY_COUNTED("user:play:counted", 1L, TimeUnit.HOURS);
+
     private final String prefix;
     private final Long expire;
     private final TimeUnit unit;

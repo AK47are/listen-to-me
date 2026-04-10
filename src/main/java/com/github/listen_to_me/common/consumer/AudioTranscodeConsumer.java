@@ -1,6 +1,10 @@
 package com.github.listen_to_me.common.consumer;
 
-import cn.hutool.json.JSONUtil;
+import java.io.File;
+
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.stereotype.Component;
+
 import com.github.listen_to_me.common.config.AudioTranscodeMqConfig;
 import com.github.listen_to_me.common.util.AudioClipUtils;
 import com.github.listen_to_me.common.util.MinioUtils;
@@ -8,12 +12,10 @@ import com.github.listen_to_me.domain.dto.TranscodeTaskDTO;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.service.IAudioInfoService;
+
+import cn.hutool.json.JSONUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.annotation.RabbitListener;
-import org.springframework.stereotype.Component;
-
-import java.io.File;
 
 /**
  * 音频转码消费者
@@ -41,7 +43,7 @@ public class AudioTranscodeConsumer {
 
         try {
             AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
-            if(audioInfo.getClipPath() != null){
+            if (audioInfo.getClipPath() != null) {
                 MinioUtils.removeFile(audioInfo.getClipPath());
             }
             // 1. 更新数据库状态为 转码中 (TRANSCODING)

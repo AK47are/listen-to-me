@@ -1,7 +1,6 @@
 package com.github.listen_to_me.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -15,7 +14,5 @@ public interface ConsultOrderMapper extends BaseMapper<ConsultOrder> {
 
     IPage<ConsultOrderVO> selectUserConsultPage(Page<ConsultOrderVO> page, Long userId, ConsultPageQuery query);
 
-    IPage<ConsultOrderVO> selectCreatorConsultPage(Page<ConsultOrderVO> page,
-            @Param("creatorId") Long creatorId,
-            @Param("query") ConsultPageQuery query);
+    IPage<ConsultOrderVO> selectCreatorConsultPage(Page<ConsultOrderVO> page, Long creatorId, ConsultPageQuery query);
 }

@@ -1,14 +1,20 @@
 package com.github.listen_to_me.controller.user;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.CreatorApplyDTO;
 import com.github.listen_to_me.domain.vo.CreatorApplyVO;
 import com.github.listen_to_me.service.CreatorApplyService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "创作者申请接口")
 @RestController

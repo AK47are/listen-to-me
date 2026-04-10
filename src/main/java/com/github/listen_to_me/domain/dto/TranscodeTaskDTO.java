@@ -1,9 +1,8 @@
 package com.github.listen_to_me.domain.dto;
 
+import java.io.Serializable;
 
 import lombok.Data;
-
-import java.io.Serializable;
 
 @Data
 public class TranscodeTaskDTO implements Serializable {

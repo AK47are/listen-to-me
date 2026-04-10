@@ -10,7 +10,12 @@ import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.query.RechargeOrderQuery;
 import com.github.listen_to_me.domain.query.TransactionPageQuery;
 import com.github.listen_to_me.domain.query.UserPageQuery;
-import com.github.listen_to_me.domain.vo.*;
+import com.github.listen_to_me.domain.vo.BalanceVO;
+import com.github.listen_to_me.domain.vo.CoinTransactionVO;
+import com.github.listen_to_me.domain.vo.RechargeOrderVO;
+import com.github.listen_to_me.domain.vo.RechargeResultVO;
+import com.github.listen_to_me.domain.vo.UserVO;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface ISysUserService extends IService<SysUser> {
@@ -81,6 +86,7 @@ public interface ISysUserService extends IService<SysUser> {
     /**
      * 分页查询用户
      * 可根据username查询用户
+     * 
      * @param query 分页查询条件
      * @return 分页结果
      */

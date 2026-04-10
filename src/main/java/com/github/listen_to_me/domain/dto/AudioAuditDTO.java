@@ -9,7 +9,7 @@ public class AudioAuditDTO {
     @NotNull(message = "音频ID不能为空")
     private Long audioId;
     /**
-     *  审核结果， 枚举值: APPROVED / REJECTED
+     * 审核结果， 枚举值: APPROVED / REJECTED
      */
     @NotBlank(message = "审核结果不能为空")
     private String status;

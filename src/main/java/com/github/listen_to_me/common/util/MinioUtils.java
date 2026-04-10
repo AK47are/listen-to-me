@@ -5,18 +5,26 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.concurrent.TimeUnit;
 
-import com.github.listen_to_me.common.enumeration.RedisKey;
-import io.minio.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.github.listen_to_me.common.enumeration.RedisKey;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.url.UrlPath;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import io.minio.CopyObjectArgs;
+import io.minio.CopySource;
+import io.minio.GetObjectArgs;
+import io.minio.GetPresignedObjectUrlArgs;
+import io.minio.MinioClient;
+import io.minio.PutObjectArgs;
+import io.minio.RemoveObjectArgs;
+import io.minio.UploadObjectArgs;
 import io.minio.http.Method;
 import lombok.extern.slf4j.Slf4j;
 
@@ -66,12 +74,12 @@ public class MinioUtils {
     }
 
     /**
-     *生成临时访问链接
+     * 生成临时访问链接
      */
     public static String generatePresignedUrl(RedisKey redisKey, String fullPath,
-                                              Integer expiration, TimeUnit unit){
+            Integer expiration, TimeUnit unit) {
         String presignedUrl = RedisUtils.get(redisKey, fullPath);
-        if(StrUtil.isNotBlank(presignedUrl)){
+        if (StrUtil.isNotBlank(presignedUrl)) {
             return presignedUrl;
         }
         try {
@@ -94,18 +102,18 @@ public class MinioUtils {
      * 获取临时访问链接
      */
     public static String getPresignedUrl(String fullPath) {
-        if(StrUtil.isBlank(fullPath)){
+        if (StrUtil.isBlank(fullPath)) {
             return null;
         }
-        if(StrUtil.contains(fullPath, "/audio/clip/")){
+        if (StrUtil.contains(fullPath, "/audio/clip/")) {
             log.info("生成临时音频资源临时链接 - 完整路径: {}", fullPath);
             return generatePresignedUrl(RedisKey.ONLINE_CLIP_URL, fullPath,
                     EXPIRATION_CLIP, TimeUnit.MINUTES);
-        }else if(StrUtil.contains(fullPath, "/audio/")){
+        } else if (StrUtil.contains(fullPath, "/audio/")) {
             log.info("生成完整音频资源临时链接 - 完整路径: {}", fullPath);
             return generatePresignedUrl(RedisKey.ONLINE_RAW_URL, fullPath,
                     EXPIRATION_RAW, TimeUnit.HOURS);
-        }else{
+        } else {
             log.info("生成图片资源临时链接 - 完整路径: {}", fullPath);
             return generatePresignedUrl(RedisKey.ONLINE_IMG_URL, fullPath,
                     EXPIRATION, TimeUnit.HOURS);

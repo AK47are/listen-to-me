@@ -1,9 +1,13 @@
 package com.github.listen_to_me.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
-import lombok.Data;
-
 import java.time.LocalDateTime;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+
+import lombok.Data;
 
 @Data
 @TableName("comments")
@@ -15,7 +19,7 @@ public class Comment {
     private Long audioId;
 
     @TableField(value = "parent_id")
-    private Long parentId;  // 0 表示顶评论
+    private Long parentId; // 0 表示顶评论
 
     private Long userId;
 

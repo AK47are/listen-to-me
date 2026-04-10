@@ -1,13 +1,13 @@
 package com.github.listen_to_me.common.util;
 
+import java.util.Collections;
+
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.engine.VelocityTemplateEngine;
 
 import cn.hutool.core.lang.Dict;
 import cn.hutool.setting.yaml.YamlUtil;
-
-import java.util.Collections;
 
 public class CodeGenerator {
     public static void main(String[] args) {

@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Schema(description = "审核查询参数")
-public class AuditQuery extends PageQuery{
+public class AuditQuery extends PageQuery {
     /**
      * 枚举值: PENDING / ALL / APPROVED / REJECTED， 默认 PENDING
      */

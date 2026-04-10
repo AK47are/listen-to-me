@@ -11,6 +11,7 @@ import com.github.listen_to_me.domain.vo.CreatorApplyVO;
 
 public interface CreatorApplyService extends IService<CreatorApply> {
     void addCreatorApply(CreatorApplyDTO creatorApplyDTO);
+
     CreatorApplyVO findApplyStatus();
 
     IPage<AuditApplyVO> findAuditApplyPage(AuditQuery query);

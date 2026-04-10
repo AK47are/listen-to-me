@@ -1,14 +1,15 @@
 package com.github.listen_to_me.domain.entity;
 
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+
 import lombok.Getter;
 import lombok.Setter;
-
-import java.io.Serializable;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -44,7 +45,7 @@ public class CreatorApply implements Serializable {
 
     /**
      * 申请时间
-     * 数据库字段：create_time  →  实体类字段：applyTime
+     * 数据库字段：create_time → 实体类字段：applyTime
      */
     @TableField(value = "create_time")
     private LocalDateTime applyTime;

@@ -1,7 +1,8 @@
 package com.github.listen_to_me.domain.vo;
 
-import lombok.Data;
 import java.math.BigDecimal;
+
+import lombok.Data;
 
 @Data
 public class CreatorVO {

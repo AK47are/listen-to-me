@@ -1,10 +1,5 @@
 package com.github.listen_to_me.common.exception;
 
-import com.github.listen_to_me.common.enumeration.UniqueIndexEnum;
-import com.github.listen_to_me.common.util.ExceptionUtils;
-
-import cn.hutool.http.HttpStatus;
-
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,7 +7,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.github.listen_to_me.common.Result;
+import com.github.listen_to_me.common.enumeration.UniqueIndexEnum;
+import com.github.listen_to_me.common.util.ExceptionUtils;
 
+import cn.hutool.http.HttpStatus;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

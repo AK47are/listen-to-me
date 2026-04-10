@@ -1,7 +1,6 @@
 package com.github.listen_to_me.mapper;
 
 import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.github.listen_to_me.domain.entity.PlayHistory;
@@ -21,5 +20,5 @@ public interface PlayHistoryMapper extends BaseMapper<PlayHistory> {
             "ON DUPLICATE KEY UPDATE " +
             "last_position = VALUES(last_position), " +
             "update_time = NOW()")
-    boolean insertOrUpdate(@Param("history") PlayHistory history);
+    boolean insertOrUpdate(PlayHistory history);
 }

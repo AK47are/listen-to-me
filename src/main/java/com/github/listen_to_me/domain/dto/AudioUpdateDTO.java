@@ -1,11 +1,12 @@
 package com.github.listen_to_me.domain.dto;
 
+import org.jetbrains.annotations.NotNull;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
-import org.jetbrains.annotations.NotNull;
 
 @Data
 public class AudioUpdateDTO {

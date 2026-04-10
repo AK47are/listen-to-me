@@ -1,12 +1,16 @@
 package com.github.listen_to_me.controller.admin;
 
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.query.UserPageQuery;
 import com.github.listen_to_me.domain.vo.UserVO;
-import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.web.bind.annotation.*;
-
-import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.service.ISysUserService;
 
 import io.swagger.v3.oas.annotations.Operation;

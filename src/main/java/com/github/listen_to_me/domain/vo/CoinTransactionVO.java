@@ -1,9 +1,9 @@
 package com.github.listen_to_me.domain.vo;
 
-import lombok.Data;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import lombok.Data;
 
 @Data
 public class CoinTransactionVO {
@@ -25,4 +25,4 @@ public class CoinTransactionVO {
     private String bizType;
     private String remark;
     private LocalDateTime createTime;
-   }
+}

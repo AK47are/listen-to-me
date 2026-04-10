@@ -1,8 +1,9 @@
 package com.github.listen_to_me.common.util;
 
-import com.github.listen_to_me.common.exception.AuthException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import com.github.listen_to_me.common.exception.AuthException;
 
 public class SecurityUtils {
     /**

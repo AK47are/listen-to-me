@@ -1,8 +1,9 @@
 package com.github.listen_to_me.domain.dto;
 
+import java.math.BigDecimal;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import java.math.BigDecimal;
 
 @Data
 @Schema(description = "创作者稿件详情（用于修改音频配置）")
