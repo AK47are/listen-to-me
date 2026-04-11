@@ -93,11 +93,6 @@ const router = createRouter({
           component: () => import('@/views/FollowList.vue'),
         },
         {
-          path: 'user/fans',
-          name: 'FansList',
-          component: () => import('@/views/FansList.vue'),
-        },
-        {
           path: 'admin',
           name: 'Admin',
           redirect: '/admin/dashboard',
