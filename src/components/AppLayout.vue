@@ -158,8 +158,6 @@ import { useUserStore } from '@/stores/user/user'
 import {
   Collection,
   User,
-  Setting,
-  Bell,
   Wallet,
   Search,
   CaretBottom,

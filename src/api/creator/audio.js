@@ -3,7 +3,7 @@ import request from '@/utils/request'
 export const creatorAudioApi = {
   uploadAudio(file) {
     const formData = new FormData()
-    formData.append('file', file)
+    formData.append('audioFile', file)
     return request({
       url: '/creator/audio/upload',
       method: 'post',
@@ -13,7 +13,7 @@ export const creatorAudioApi = {
   },
   uploadCover(file) {
     const formData = new FormData()
-    formData.append('file', file)
+    formData.append('coverFile', file)
     return request({
       url: '/creator/audio/cover/upload',
       method: 'post',
