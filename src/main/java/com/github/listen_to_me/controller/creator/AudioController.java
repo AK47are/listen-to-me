@@ -37,7 +37,6 @@ public class AudioController {
     private final IAudioInfoService audioInfoService;
 
     @PostMapping("/upload")
-    @PreAuthorize("hasAuthority('audio:upload')")
     @Operation(summary = "上传音频", description = "上传 MP3 格式的音频文件")
     public Result<String> uploadAudio(
             @Parameter(description = "音频文件", required = true) MultipartFile audioFile) throws Exception {
@@ -45,7 +44,6 @@ public class AudioController {
     }
 
     @PostMapping("/cover/upload")
-    @PreAuthorize("hasAuthority('cover:upload')")
     @Operation(summary = "上传封面", description = "上传 JPG、JPEG、PNG 格式的封面图片")
     public Result<String> uploadCover(
             @Parameter(description = "封面文件", required = true) MultipartFile coverFile) throws Exception {
