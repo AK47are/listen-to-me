@@ -1,7 +1,6 @@
 package com.github.listen_to_me.controller.creator;
 
 import org.springdoc.core.annotations.ParameterObject;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -58,7 +57,7 @@ public class AudioController {
     }
 
     @GetMapping("/page")
-    @Operation(summary = "分页查询我的稿件")
+    @Operation(summary = "分页查询我的稿件", description = "分页获取当前创作者的所有音频稿件")
     public Result<IPage<CreatorAudioVO>> getAudioPage(
             @AuthenticationPrincipal Long userId,
             @ParameterObject PageQuery pageQuery) {
@@ -66,7 +65,7 @@ public class AudioController {
     }
 
     @GetMapping("/{audioId}")
-    @Operation(summary = "获取稿件详情（用于修改）")
+    @Operation(summary = "获取稿件详情（用于修改）", description = "根据音频ID获取稿件详情，用于回填修改表单")
     public Result<CreatorAudioDetailVO> getAudio(
             @AuthenticationPrincipal Long userId,
             @PathVariable Long audioId) {
@@ -74,20 +73,22 @@ public class AudioController {
     }
 
     @GetMapping("/{id}/status")
+    @Operation(summary = "查询稿件状态", description = "获取音频稿件的发布状态（待转码/转码中/已上线/失败）")
     public Result<AudioStatusVO> getAudioStatus(@PathVariable Long id) {
         return Result.success(audioInfoService.getAudioStatus(id));
     }
 
     @PutMapping
+    @Operation(summary = "修改音频配置", description = "修改音频稿件的标题、简介、价格、可见性等配置")
     public Result<Void> updateAudio(@RequestBody AudioUpdateDTO audioUpdateDTO) {
         audioInfoService.updateAudio(audioUpdateDTO);
         return Result.success();
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "删除稿件", description = "逻辑删除音频稿件")
     public Result<Void> removeAudio(@PathVariable Long id) {
         audioInfoService.removeAudioInfo(id);
         return Result.success();
     }
-
 }
