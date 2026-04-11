@@ -309,16 +309,19 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     @Override
     public IPage<AudioVO> searchAudio(AudioSearchQuery audioSearchQuery) {
         Page<AudioVO> page = new Page<>(audioSearchQuery.getPageNum(), audioSearchQuery.getPageSize());
+        IPage<AudioVO> result;
         if ("TITLE".equals(audioSearchQuery.getSearchType())) {
-            return audioVOMapper.selectByTitle(page, audioSearchQuery.getKeyword());
+            result = audioVOMapper.selectByTitle(page, audioSearchQuery.getKeyword());
+        } else if ("CREATOR".equals(audioSearchQuery.getSearchType())) {
+            result = audioVOMapper.selectByCreator(page, audioSearchQuery.getKeyword());
+        } else if ("TRANSCRIPT".equals(audioSearchQuery.getSearchType())) {
+            result = audioVOMapper.selectByTranscript(page, audioSearchQuery.getKeyword());
+        } else {
+            throw new BaseException(400, "搜索类型无效，仅支持 TITLE、CREATOR、TRANSCRIPT");
         }
-        if ("CREATOR".equals(audioSearchQuery.getSearchType())) {
-            return audioVOMapper.selectByCreator(page, audioSearchQuery.getKeyword());
-        }
-        if ("TRANSCRIPT".equals(audioSearchQuery.getSearchType())) {
-            return audioVOMapper.selectByTranscript(page, audioSearchQuery.getKeyword());
-        }
-        throw new BaseException(400, "搜索类型无效，仅支持 TITLE、CREATOR、TRANSCRIPT");
+
+        result.getRecords().forEach(vo -> vo.setCoverUrl(MinioUtils.getPresignedUrl(vo.getCoverUrl())));
+        return result;
     }
 
     @Transactional
