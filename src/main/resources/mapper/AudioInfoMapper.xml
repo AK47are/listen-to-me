@@ -4,13 +4,13 @@
     <update id="updateStatusById">
         UPDATE audio_info
         SET status = #{status}
-        WHERE id = #{audioId}
+        WHERE id = #{audioId} AND is_deleted = 0
     </update>
 
     <update id="updateStatusAndClipPathById">
         UPDATE audio_info
         SET status = #{status}, clip_path = #{clipPath}
-        WHERE id = #{audioId}
+        WHERE id = #{audioId} AND is_deleted = 0
     </update>
 
     <select id="selectAuditAudioPage" resultType="com.github.listen_to_me.domain.vo.AuditAudioVO">
