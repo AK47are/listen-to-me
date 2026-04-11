@@ -12,12 +12,6 @@ INSERT INTO `sys_role` (`role_name`, `role_code`) VALUES
 
 -- 系统权限
 INSERT INTO `sys_permission` (`perm_name`, `perm_code`) VALUES
-('音频上传', 'audio:upload'),
-('音频删除', 'audio:delete'),
-('音频审核', 'audio:audit'),
-('订单管理', 'order:manage'),
-('个人中心', 'user:info'),
-('封面上传', 'cover:upload'),
 ('用户基本权限','user:basic'),
 ('创作者基本权限','creator:basic'),
 ('管理员基本权限','admin:basic');
@@ -40,9 +34,9 @@ INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 
 -- 角色-权限关联
 INSERT INTO `sys_role_permission` (`role_id`, `perm_id`) VALUES
-(1, 1), (1, 2), (1, 3), (1, 4), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), -- 管理员拥有所有权限
-(2, 1), (2, 2), (2, 5), (2, 6),  (2, 7), (2, 8),                -- 创作者拥有上传、删除、个人中心、封面上传权限
-(3, 5), (3, 7);                                  -- 普通听众仅拥有个人中心权限
+(1, 1), (1, 2), (1, 3),
+(2, 2), (2, 3),
+(3, 3);
 
 -- ----------------------------
 -- 2. 音频资产域 - 测试数据
