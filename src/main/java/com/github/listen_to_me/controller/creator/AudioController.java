@@ -87,8 +87,10 @@ public class AudioController {
 
     @DeleteMapping("/{id}")
     @Operation(summary = "删除稿件", description = "逻辑删除音频稿件")
-    public Result<Void> removeAudio(@PathVariable Long id) {
-        audioInfoService.removeAudioInfo(id);
+    public Result<Void> removeAudio(
+            @AuthenticationPrincipal Long creatorId,
+            @PathVariable Long id) {
+        audioInfoService.removeAudioInfo(creatorId, id);
         return Result.success();
     }
 }
