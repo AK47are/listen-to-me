@@ -50,7 +50,7 @@ public interface IAudioInfoService extends IService<AudioInfo> {
 
     void updateAudio(AudioUpdateDTO audioUpdateDTO);
 
-    void removeAudioInfo(Long id);
+    void removeAudioInfo(Long creatorId, Long audioId);
 
     List<AudioVO> getHotList();
 

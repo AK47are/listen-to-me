@@ -271,15 +271,13 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     }
 
     @Override
-    public void removeAudioInfo(Long id) {
-        Long userId = SecurityUtils.getCurrentUserId();
-        AudioInfo audioInfo = audioInfoMapper.selectById(id);
-        if (audioInfo == null || !audioInfo.getCreatorId().equals(userId)) {
+    public void removeAudioInfo(Long creatorId, Long audioId) {
+        AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
+        if (audioInfo == null || !audioInfo.getCreatorId().equals(creatorId)) {
             throw new BaseException(404, "稿件不存在");
         }
-        // 逻辑删除
-        audioInfo.setIsDeleted((byte) 1);
-        audioInfoMapper.updateById(audioInfo);
+        // 逻辑删除, 配置了 @TableLogic 会自动进行逻辑删除
+        audioInfoMapper.deleteById(audioId);
     }
 
     @Override
