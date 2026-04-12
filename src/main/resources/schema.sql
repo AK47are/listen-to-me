@@ -218,11 +218,12 @@ CREATE TABLE IF NOT EXISTS `folder` (
 CREATE TABLE IF NOT EXISTS `audio_folder_relation` (
   `audio_id` bigint NOT NULL COMMENT '音频ID',
   `folder_id` bigint NOT NULL COMMENT '收藏夹ID',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`audio_id`,`folder_id`) USING BTREE COMMENT '联合主键',
-   INDEX `idx_folder_id` (`folder_id`),
-   CONSTRAINT `fk_relation_folder` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`),
-   CONSTRAINT `fk_relation_audio` FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
-
+  INDEX `idx_folder_id` (`folder_id`),
+  INDEX `idx_create_time` (`create_time`),
+  CONSTRAINT `fk_relation_folder` FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`),
+  CONSTRAINT `fk_relation_audio` FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='音频-收藏夹关联表';
 
 -- 用户 - 收藏夹关联表
