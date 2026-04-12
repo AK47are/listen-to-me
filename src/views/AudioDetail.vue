@@ -105,7 +105,10 @@
       :progress="audioDetail.progress || 0"
       :is-paid="audioDetail.isPaid"
       :is-purchased="audioDetail.isPurchased"
+      :trial-duration="audioDetail.trialDuration || 0"
+      :price="audioDetail.price || 0"
       @close="showPlayer = false"
+      @go-to-purchase="handleGoToPurchase"
     />
 
     <!-- 收藏夹管理弹窗 -->
@@ -459,6 +462,11 @@ const goToCreator = () => {
   if (audioDetail.value?.creator?.id) {
     router.push(`/creator/${audioDetail.value.creator.id}`)
   }
+}
+
+const handleGoToPurchase = () => {
+  showPlayer.value = false
+  showPurchaseDialog.value = true
 }
 
 onMounted(() => {
