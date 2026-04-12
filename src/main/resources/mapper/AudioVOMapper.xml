@@ -13,7 +13,7 @@
         FROM audio_info ai
         INNER JOIN sys_user u ON ai.creator_id = u.id
         WHERE ai.is_deleted = 0
-            AND ai.audit_status = 1
+            AND ai.audit_status = 'APPROVED'
             AND ai.visibility = 'PUBLIC'
     </sql>
 
@@ -100,7 +100,7 @@
             LIMIT 5
         ) recent ON ai.creator_id = recent.creator_id
         WHERE ai.is_deleted = 0
-        AND ai.audit_status = 1
+        AND ai.audit_status = 'APPROVED'
         AND NOT EXISTS (
             SELECT 1 FROM audio_like al2
             WHERE al2.user_id = #{userId}
