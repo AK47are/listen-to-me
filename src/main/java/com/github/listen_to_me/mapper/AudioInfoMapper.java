@@ -39,7 +39,7 @@ public interface AudioInfoMapper extends BaseMapper<AudioInfo> {
             "FROM audio_info ai " +
             "WHERE ai.create_time >= #{oneMonthAgo} " +
             "AND ai.is_deleted = 0 " +
-            "AND ai.audit_status = 1")
+            "AND ai.audit_status = 'APPROVED'")
     List<AudioStatsDTO> selectAudioStatsForHotRank(LocalDateTime oneMonthAgo);
 
     IPage<AuditAudioVO> selectAuditAudioPage(Page<AuditAudioVO> page, String status);

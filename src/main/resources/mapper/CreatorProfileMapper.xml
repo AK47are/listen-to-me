@@ -18,7 +18,7 @@
         (
             SELECT COUNT(*) FROM audio_info ai
             WHERE ai.creator_id = u.id
-              AND ai.audit_status = 1
+              AND ai.audit_status = 'APPROVED'
               AND ai.is_deleted = 0
         ) AS audio_count,
         (

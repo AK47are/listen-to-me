@@ -8,7 +8,7 @@
             (SELECT COUNT(*) FROM sys_user) AS totalUsers,
             (SELECT COUNT(*) FROM sys_user WHERE is_creator = 1) AS totalCreators,
             (SELECT COUNT(*) FROM audio_info WHERE is_deleted = 0) AS totalAudios,
-            (SELECT COUNT(*) FROM audio_info WHERE audit_status = 1 AND is_deleted = 0) AS approvedAudios,
+            (SELECT COUNT(*) FROM audio_info WHERE audit_status = 'APPROVED' AND is_deleted = 0) AS approvedAudios,
             (SELECT COALESCE(SUM(play_count), 0) FROM audio_info WHERE is_deleted = 0) AS totalPlays,
             (SELECT COALESCE(SUM(pay_amount), 0) FROM audio_order WHERE pay_status = 1) AS totalAudioSales,
             (SELECT COALESCE(SUM(recharge_amount), 0) FROM user_recharge_order WHERE pay_status = 'PAID') AS totalRecharge,
@@ -42,7 +42,7 @@
                     ) AS newAudios,
                     (SELECT COUNT(*) FROM audio_info
                      <where>
-                         audit_status = 1 AND is_deleted = 0
+                         audit_status = 'APPROVED' AND is_deleted = 0
                          <if test="startDate != null">AND create_time >= #{startDate}</if>
                          <if test="endDate != null">AND create_time &lt;= #{endDate}</if>
                      </where>

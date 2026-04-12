@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS `audio_info` (
   `price` decimal(10, 2) DEFAULT 0.00,
   `duration` int DEFAULT 0 COMMENT '总时长',
   `trial_duration` int DEFAULT 0 COMMENT '试听秒数',
-  `audit_status` int DEFAULT 0 COMMENT '0-待审, 1-通过, 2-违规',
+  `audit_status` ENUM('PENDING','APPROVED','REJECTED') NOT NULL DEFAULT 'PENDING' COMMENT '审核状态：PENDING-待审核, APPROVED-已通过, REJECTED-已拒绝',
   `reject_reason` varchar(255) DEFAULT NULL COMMENT '拒绝原因',
   `status` ENUM('PENDING_TRANSCODE', 'TRANSCODING', 'ONLINE', 'FAILED') NOT NULL DEFAULT 'PENDING_TRANSCODE' COMMENT '发布状态: 待转码, 转码中, 已上线, 转码失败',
   `play_count` int DEFAULT 0 COMMENT '播放量',

@@ -22,14 +22,8 @@
         LEFT JOIN sys_user u ON ai.creator_id = u.id
         LEFT JOIN audio_transcript t ON ai.id = t.audio_id
         WHERE ai.is_deleted = 0
-        <if test="status != null and status == 'PENDING'">
-            AND ai.audit_status = 0
-        </if>
-        <if test="status != null and status == 'APPROVED'">
-            AND ai.audit_status = 1
-        </if>
-        <if test="status != null and status == 'REJECTED'">
-            AND ai.audit_status = 2
+        <if test="status != null and status != 'ALL'">
+            AND ai.audit_status = #{status}
         </if>
         ORDER BY ai.create_time DESC
     </select>

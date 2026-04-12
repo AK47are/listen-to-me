@@ -435,16 +435,16 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     public void auditAudio(AudioAuditDTO audioAuditDTO) {
         AudioInfo audioInfo = this.getById(audioAuditDTO.getAudioId());
         if (audioInfo == null
-                || audioInfo.getAuditStatus() != 0
+                || !"PENDING".equals(audioInfo.getAuditStatus())
                 || audioInfo.getIsDeleted() == 1) {
             throw new BaseException(400, "音频不存在或已处理");
         }
         if ("APPROVED".equals(audioAuditDTO.getStatus())) {
-            audioInfo.setAuditStatus(1);
+            audioInfo.setAuditStatus("APPROVED");
             // TODO 触发上线通知、推荐索引更新等
         } else if ("REJECTED".equals(audioAuditDTO.getStatus())) {
             // TODO 通知创作者驳回原因
-            audioInfo.setAuditStatus(2);
+            audioInfo.setAuditStatus("REJECTED");
             audioInfo.setRejectReason(audioAuditDTO.getRejectReason());
         } else {
             throw new BaseException(400, "审核状态无效，仅支持 APPROVED、REJECTED");
