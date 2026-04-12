@@ -16,7 +16,7 @@ import com.github.listen_to_me.domain.entity.PlayHistory;
 public interface PlayHistoryMapper extends BaseMapper<PlayHistory> {
 
     @Insert("INSERT INTO play_history (user_id, audio_id, last_position, update_time) " +
-            "VALUES (#{history.userId}, #{history.audioId}, #{history.lastPosition}, NOW()) " +
+            "VALUES (#{userId}, #{audioId}, #{lastPosition}, NOW()) " +
             "ON DUPLICATE KEY UPDATE " +
             "last_position = VALUES(last_position), " +
             "update_time = NOW()")
