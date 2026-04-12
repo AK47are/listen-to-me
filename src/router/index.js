@@ -93,11 +93,6 @@ const router = createRouter({
           component: () => import('@/views/UserConsult.vue'),
         },
         {
-          path: 'user/follow',
-          name: 'FollowList',
-          component: () => import('@/views/FollowList.vue'),
-        },
-        {
           path: 'admin/dashboard',
           name: 'Admin',
           component: () => import('@/views/admin/Dashboard.vue'),
