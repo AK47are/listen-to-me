@@ -66,21 +66,6 @@ INSERT INTO `audio_order` (`order_sn`, `user_id`, `audio_id`, `pay_amount`, `pay
 ('20250523456789', 4, 5, 12.90, 2, 'alipay', NULL),
 ('20250524789456', 3, 4, 15.90, 0, 'wechat', NULL);
 
--- ----------------------------
--- 4. 社交与标签域 - 测试数据
--- ----------------------------
--- 系统标签
-INSERT INTO `sys_tag` (`name`) VALUES
-('心理学'), ('职场'), ('民间故事'), ('悬疑'), ('自我提升'), ('情感');
-
--- 音频-标签关联
-INSERT INTO `audio_tag_relation` (`audio_id`, `tag_id`) VALUES
-(1, 1), (1, 5),
-(2, 2), (2, 5),
-(3, 3),
-(4, 3), (4, 4),
-(5, 5), (5, 6);
-
 -- 播放历史
 INSERT INTO `play_history` (`user_id`, `audio_id`, `last_position`) VALUES
 (3, 1, 1250),

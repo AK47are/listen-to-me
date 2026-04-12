@@ -1,6 +1,3 @@
--- ----------------------------
--- 1. RBAC 权限域
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `sys_user` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `username` varchar(64) UNIQUE NOT NULL COMMENT '账号',
@@ -39,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `sys_permission` (
   UNIQUE INDEX uk_perm_code (perm_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 中间表：用户-角色, 角色-权限 (略，仅展示核心)
+-- 用户-角色, 角色-权限
 CREATE TABLE IF NOT EXISTS `sys_user_role` (
   `user_id` bigint, `role_id` bigint, PRIMARY KEY (`user_id`, `role_id`),
   CONSTRAINT fk_user_role_user FOREIGN KEY (`user_id`) REFERENCES `sys_user` (`id`),
@@ -53,9 +50,6 @@ CREATE TABLE IF NOT EXISTS `sys_role_permission` (
   CONSTRAINT fk_role_perm_perm FOREIGN KEY (`perm_id`) REFERENCES `sys_permission` (`id`)
 );
 
--- ----------------------------
--- 2. 音频资产域
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `audio_info` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `creator_id` bigint NOT NULL COMMENT '对应 sys_user.id',
@@ -94,9 +88,6 @@ CREATE TABLE IF NOT EXISTS `audio_transcript` (
   CONSTRAINT fk_transcript_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ----------------------------
--- 3. 交易业务域
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `audio_order` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `order_sn` varchar(64) UNIQUE NOT NULL,
@@ -116,21 +107,6 @@ CREATE TABLE IF NOT EXISTS `audio_order` (
   CONSTRAINT fk_order_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- ----------------------------
--- 4. 社交与标签域
--- ----------------------------
-CREATE TABLE IF NOT EXISTS `sys_tag` (
-  `id` bigint PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(32) UNIQUE NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS `audio_tag_relation` (
-  `audio_id` bigint, `tag_id` bigint, PRIMARY KEY (`audio_id`, `tag_id`),
-  INDEX idx_tag_id (tag_id),
-  CONSTRAINT fk_tag_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`),
-  CONSTRAINT fk_tag_relation FOREIGN KEY (`tag_id`) REFERENCES `sys_tag` (`id`)
-);
-
 CREATE TABLE IF NOT EXISTS `play_history` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `user_id` bigint,
@@ -143,9 +119,6 @@ CREATE TABLE IF NOT EXISTS `play_history` (
   CONSTRAINT fk_play_history_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 );
 
--- ----------------------------
--- 5. 咨询服务域
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `consult_slot` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `creator_id` bigint NOT NULL COMMENT '创作者ID, 关联 sys_user.id',
@@ -162,9 +135,6 @@ CREATE TABLE IF NOT EXISTS `consult_slot` (
   CONSTRAINT fk_consult_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='时间槽表';
 
--- ----------------------------
--- 5. 咨询服务域 - 预约订单表
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `consult_order` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `slot_id` bigint NOT NULL COMMENT '时间槽ID',
@@ -185,9 +155,6 @@ CREATE TABLE IF NOT EXISTS `consult_order` (
   CONSTRAINT fk_consult_order_creator FOREIGN KEY (`creator_id`) REFERENCES `sys_user` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='预约订单表';
 
--- ----------------------------
--- 5. 咨询服务域 - 退款申请表
--- ----------------------------
 CREATE TABLE IF NOT EXISTS `refund_apply` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `order_id` bigint NOT NULL COMMENT '预约订单ID',
@@ -341,7 +308,7 @@ CREATE TABLE IF NOT EXISTS `user_recharge_order` (
     `recharge_sn` varchar(64) UNIQUE NOT NULL COMMENT '充值订单号（RC开头）',
     `user_id` bigint NOT NULL COMMENT '用户ID',
     `recharge_amount` decimal(10, 2) NOT NULL COMMENT '充值金额（元）',
-    `pay_status` varchar(20) DEFAULT 'PENDING' COMMENT '支付状态：PENDING-待支付，PAID-已支付，CANCELLED-已取消',
+    `pay_status` ENUM('PENDING', 'PAID', 'CANCELLED') NOT NULL DEFAULT 'PENDING' COMMENT '支付状态：PENDING-待支付，PAID-已支付，CANCELLED-已取消',
     `pay_channel` varchar(20) COMMENT '支付渠道：alipay-支付宝，wechat-微信',
     `pay_time` datetime COMMENT '支付成功时间',
     `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
