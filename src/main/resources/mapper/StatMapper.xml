@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.listen_to_me.mapper.StatMapper">
+
+    <select id="selectDashboardStats" resultType="com.github.listen_to_me.domain.vo.DashboardVO">
+        SELECT
+            -- 累计指标
+            (SELECT COUNT(*) FROM sys_user) AS totalUsers,
+            (SELECT COUNT(*) FROM sys_user WHERE is_creator = 1) AS totalCreators,
+            (SELECT COUNT(*) FROM audio_info WHERE is_deleted = 0) AS totalAudios,
+            (SELECT COUNT(*) FROM audio_info WHERE audit_status = 1 AND is_deleted = 0) AS approvedAudios,
+            (SELECT COALESCE(SUM(play_count), 0) FROM audio_info WHERE is_deleted = 0) AS totalPlays,
+            (SELECT COALESCE(SUM(pay_amount), 0) FROM audio_order WHERE pay_status = 1) AS totalAudioSales,
+            (SELECT COALESCE(SUM(recharge_amount), 0) FROM user_recharge_order WHERE pay_status = 'PAID') AS totalRecharge,
+            (SELECT COALESCE(SUM(pay_amount), 0) FROM consult_order WHERE status = 'COMPLETED') AS totalConsultSales,
+            (SELECT COUNT(*) FROM audio_folder_relation) AS totalCollects,
+            (SELECT COUNT(*) FROM audio_like) AS totalLikes,
+            (SELECT COUNT(*) FROM comments) AS totalComments,
+
+            -- 时间段内新增指标
+            <choose>
+                <when test="startDate != null or endDate != null">
+                    (SELECT COUNT(*) FROM sys_user
+                     <where>
+                         <if test="startDate != null">create_time >= #{startDate}</if>
+                         <if test="endDate != null">AND create_time &lt;= #{endDate}</if>
+                     </where>
+                    ) AS newUsers,
+                    (SELECT COUNT(*) FROM sys_user
+                     <where>
+                         is_creator = 1
+                         <if test="startDate != null">AND create_time >= #{startDate}</if>
+                         <if test="endDate != null">AND create_time &lt;= #{endDate}</if>
+                     </where>
+                    ) AS newCreators,
+                    (SELECT COUNT(*) FROM audio_info
+                     <where>
+                         is_deleted = 0
+                         <if test="startDate != null">AND create_time >= #{startDate}</if>
+                         <if test="endDate != null">AND create_time &lt;= #{endDate}</if>
+                     </where>
+                    ) AS newAudios,
+                    (SELECT COUNT(*) FROM audio_info
+                     <where>
+                         audit_status = 1 AND is_deleted = 0
+                         <if test="startDate != null">AND create_time >= #{startDate}</if>
+                         <if test="endDate != null">AND create_time &lt;= #{endDate}</if>
+                     </where>
+                    ) AS newApprovedAudios,
+                    (SELECT COUNT(*) FROM audio_folder_relation
+                     <where>
+                         <if test="startDate != null">create_time >= #{startDate}</if>
+                         <if test="endDate != null">AND create_time &lt;= #{endDate}</if>
+                     </where>
+                    ) AS newCollects,
+                    (SELECT COUNT(*) FROM audio_like
+                     <where>
+                         <if test="startDate != null">create_time >= #{startDate}</if>
+                         <if test="endDate != null">AND create_time &lt;= #{endDate}</if>
+                     </where>
+                    ) AS newLikes,
+                    (SELECT COUNT(*) FROM comments
+                     <where>
+                         <if test="startDate != null">create_time >= #{startDate}</if>
+                         <if test="endDate != null">AND create_time &lt;= #{endDate}</if>
+                     </where>
+                    ) AS newComments
+                </when>
+                <otherwise>
+                    0 AS newUsers, 0 AS newCreators, 0 AS newAudios, 0 AS newApprovedAudios,
+                    0 AS newCollects, 0 AS newLikes, 0 AS newComments
+                </otherwise>
+            </choose>
+        FROM DUAL
+    </select>
+
+</mapper>
