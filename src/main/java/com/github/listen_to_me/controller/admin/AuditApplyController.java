@@ -32,8 +32,8 @@ public class AuditApplyController {
         return Result.success(creatorApplyService.findAuditApplyPage(query));
     }
 
-    @Operation(summary = "执行申请审核")
     @PutMapping
+    @Operation(summary = "执行申请审核")
     public Result<Void> auditApply(@RequestBody ApplyAuditDTO applyAuditDTO) {
         creatorApplyService.auditApply(applyAuditDTO);
         return Result.success();

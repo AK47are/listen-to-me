@@ -2,7 +2,7 @@ package com.github.listen_to_me.controller.admin;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,7 +33,7 @@ public class AudioController {
         return Result.success(audioInfoService.getAuditAudioPage(auditQuery));
     }
 
-    @PostMapping
+    @PutMapping
     @Operation(summary = "审核音频")
     public Result<Void> auditAudio(@Valid @RequestBody AudioAuditDTO audioAuditDTO) {
         audioInfoService.auditAudio(audioAuditDTO);
