@@ -34,7 +34,7 @@ public class RefundController {
         return Result.success(refundApplyService.getRefundApplyPage(query));
     }
 
-    @PutMapping("/audio")
+    @PutMapping("/audit")
     @Operation(summary = "审核退款")
     public Result<Void> auditRefund(@RequestBody RefundAuditDTO refundAuditDTO) {
         refundApplyService.auditRefund(refundAuditDTO);
