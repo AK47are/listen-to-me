@@ -7,7 +7,7 @@ export const auditApi = {
   auditAudio(data) {
     return request({ url: '/admin/audio/audit', method: 'put', data })
   },
-  getApplyAuditPage(params) {
+  getAuditApplyPage(params) {
     return request({ url: '/admin/creator/apply/audit/page', method: 'get', params })
   },
   auditApply(data) {
