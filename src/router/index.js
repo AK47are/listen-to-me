@@ -98,36 +98,9 @@ const router = createRouter({
           component: () => import('@/views/FollowList.vue'),
         },
         {
-          path: 'admin',
+          path: 'admin/dashboard',
           name: 'Admin',
-          redirect: '/admin/dashboard',
-          children: [
-            {
-              path: 'dashboard',
-              name: 'AdminDashboard',
-              component: () => import('@/views/admin/Dashboard.vue'),
-            },
-            {
-              path: 'audio-audit',
-              name: 'AudioAudit',
-              component: () => import('@/views/admin/AudioAudit.vue'),
-            },
-            {
-              path: 'apply-audit',
-              name: 'ApplyAudit',
-              component: () => import('@/views/admin/ApplyAudit.vue'),
-            },
-            {
-              path: 'refund-audit',
-              name: 'RefundAudit',
-              component: () => import('@/views/admin/RefundAudit.vue'),
-            },
-            {
-              path: 'user-management',
-              name: 'UserManagement',
-              component: () => import('@/views/admin/UserManagement.vue'),
-            },
-          ],
+          component: () => import('@/views/admin/Dashboard.vue'),
         },
       ],
     },
