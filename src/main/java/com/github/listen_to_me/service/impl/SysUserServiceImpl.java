@@ -4,45 +4,49 @@ import java.math.BigDecimal;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 import java.util.Map;
+import java.util.UUID;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.github.listen_to_me.domain.query.RechargeOrderQuery;
-import com.github.listen_to_me.domain.query.TransactionPageQuery;
-import com.github.listen_to_me.domain.query.UserPageQuery;
-import com.alipay.easysdk.factory.Factory;
-import com.github.listen_to_me.common.config.AlipayConfig;
-import com.github.listen_to_me.domain.dto.RechargeResultDTO;
-import com.github.listen_to_me.domain.entity.UserRechargeOrder;
-import com.github.listen_to_me.domain.vo.*;
-import com.github.listen_to_me.mapper.CoinTransactionMapper;
-import com.github.listen_to_me.mapper.UserRechargeOrderMapper;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.alipay.easysdk.factory.Factory;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.common.config.AlipayConfig;
 import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.common.util.SecurityUtils;
+import com.github.listen_to_me.domain.dto.RechargeResultDTO;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.entity.CoinTransaction;
 import com.github.listen_to_me.domain.entity.SysUser;
+import com.github.listen_to_me.domain.entity.UserRechargeOrder;
+import com.github.listen_to_me.domain.query.RechargeOrderQuery;
+import com.github.listen_to_me.domain.query.TransactionPageQuery;
+import com.github.listen_to_me.domain.query.UserPageQuery;
+import com.github.listen_to_me.domain.vo.BalanceVO;
+import com.github.listen_to_me.domain.vo.CoinTransactionVO;
+import com.github.listen_to_me.domain.vo.RechargeOrderVO;
+import com.github.listen_to_me.domain.vo.RechargeResultVO;
+import com.github.listen_to_me.domain.vo.UserVO;
+import com.github.listen_to_me.mapper.CoinTransactionMapper;
 import com.github.listen_to_me.mapper.SysUserMapper;
+import com.github.listen_to_me.mapper.UserRechargeOrderMapper;
 import com.github.listen_to_me.service.ICoinTransactionService;
 import com.github.listen_to_me.service.ISysUserService;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -296,9 +300,13 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             vo.setIsCreator(sysUser.getIsCreator());
             vo.setUsername(sysUser.getUsername());
             vo.setNickname(sysUser.getNickname());
+            vo.setAvatar(MinioUtils.getPresignedUrl(sysUser.getAvatar()));
+            vo.setStatus(sysUser.getStatus());
+            vo.setCreateTime(sysUser.getCreateTime());
             return vo;
         });
     }
+
     private String generateRechargeSn() {
         return "RC" + UUID.randomUUID().toString().replace("-", "");
     }
@@ -322,7 +330,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         userRechargeOrderMapper.insert(order);
 
         String payUrl = Factory.Payment.Page()
-                .pay("用户虚拟币充值", order.getRechargeSn(), order.getRechargeAmount().toString(), alipayConfig.getNotifyUrl())
+                .pay("用户虚拟币充值", order.getRechargeSn(), order.getRechargeAmount().toString(),
+                        alipayConfig.getNotifyUrl())
                 .getBody();
         RechargeResultVO rechargeResultVO = new RechargeResultVO();
         rechargeResultVO.setRechargeSn(order.getRechargeSn());
@@ -365,7 +374,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             order.setPayStatus("SUCCESS");
             userRechargeOrderMapper.updateById(order);
 
-            addBalance(order.getUserId(), BigDecimal.valueOf(order.getRechargeAmount()), "RECHARGE", order.getRechargeSn());
+            addBalance(order.getUserId(), BigDecimal.valueOf(order.getRechargeAmount()), "RECHARGE",
+                    order.getRechargeSn());
 
             return "success";
         }
