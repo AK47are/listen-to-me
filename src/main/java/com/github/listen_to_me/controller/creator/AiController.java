@@ -3,6 +3,7 @@ package com.github.listen_to_me.controller.creator;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,5 +32,13 @@ public class AiController {
             @PathVariable Long audioId) {
         AiTaskVO vo = aiTaskService.createTranscriptionTask(userId, audioId);
         return Result.success(vo);
+    }
+
+    @PutMapping("/transcript/{taskId}/confirm")
+    @Operation(summary = "确认转写结果")
+    public Result<Void> confirmTranscript(@AuthenticationPrincipal Long userId,
+            @PathVariable String taskId) {
+        aiTaskService.confirmTranscript(userId, taskId);
+        return Result.success();
     }
 }
