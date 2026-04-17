@@ -81,12 +81,14 @@ CREATE TABLE IF NOT EXISTS `audio_info` (
 CREATE TABLE IF NOT EXISTS `audio_transcript` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
   `audio_id` bigint NOT NULL,
+  `task_id` varchar(64) COMMENT '关联的AI任务ID',
   `full_text` longtext COMMENT 'AI转写文本',
-  `segment_json` json COMMENT 'AI分段标题与时间戳 [{time: 0, title: "..."}]',
-
+  `segment_json` json COMMENT '完整转写结果（sentences + words + emotion）',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
   UNIQUE INDEX uk_audio_id (audio_id),
+  INDEX idx_task_id (task_id),
   CONSTRAINT fk_transcript_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='音频转写结果表';
 
 CREATE TABLE IF NOT EXISTS `audio_order` (
   `id` bigint PRIMARY KEY AUTO_INCREMENT,
