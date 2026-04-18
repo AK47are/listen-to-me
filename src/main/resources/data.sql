@@ -239,4 +239,7 @@ INSERT INTO `creator_profile` (`user_id`, `intro`) VALUES
 (2, '10年后端开发经验，擅长微服务架构设计、分布式系统、高并发处理。曾任职于多家互联网大厂。'),
 (5, '12年产品经验，从0到1主导过多个千万级用户产品，擅长产品规划和用户增长策略。');
 
+INSERT INTO `audio_summary` (`audio_id`, `task_id`, `summary`) VALUES
+(1, 'test_summary_task_001', '这是心理学入门课程的AI生成摘要，介绍了心理学的基本定义和研究对象。');
+
 SET FOREIGN_KEY_CHECKS = 1;
