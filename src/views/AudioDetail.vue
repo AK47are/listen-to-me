@@ -9,10 +9,26 @@
 
     <div class="detail-content">
       <div v-if="audioDetail" class="audio-detail-card">
+        <!-- 左侧：封面 + 简介 -->
         <div class="cover-section">
           <img :src="audioDetail.coverUrl" class="cover-image" />
+
+          <div class="content-section collapsible-section cover-description">
+            <div class="section-header" @click="toggleSection('description')">
+              <h3>简介</h3>
+              <el-icon :class="{ rotated: !sectionCollapsed.description }">
+                <ArrowDown />
+              </el-icon>
+            </div>
+            <el-collapse-transition>
+              <div v-show="!sectionCollapsed.description" class="section-content">
+                <p>{{ audioDetail.description || '暂无简介' }}</p>
+              </div>
+            </el-collapse-transition>
+          </div>
         </div>
 
+        <!-- 右侧：信息区 -->
         <div class="info-section">
           <h1 class="audio-title">{{ audioDetail.title }}</h1>
 
@@ -77,6 +93,15 @@
             <el-button class="action-btn" :icon="FolderOpened" @click="openFolderManager">
               收藏
             </el-button>
+            <!-- AI 转写按钮 -->
+            <el-button
+              v-if="audioDetail.transcript"
+              class="action-btn ai-transcript-btn"
+              @click="showTranscriptDialog = true"
+            >
+              <el-icon><Document /></el-icon>
+              AI 转写
+            </el-button>
           </div>
 
           <div v-if="audioDetail.isPaid && !audioDetail.isPurchased" class="trial-alert">
@@ -85,9 +110,22 @@
             </el-alert>
           </div>
 
-          <div class="description-section">
-            <h3>简介</h3>
-            <p>{{ audioDetail.description || '暂无简介' }}</p>
+          <!-- AI 摘要区块（可折叠） -->
+          <div v-if="audioDetail.summary" class="content-section collapsible-section">
+            <div class="section-header" @click="toggleSection('summary')">
+              <h3>
+                <el-icon class="ai-icon"><MagicStick /></el-icon>
+                AI 摘要
+              </h3>
+              <el-icon :class="{ rotated: !sectionCollapsed.summary }">
+                <ArrowDown />
+              </el-icon>
+            </div>
+            <el-collapse-transition>
+              <div v-show="!sectionCollapsed.summary" class="section-content ai-content">
+                <p>{{ audioDetail.summary }}</p>
+              </div>
+            </el-collapse-transition>
           </div>
         </div>
       </div>
@@ -105,11 +143,32 @@
       :progress="audioDetail.progress || 0"
       :is-paid="audioDetail.isPaid"
       :is-purchased="audioDetail.isPurchased"
-      :trial-duration="audioDetail.trialDuration || 0"
-      :price="audioDetail.price || 0"
       @close="showPlayer = false"
-      @go-to-purchase="handleGoToPurchase"
     />
+
+    <!-- AI 转写弹窗 -->
+    <el-dialog
+      v-model="showTranscriptDialog"
+      title="AI 转写"
+      width="680px"
+      class="transcript-dialog"
+      destroy-on-close
+    >
+      <div class="transcript-dialog-content">
+        <div class="transcript-header">
+          <el-icon class="ai-icon-large"><MagicStick /></el-icon>
+          <span>以下内容由 AI 生成，仅供参考</span>
+        </div>
+        <div class="transcript-body">
+          <p>{{ audioDetail?.transcript || '暂无转写内容' }}</p>
+        </div>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button class="close-btn" @click="showTranscriptDialog = false">关闭</el-button>
+        </div>
+      </template>
+    </el-dialog>
 
     <!-- 收藏夹管理弹窗 -->
     <el-dialog
@@ -205,7 +264,7 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="showPurchaseDialog = false">取消</el-button>
-          <el-button type="primary" @click="handlePurchase"> 立即购买 </el-button>
+          <el-button type="primary" @click="handlePurchase">立即购买</el-button>
         </div>
       </template>
     </el-dialog>
@@ -226,6 +285,9 @@ import {
   ShoppingCart,
   Check,
   Clock,
+  ArrowDown,
+  Document,
+  MagicStick,
 } from '@element-plus/icons-vue'
 import { audioApi } from '@/api/user/audio'
 import { likeApi } from '@/api/user/like'
@@ -239,6 +301,7 @@ import CommentSection from '@/components/CommentSection.vue'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 
 const audioId = ref(Number(route.params.id))
 const audioDetail = ref(null)
@@ -246,7 +309,18 @@ const showPlayer = ref(false)
 const isLiked = ref(false)
 const isFollowing = ref(false)
 const showPurchaseDialog = ref(false)
+const showTranscriptDialog = ref(false)
 const defaultAvatar = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+
+// 折叠状态管理
+const sectionCollapsed = reactive({
+  description: false, // 简介默认展开
+  summary: true, // 摘要默认折叠
+})
+
+const toggleSection = (section) => {
+  sectionCollapsed[section] = !sectionCollapsed[section]
+}
 
 const allFolders = ref([])
 const collectedFolderIds = ref(new Set())
@@ -285,15 +359,12 @@ const getAudioDetail = async () => {
   }
 }
 
-const userStore = useUserStore()
-
 const handlePurchase = async () => {
   try {
     await orderApi.purchaseAudio(audioId.value)
     ElMessage.success('购买成功')
     showPurchaseDialog.value = false
     await getAudioDetail()
-    // 刷新用户信息（更新余额）
     const profileRes = await profileApi.getProfile()
     userStore.setUserInfo(profileRes.data)
   } catch (error) {
@@ -464,11 +535,6 @@ const goToCreator = () => {
   }
 }
 
-const handleGoToPurchase = () => {
-  showPlayer.value = false
-  showPurchaseDialog.value = true
-}
-
 onMounted(() => {
   getAudioDetail()
 })
@@ -530,6 +596,7 @@ onMounted(() => {
 
 .cover-section {
   flex-shrink: 0;
+  width: 220px;
 }
 
 .cover-image {
@@ -540,8 +607,24 @@ onMounted(() => {
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
 }
 
+/* 封面下方的简介区块 */
+.cover-description {
+  margin-top: 16px;
+  border-top: 1px solid #f0efeb;
+  padding-top: 12px;
+}
+
+.cover-description .section-header {
+  padding: 4px 0;
+}
+
+.cover-description .section-content {
+  padding: 8px 0 4px;
+}
+
 .info-section {
   flex: 1;
+  min-width: 0;
 }
 
 .audio-title {
@@ -754,6 +837,17 @@ onMounted(() => {
   color: #ffffff;
 }
 
+.ai-transcript-btn {
+  color: #7c6a9c;
+  border-color: #e0d8ec;
+}
+
+.ai-transcript-btn:hover {
+  background: #f5f0fa;
+  border-color: #c8b8dc;
+  color: #5a4a72;
+}
+
 .trial-alert {
   margin-top: 16px;
 }
@@ -764,27 +858,166 @@ onMounted(() => {
   border: none;
 }
 
-.description-section {
-  margin-top: 24px;
-  padding-top: 20px;
+/* 统一折叠卡片样式 - 紧凑版 */
+.content-section {
+  margin-top: 12px;
   border-top: 1px solid #f0efeb;
+  padding-top: 12px;
 }
 
-.description-section h3 {
+.content-section:first-of-type {
+  margin-top: 0;
+  border-top: none;
+  padding-top: 0;
+}
+
+.collapsible-section .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 0;
+  transition: opacity 0.2s;
+}
+
+.collapsible-section .section-header:hover {
+  opacity: 0.7;
+}
+
+.collapsible-section .section-header h3 {
   font-size: 0.9rem;
   font-weight: 600;
   color: #8e8c84;
-  margin: 0 0 12px 0;
+  margin: 0;
   letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.description-section p {
+.collapsible-section .section-header .el-icon {
+  font-size: 16px;
+  color: #b0aea3;
+  transition: transform 0.3s;
+}
+
+.collapsible-section .section-header .el-icon.rotated {
+  transform: rotate(180deg);
+}
+
+.section-content {
+  padding: 8px 0 4px;
+}
+
+.section-content p {
   font-size: 0.9rem;
   line-height: 1.6;
   color: #6b6a62;
   margin: 0;
 }
 
+.ai-content {
+  background: #fcfbf7;
+  padding: 12px;
+  border-radius: 12px;
+  margin-top: 2px;
+}
+
+.ai-icon {
+  color: #a28bc2;
+}
+
+/* AI 转写弹窗样式 */
+.transcript-dialog :deep(.el-dialog) {
+  border-radius: 28px;
+  background: #ffffff;
+}
+
+.transcript-dialog :deep(.el-dialog__header) {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid #f0efeb;
+}
+
+.transcript-dialog :deep(.el-dialog__title) {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.transcript-dialog :deep(.el-dialog__body) {
+  padding: 20px 28px;
+}
+
+.transcript-dialog-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.transcript-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px dashed #e8e6df;
+  font-size: 0.8rem;
+  color: #b0aea3;
+}
+
+.ai-icon-large {
+  font-size: 18px;
+  color: #a28bc2;
+}
+
+.transcript-body {
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.transcript-body p {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #4a4a44;
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.transcript-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.transcript-body::-webkit-scrollbar-thumb {
+  background: #e0d8ec;
+  border-radius: 4px;
+}
+
+.transcript-dialog .dialog-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.transcript-dialog .close-btn {
+  background: #1a1a1a;
+  border: none;
+  border-radius: 40px;
+  padding: 10px 32px;
+  font-weight: 500;
+  color: #ffffff;
+  transition: all 0.2s;
+}
+
+.transcript-dialog .close-btn:hover {
+  background: #2c2c2c;
+  transform: translateY(-1px);
+}
+
+/* 收藏夹相关样式 */
 .folder-manager-item {
   display: flex;
   align-items: center;
@@ -914,11 +1147,6 @@ onMounted(() => {
   box-shadow: none;
 }
 
-.folder-create-dialog :deep(.el-textarea__inner:focus) {
-  border-color: #1a1a1a;
-  box-shadow: 0 0 0 2px rgba(26, 26, 26, 0.05);
-}
-
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
@@ -1016,9 +1244,19 @@ onMounted(() => {
     text-align: center;
     padding: 24px;
   }
+  .cover-section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   .cover-image {
     width: 180px;
     height: 180px;
+  }
+  .cover-description {
+    width: 100%;
+    max-width: 260px;
   }
   .creator-row {
     flex-direction: column;
@@ -1034,6 +1272,10 @@ onMounted(() => {
   }
   .action-buttons {
     justify-content: center;
+  }
+  .collapsible-section .section-header {
+    justify-content: center;
+    gap: 8px;
   }
   .folder-manager-item {
     flex-direction: column;
@@ -1053,6 +1295,9 @@ onMounted(() => {
     width: calc(100% - 40px) !important;
   }
   .purchase-dialog :deep(.el-dialog) {
+    width: calc(100% - 40px) !important;
+  }
+  .transcript-dialog :deep(.el-dialog) {
     width: calc(100% - 40px) !important;
   }
 }
