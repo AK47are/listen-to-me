@@ -11,13 +11,17 @@ import {
   Loading,
   Search,
   CopyDocument,
+  MagicStick,
 } from '@element-plus/icons-vue'
 import { slotApi } from '@/api/creator/slot'
+import { creatorAiApi } from '@/api/creator/ai'
 
 const slotList = ref([])
 const loading = ref(false)
 const submitting = ref(false)
 const batchExpanded = ref(true)
+const aiGenerating = ref(false)
+const aiDescription = ref('')
 
 const pagination = reactive({
   pageNum: 1,
@@ -95,6 +99,38 @@ const copyAddress = (address) => {
     .catch(() => {
       ElMessage.error('复制失败')
     })
+}
+
+const handleAiGenerateSlots = async () => {
+  if (!aiDescription.value.trim()) {
+    ElMessage.warning('请输入排期描述')
+    return
+  }
+
+  aiGenerating.value = true
+  try {
+    const res = await creatorAiApi.aiGenerateSlots({ description: aiDescription.value })
+    const generatedSlots = res.data || []
+
+    if (generatedSlots.length === 0) {
+      ElMessage.warning('AI 未能生成时间槽，请尝试更具体的描述')
+      return
+    }
+
+    batchForm.slots = generatedSlots.map((slot) => ({
+      startTime: slot.startTime || '',
+      endTime: slot.endTime || '',
+      price: slot.price || 50,
+      address: slot.address || '',
+    }))
+
+    ElMessage.success(`AI 已生成 ${generatedSlots.length} 个时间槽，请确认后提交`)
+    aiDescription.value = ''
+  } catch (error) {
+    ElMessage.error(error.response?.data?.msg || 'AI 生成失败')
+  } finally {
+    aiGenerating.value = false
+  }
 }
 
 const handleBatchCreate = async () => {
@@ -221,6 +257,32 @@ onMounted(() => {
         <div class="batch-header">
           <h3>批量创建时间槽</h3>
           <span class="batch-hint">一次创建多个时段，提高排期效率</span>
+        </div>
+
+        <div class="ai-section">
+          <div class="ai-input-wrapper">
+            <el-input
+              v-model="aiDescription"
+              placeholder="例如：下周一三五下午3点到5点，价格80元"
+              class="ai-input"
+              :disabled="aiGenerating"
+              @keyup.enter="handleAiGenerateSlots"
+            >
+              <template #prefix>
+                <el-icon><MagicStick /></el-icon>
+              </template>
+            </el-input>
+            <button
+              class="ai-generate-btn"
+              :disabled="aiGenerating || !aiDescription.trim()"
+              @click="handleAiGenerateSlots"
+            >
+              <el-icon v-if="!aiGenerating"><MagicStick /></el-icon>
+              <el-icon v-else class="is-loading"><Loading /></el-icon>
+              <span>{{ aiGenerating ? '生成中' : 'AI 智能排期' }}</span>
+            </button>
+          </div>
+          <p class="ai-hint">用自然语言描述你的排期需求，AI 将自动生成时间槽</p>
         </div>
 
         <div class="batch-slots">
@@ -523,6 +585,66 @@ onMounted(() => {
 .batch-hint {
   font-size: 0.85rem;
   color: #8e8c84;
+}
+
+.ai-section {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #efeee8;
+}
+
+.ai-input-wrapper {
+  display: flex;
+  gap: 12px;
+}
+
+.ai-input {
+  flex: 1;
+}
+
+.ai-input :deep(.el-input__wrapper) {
+  background: #fcfbf7;
+  border: 1px solid #e8e6df;
+  border-radius: 40px;
+  box-shadow: none;
+  padding: 6px 16px;
+}
+
+.ai-input :deep(.el-input__prefix) {
+  color: #a28bc2;
+}
+
+.ai-generate-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f5f0fa;
+  border: 1px solid #e0d8ec;
+  border-radius: 40px;
+  padding: 10px 24px;
+  font-weight: 500;
+  color: #7c6a9c;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.ai-generate-btn:hover:not(:disabled) {
+  background: #e8ddf5;
+  border-color: #c8b8dc;
+  color: #5a4a72;
+}
+
+.ai-generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.ai-hint {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  color: #b0aea3;
 }
 
 .batch-slots {
@@ -1020,6 +1142,12 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 20px;
+  }
+  .ai-input-wrapper {
+    flex-direction: column;
+  }
+  .ai-generate-btn {
+    justify-content: center;
   }
   .row-fields {
     grid-template-columns: 1fr;
