@@ -35,8 +35,8 @@ INSERT INTO `sys_user_role` (`user_id`, `role_id`) VALUES
 -- 角色-权限关联
 INSERT INTO `sys_role_permission` (`role_id`, `perm_id`) VALUES
 (1, 1), (1, 2), (1, 3),
-(2, 2), (2, 3),
-(3, 3);
+(2, 1), (2, 2),
+(3, 1);
 
 -- ----------------------------
 -- 2. 音频资产域 - 测试数据
