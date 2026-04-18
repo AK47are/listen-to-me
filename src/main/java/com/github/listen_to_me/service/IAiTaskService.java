@@ -31,4 +31,13 @@ public interface IAiTaskService extends IService<AiTask> {
      * @param taskId 任务ID
      */
     void confirmTranscript(Long userId, String taskId);
+
+    /**
+     * 创建音频摘要任务
+     *
+     * @param userId  用户ID
+     * @param audioId 音频ID
+     * @return 任务信息
+     */
+    AiTaskVO createSummarizationTask(Long userId, Long audioId);
 }

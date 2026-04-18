@@ -13,6 +13,8 @@ public class AiTaskMqConfig {
     public static final String EXCHANGE_NAME = "ai.task.exchange";
     public static final String TRANSCRIPTION_QUEUE = "ai.transcription.queue";
     public static final String TRANSCRIPTION_ROUTING_KEY = "ai.transcription";
+    public static final String SUMMARIZATION_QUEUE = "ai.summarization.queue";
+    public static final String SUMMARIZATION_ROUTING_KEY = "ai.summarization";
 
     @Bean
     public DirectExchange aiTaskExchange() {
@@ -29,5 +31,17 @@ public class AiTaskMqConfig {
         return BindingBuilder.bind(transcriptionQueue())
                 .to(aiTaskExchange())
                 .with(TRANSCRIPTION_ROUTING_KEY);
+    }
+
+    @Bean
+    public Queue summarizationQueue() {
+        return new Queue(SUMMARIZATION_QUEUE, true);
+    }
+
+    @Bean
+    public Binding summarizationBinding() {
+        return BindingBuilder.bind(summarizationQueue())
+                .to(aiTaskExchange())
+                .with(SUMMARIZATION_ROUTING_KEY);
     }
 }

@@ -27,4 +27,16 @@ public class AiTaskProducer {
                 json);
         log.debug("发送转写任务 - taskId: {}, audioId: {}", taskId, audioId);
     }
+
+    public void sendSummarizationTask(String taskId, Long audioId) {
+        String json = JSONUtil.createObj()
+                .set("taskId", taskId)
+                .set("audioId", audioId)
+                .toString();
+        rabbitTemplate.convertAndSend(
+                AiTaskMqConfig.EXCHANGE_NAME,
+                AiTaskMqConfig.SUMMARIZATION_ROUTING_KEY,
+                json);
+        log.debug("发送摘要任务 - taskId: {}, audioId: {}", taskId, audioId);
+    }
 }

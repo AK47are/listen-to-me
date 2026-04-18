@@ -55,4 +55,11 @@ public class AiController {
             @RequestBody SlotsGenerateDTO dto) {
         return Result.success(aiService.generateSlots(userId, dto.getDescription()));
     }
+
+    @PostMapping("/note/{audioId}")
+    @Operation(summary = "申请 AI 摘要")
+    public Result<AiTaskVO> saveAiNote(@AuthenticationPrincipal Long userId,
+            @PathVariable Long audioId) {
+        return Result.success(aiTaskService.createSummarizationTask(userId, audioId));
+    }
 }

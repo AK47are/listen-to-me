@@ -2,6 +2,8 @@ package com.github.listen_to_me.service;
 
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -9,18 +11,22 @@ import org.springframework.stereotype.Service;
 import com.alibaba.dashscope.aigc.generation.Generation;
 import com.alibaba.dashscope.aigc.generation.GenerationParam;
 import com.alibaba.dashscope.aigc.generation.GenerationResult;
+import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversation;
+import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversationParam;
+import com.alibaba.dashscope.aigc.multimodalconversation.MultiModalConversationResult;
 import com.alibaba.dashscope.audio.qwen_asr.QwenTranscription;
 import com.alibaba.dashscope.audio.qwen_asr.QwenTranscriptionParam;
 import com.alibaba.dashscope.audio.qwen_asr.QwenTranscriptionQueryParam;
 import com.alibaba.dashscope.audio.qwen_asr.QwenTranscriptionResult;
 import com.alibaba.dashscope.common.Message;
+import com.alibaba.dashscope.common.MultiModalMessage;
 import com.alibaba.dashscope.common.ResponseFormat;
 import com.alibaba.dashscope.common.Role;
 import com.alibaba.dashscope.utils.Constants;
 import com.github.listen_to_me.common.config.DashScopeConfig;
 import com.github.listen_to_me.common.exception.BaseException;
-import com.github.listen_to_me.domain.vo.SlotVO;
 import com.github.listen_to_me.domain.entity.AiTask;
+import com.github.listen_to_me.domain.vo.SlotVO;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpRequest;
@@ -160,6 +166,81 @@ public class AiService {
         } catch (Exception e) {
             log.error("DashScope 调用失败 - model: {}", model, e);
             throw new BaseException(500, "AI 调用失败: " + e.getMessage());
+        }
+    }
+
+    /**
+     * 生成英文摘要
+     *
+     * @param fileUrl 公网可访问的音频文件 URL
+     * @return 英文摘要文本
+     */
+    public String generateSummary(String fileUrl) {
+        log.debug("开始生成英文摘要 - fileUrl: {}", fileUrl);
+
+        MultiModalMessage userMessage = MultiModalMessage.builder()
+                .role(Role.USER.getValue())
+                .content(Collections.singletonList(
+                        new HashMap<String, Object>() {
+                            {
+                                put("audio", fileUrl);
+                            }
+                        }))
+                .build();
+
+        MultiModalConversationParam param = MultiModalConversationParam.builder()
+                .apiKey(dashScopeConfig.getApiKey())
+                .model(dashScopeConfig.getSummarizationModel())
+                .message(userMessage)
+                .build();
+
+        try {
+            MultiModalConversation conv = new MultiModalConversation();
+            MultiModalConversationResult result = conv.call(param);
+            String summary = result.getOutput()
+                    .getChoices().get(0)
+                    .getMessage().getContent().get(0)
+                    .get("text").toString();
+            log.debug("英文摘要生成成功");
+            return summary;
+        } catch (Exception e) {
+            log.error("英文摘要生成失败", e);
+            throw new RuntimeException("英文摘要生成失败: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 翻译摘要为中文
+     *
+     * @param englishSummary 英文摘要
+     * @return 中文摘要
+     */
+    public String translateSummary(String englishSummary) {
+        log.debug("开始翻译摘要");
+
+        String prompt = "请将以下英文内容进行不多于 100 字的中文摘要分析。直接输出结果, 结果不用携带字数说明：\n" + englishSummary;
+
+        Message userMsg = Message.builder()
+                .role(Role.USER.getValue())
+                .content(prompt)
+                .build();
+
+        GenerationParam param = GenerationParam.builder()
+                .apiKey(dashScopeConfig.getApiKey())
+                .model(dashScopeConfig.getTranslationModel())
+                .messages(Arrays.asList(userMsg))
+                .resultFormat(GenerationParam.ResultFormat.MESSAGE)
+                .build();
+
+        try {
+            Generation gen = new Generation();
+            GenerationResult result = gen.call(param);
+            String response = result.getOutput().getChoices().get(0).getMessage().getContent();
+            log.debug("翻译完成");
+            return response;
+        } catch (Exception e) {
+            log.error("翻译失败", e);
+            throw new RuntimeException("翻译失败: " + e.getMessage(), e);
         }
     }
 }

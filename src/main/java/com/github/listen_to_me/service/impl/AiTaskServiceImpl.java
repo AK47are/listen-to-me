@@ -124,4 +124,28 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
 
         log.debug("确认转写结果成功 - taskId: {}, audioId: {}", taskId, task.getAudioId());
     }
+
+    @Override
+    public AiTaskVO createSummarizationTask(Long userId, Long audioId) {
+        log.debug("创建音频摘要任务 - 用户ID: {}, 音频ID: {}", userId, audioId);
+
+        AudioInfo audio = audioInfoService.getById(audioId);
+        if (audio == null || !audio.getCreatorId().equals(userId)) {
+            throw new BaseException(404, "音频不存在");
+        }
+
+        String taskId = IdUtil.fastSimpleUUID();
+
+        AiTask task = new AiTask();
+        task.setTaskId(taskId);
+        task.setUserId(userId);
+        task.setAudioId(audioId);
+        task.setType("SUMMARIZATION");
+        task.setStatus("PENDING");
+
+        aiTaskProducer.sendSummarizationTask(taskId, audioId);
+        save(task);
+
+        return getTaskById(userId, taskId);
+    }
 }
