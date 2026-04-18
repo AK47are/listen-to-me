@@ -36,6 +36,7 @@ import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.github.listen_to_me.domain.entity.AudioLike;
 import com.github.listen_to_me.domain.entity.AudioOrder;
+import com.github.listen_to_me.domain.entity.AudioSummary;
 import com.github.listen_to_me.domain.entity.AudioTranscript;
 import com.github.listen_to_me.domain.entity.SysUser;
 import com.github.listen_to_me.domain.entity.UserFollow;
@@ -53,6 +54,7 @@ import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
 import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.mapper.AudioLikeMapper;
 import com.github.listen_to_me.mapper.AudioOrderMapper;
+import com.github.listen_to_me.mapper.AudioSummaryMapper;
 import com.github.listen_to_me.mapper.AudioTranscriptMapper;
 import com.github.listen_to_me.mapper.AudioVOMapper;
 import com.github.listen_to_me.mapper.SysUserMapper;
@@ -95,6 +97,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     private final AudioFolderRelationMapper audioFolderRelationMapper;
     private final AudioTranscriptMapper audioTranscriptMapper;
     private final UserFollowMapper userFollowMapper;
+    private final AudioSummaryMapper audioSummaryMapper;
 
     @Override
     public IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery) {
@@ -409,11 +412,19 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
                 Wrappers.lambdaQuery(AudioFolderRelation.class).eq(AudioFolderRelation::getAudioId, audioId))));
         audioDetailVO.setStats(statsInfo);
 
-        // 转写和摘要
-        AudioTranscript transcript = audioTranscriptMapper.selectOne(
-                Wrappers.lambdaQuery(AudioTranscript.class).eq(AudioTranscript::getAudioId, audioId));
-        if (transcript != null) {
-            audioDetailVO.setTranscript(transcript.getFullText());
+        // 转写和摘要（仅免费音频或已购买用户可见）
+        if (!audioInfo.getIsPaid() || audioDetailVO.getIsPurchased()) {
+            AudioTranscript transcript = audioTranscriptMapper.selectOne(
+                    Wrappers.lambdaQuery(AudioTranscript.class).eq(AudioTranscript::getAudioId, audioId));
+            if (transcript != null) {
+                audioDetailVO.setTranscript(transcript.getFullText());
+            }
+
+            AudioSummary summary = audioSummaryMapper.selectOne(
+                    Wrappers.lambdaQuery(AudioSummary.class).eq(AudioSummary::getAudioId, audioId));
+            if (summary != null) {
+                audioDetailVO.setSummary(summary.getSummary());
+            }
         }
 
         return audioDetailVO;
