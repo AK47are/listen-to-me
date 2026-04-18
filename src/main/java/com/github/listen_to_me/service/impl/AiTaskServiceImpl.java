@@ -9,9 +9,11 @@ import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.producer.AiTaskProducer;
 import com.github.listen_to_me.domain.entity.AiTask;
 import com.github.listen_to_me.domain.entity.AudioInfo;
+import com.github.listen_to_me.domain.entity.AudioSummary;
 import com.github.listen_to_me.domain.entity.AudioTranscript;
 import com.github.listen_to_me.domain.vo.AiTaskVO;
 import com.github.listen_to_me.mapper.AiTaskMapper;
+import com.github.listen_to_me.mapper.AudioSummaryMapper;
 import com.github.listen_to_me.mapper.AudioTranscriptMapper;
 import com.github.listen_to_me.service.IAiTaskService;
 import com.github.listen_to_me.service.IAudioInfoService;
@@ -31,6 +33,7 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
     private final AiTaskProducer aiTaskProducer;
     private final IAudioInfoService audioInfoService;
     private final AudioTranscriptMapper audioTranscriptMapper;
+    private final AudioSummaryMapper audioSummaryMapper;
 
     @Override
     public AiTaskVO getTaskById(Long userId, String taskId) {
@@ -147,5 +150,39 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
         save(task);
 
         return getTaskById(userId, taskId);
+    }
+
+    @Override
+    @Transactional
+    public void confirmSummary(Long userId, String taskId) {
+        log.debug("确认摘要结果 - 用户ID: {}, 任务ID: {}", userId, taskId);
+
+        AiTask task = getOne(Wrappers.<AiTask>lambdaQuery().eq(AiTask::getTaskId, taskId));
+        if (task == null) {
+            throw new BaseException(404, "任务不存在");
+        }
+        if (!task.getUserId().equals(userId)) {
+            throw new BaseException(403, "无权操作该任务");
+        }
+        if (!"SUCCESS".equals(task.getStatus())) {
+            throw new BaseException(400, "任务未完成，无法确认");
+        }
+
+        // 解析 result JSON
+        JSONObject resultJson = JSONUtil.parseObj(task.getResult());
+        String summary = resultJson.getStr("summary");
+
+        // 删除该音频的旧摘要记录
+        audioSummaryMapper.delete(Wrappers.<AudioSummary>lambdaQuery()
+                .eq(AudioSummary::getAudioId, task.getAudioId()));
+
+        // 存入 audio_summary 表
+        AudioSummary audioSummary = new AudioSummary();
+        audioSummary.setAudioId(task.getAudioId());
+        audioSummary.setTaskId(taskId);
+        audioSummary.setSummary(summary);
+        audioSummaryMapper.insert(audioSummary);
+
+        log.debug("确认摘要结果成功 - taskId: {}, audioId: {}", taskId, task.getAudioId());
     }
 }
