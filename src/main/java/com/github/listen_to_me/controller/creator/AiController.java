@@ -1,14 +1,20 @@
 package com.github.listen_to_me.controller.creator;
 
+import java.util.List;
+
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.listen_to_me.common.Result;
+import com.github.listen_to_me.domain.dto.SlotsGenerateDTO;
 import com.github.listen_to_me.domain.vo.AiTaskVO;
+import com.github.listen_to_me.domain.vo.SlotVO;
+import com.github.listen_to_me.service.AiService;
 import com.github.listen_to_me.service.IAiTaskService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController("creatorAiController")
 public class AiController {
 
+    private final AiService aiService;
     private final IAiTaskService aiTaskService;
 
     @PostMapping("/transcript/{audioId}")
@@ -40,5 +47,12 @@ public class AiController {
             @PathVariable String taskId) {
         aiTaskService.confirmTranscript(userId, taskId);
         return Result.success();
+    }
+
+    @PostMapping("/slots")
+    @Operation(summary = "AI 智能排期（预览）")
+    public Result<List<SlotVO>> generateSlots(@AuthenticationPrincipal Long userId,
+            @RequestBody SlotsGenerateDTO dto) {
+        return Result.success(aiService.generateSlots(userId, dto.getDescription()));
     }
 }
