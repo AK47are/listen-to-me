@@ -62,4 +62,12 @@ public class AiController {
             @PathVariable Long audioId) {
         return Result.success(aiTaskService.createSummarizationTask(userId, audioId));
     }
+
+    @PutMapping("/note/{taskId}/confirm")
+    @Operation(summary = "确认摘要结果")
+    public Result<Void> confirmSummary(@AuthenticationPrincipal Long userId,
+            @PathVariable String taskId) {
+        aiTaskService.confirmSummary(userId, taskId);
+        return Result.success();
+    }
 }

@@ -40,4 +40,12 @@ public interface IAiTaskService extends IService<AiTask> {
      * @return 任务信息
      */
     AiTaskVO createSummarizationTask(Long userId, Long audioId);
+
+    /**
+     * 确认摘要结果，将结果存入 audio_summary 表
+     *
+     * @param userId 当前用户ID
+     * @param taskId 任务ID
+     */
+    void confirmSummary(Long userId, String taskId);
 }
