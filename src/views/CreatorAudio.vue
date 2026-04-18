@@ -1,235 +1,3 @@
-<script setup>
-import { ref, onMounted, reactive } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { Edit, Delete, Loading, Headset, Star, Plus } from '@element-plus/icons-vue'
-import { creatorAudioApi } from '@/api/creator/audio'
-
-const audioList = ref([])
-const loading = ref(false)
-const pagination = ref({
-  pageNum: 1,
-  pageSize: 20,
-  total: 0,
-})
-
-const dialogVisible = ref(false)
-const dialogTitle = ref('编辑稿件')
-const submitting = ref(false)
-const uploadingCover = ref(false)
-const uploadingAudio = ref(false)
-
-const audioForm = reactive({
-  id: null,
-  title: '',
-  coverUrl: '',
-  description: '',
-  trialDuration: 30,
-  isPaid: false,
-  price: 0,
-  visibility: 'PUBLIC',
-})
-
-const getAudioList = async () => {
-  loading.value = true
-  try {
-    const res = await creatorAudioApi.getAudioPage({
-      pageNum: pagination.value.pageNum,
-      pageSize: pagination.value.pageSize,
-    })
-    audioList.value = res.data.records || []
-    pagination.value.total = res.data.total || 0
-  } catch (error) {
-    ElMessage.error('获取稿件列表失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-const handlePageChange = (page) => {
-  pagination.value.pageNum = page
-  getAudioList()
-}
-
-const handleDeleteAudio = async (audio) => {
-  try {
-    await ElMessageBox.confirm('确定要删除该稿件吗？', '提示', {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
-
-    const index = audioList.value.findIndex((item) => item.id === audio.id)
-    if (index !== -1) {
-      audioList.value.splice(index, 1)
-    }
-
-    await creatorAudioApi.deleteAudio(audio.id)
-    ElMessage.success('删除成功')
-  } catch (error) {
-    if (error !== 'cancel') {
-      ElMessage.error('删除失败')
-      await getAudioList()
-    }
-  }
-}
-
-const handleEditAudio = async (audio) => {
-  dialogTitle.value = '编辑稿件'
-  try {
-    const res = await creatorAudioApi.getAudioDetail(audio.id)
-    const data = res.data
-    audioForm.id = data.id
-    audioForm.title = data.title || ''
-    audioForm.coverUrl = data.coverUrl || ''
-    audioForm.description = data.description || ''
-    audioForm.trialDuration = data.trialDuration ?? 30
-    audioForm.isPaid = data.isPaid ?? false
-    audioForm.price = data.price ?? 0
-    audioForm.visibility = data.visibility || 'PUBLIC'
-    dialogVisible.value = true
-  } catch (error) {
-    ElMessage.error('获取稿件详情失败')
-  }
-}
-
-const beforeUploadCover = (file) => {
-  const isImage = file.type === 'image/jpeg' || file.type === 'image/png'
-  const isLt20M = file.size / 1024 / 1024 < 20
-
-  if (!isImage) {
-    ElMessage.error('只能上传 JPG/PNG 图片')
-    return false
-  }
-  if (!isLt20M) {
-    ElMessage.error('图片大小不能超过 20MB')
-    return false
-  }
-  return true
-}
-
-const handleCoverUpload = async (options) => {
-  const file = options.file
-  if (!file) {
-    ElMessage.error('请选择文件')
-    return
-  }
-  uploadingCover.value = true
-  try {
-    const res = await creatorAudioApi.uploadCover(file)
-    audioForm.coverUrl = res.data
-    ElMessage.success('封面上传成功')
-  } catch (error) {
-    ElMessage.error(error.response?.data?.msg || '封面上传失败')
-  } finally {
-    uploadingCover.value = false
-  }
-}
-
-const beforeUploadAudio = (file) => {
-  const isMp3 = file.type === 'audio/mpeg'
-  const isLt200M = file.size / 1024 / 1024 < 200
-
-  if (!isMp3) {
-    ElMessage.error('只能上传 MP3 格式')
-    return false
-  }
-  if (!isLt200M) {
-    ElMessage.error('文件大小不能超过 200MB')
-    return false
-  }
-  return true
-}
-
-const handleAudioUpload = async (options) => {
-  const file = options.file
-  if (!file) {
-    ElMessage.error('请选择文件')
-    return
-  }
-  uploadingAudio.value = true
-  try {
-    const res = await creatorAudioApi.uploadAudio(file)
-    audioForm.audioUrl = res.data
-    ElMessage.success('音频上传成功')
-  } catch (error) {
-    ElMessage.error(error.response?.data?.msg || '音频上传失败')
-  } finally {
-    uploadingAudio.value = false
-  }
-}
-
-const handleSubmit = async () => {
-  if (!audioForm.title.trim()) {
-    ElMessage.warning('请输入标题')
-    return
-  }
-
-  if (!audioForm.coverUrl) {
-    ElMessage.warning('请上传封面')
-    return
-  }
-
-  if (audioForm.isPaid && (!audioForm.price || audioForm.price <= 0)) {
-    ElMessage.warning('付费音频请设置价格')
-    return
-  }
-
-  submitting.value = true
-  try {
-    await creatorAudioApi.updateAudio({
-      id: audioForm.id,
-      title: audioForm.title,
-      coverUrl: audioForm.coverUrl,
-      description: audioForm.description,
-      trialDuration: audioForm.trialDuration,
-      isPaid: audioForm.isPaid,
-      price: audioForm.price,
-      visibility: audioForm.visibility,
-    })
-    ElMessage.success('保存成功')
-    dialogVisible.value = false
-    await getAudioList()
-  } catch (error) {
-    ElMessage.error(error.response?.data?.msg || '保存失败')
-  } finally {
-    submitting.value = false
-  }
-}
-
-const handleDialogClose = () => {
-  audioForm.id = null
-  audioForm.title = ''
-  audioForm.coverUrl = ''
-  audioForm.description = ''
-  audioForm.trialDuration = 30
-  audioForm.isPaid = false
-  audioForm.price = 0
-  audioForm.visibility = 'PUBLIC'
-  audioForm.audioUrl = ''
-}
-
-const formatDuration = (seconds) => {
-  if (!seconds) return '0 分钟'
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  return secs > 0 ? `${mins} 分 ${secs} 秒` : `${mins} 分钟`
-}
-
-const getStatusConfig = (status) => {
-  const statusMap = {
-    PENDING_TRANSCODE: { text: '转码中', class: 'status-pending' },
-    TRANSCODING: { text: '转码中', class: 'status-pending' },
-    ONLINE: { text: '已发布', class: 'status-approved' },
-    FAILED: { text: '失败', class: 'status-rejected' },
-  }
-  return statusMap[status] || { text: '处理中', class: 'status-pending' }
-}
-
-onMounted(() => {
-  getAudioList()
-})
-</script>
-
 <template>
   <div class="my-audio-page">
     <div class="page-header">
@@ -298,6 +66,23 @@ onMounted(() => {
               <span>删除</span>
             </button>
           </div>
+
+          <div class="card-ai-section">
+            <div class="ai-section-title">
+              <el-icon><MagicStick /></el-icon>
+              <span>AI 工具</span>
+            </div>
+            <div class="ai-buttons">
+              <button class="ai-action-btn" @click="openAiDialog(audio, 'transcript')">
+                <el-icon><Document /></el-icon>
+                <span>智能转写</span>
+              </button>
+              <button class="ai-action-btn" @click="openAiDialog(audio, 'summary')">
+                <el-icon><MagicStick /></el-icon>
+                <span>智能摘要</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -315,7 +100,7 @@ onMounted(() => {
     <el-dialog
       v-model="dialogVisible"
       :title="dialogTitle"
-      width="700px"
+      width="600px"
       :close-on-click-modal="false"
       @close="handleDialogClose"
     >
@@ -415,8 +200,241 @@ onMounted(() => {
         </div>
       </template>
     </el-dialog>
+
+    <AiManageDialog
+      v-for="audio in audioList"
+      :key="`transcript-${audio.id}`"
+      :ref="(el) => setDialogRef(el, audio.id, 'transcript')"
+      :audio-id="audio.id"
+      type="transcript"
+      :audio-title="audio.title"
+      @success="handleAiSuccess"
+    />
+    <AiManageDialog
+      v-for="audio in audioList"
+      :key="`summary-${audio.id}`"
+      :ref="(el) => setDialogRef(el, audio.id, 'summary')"
+      :audio-id="audio.id"
+      type="summary"
+      :audio-title="audio.title"
+      @success="handleAiSuccess"
+    />
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted, reactive } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import {
+  Edit,
+  Delete,
+  Loading,
+  Headset,
+  Star,
+  Plus,
+  Document,
+  MagicStick,
+} from '@element-plus/icons-vue'
+import { creatorAudioApi } from '@/api/creator/audio'
+import AiManageDialog from '@/components/AiManageDialog.vue'
+
+const audioList = ref([])
+const loading = ref(false)
+const pagination = ref({
+  pageNum: 1,
+  pageSize: 20,
+  total: 0,
+})
+
+const dialogVisible = ref(false)
+const dialogTitle = ref('编辑稿件')
+const submitting = ref(false)
+const uploadingCover = ref(false)
+
+const audioForm = reactive({
+  id: null,
+  title: '',
+  coverUrl: '',
+  description: '',
+  trialDuration: 30,
+  isPaid: false,
+  price: 0,
+  visibility: 'PUBLIC',
+})
+
+const dialogRefs = new Map()
+
+const setDialogRef = (el, audioId, type) => {
+  if (el) {
+    dialogRefs.set(`${audioId}-${type}`, el)
+  }
+}
+
+const openAiDialog = (audio, type) => {
+  const ref = dialogRefs.get(`${audio.id}-${type}`)
+  if (ref) {
+    ref.open()
+  }
+}
+
+const handleAiSuccess = () => {
+  getAudioList()
+}
+
+const getAudioList = async () => {
+  loading.value = true
+  try {
+    const res = await creatorAudioApi.getAudioPage({
+      pageNum: pagination.value.pageNum,
+      pageSize: pagination.value.pageSize,
+    })
+    audioList.value = res.data.records || []
+    pagination.value.total = res.data.total || 0
+  } catch (error) {
+    ElMessage.error('获取稿件列表失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const handlePageChange = (page) => {
+  pagination.value.pageNum = page
+  getAudioList()
+}
+
+const handleDeleteAudio = async (audio) => {
+  try {
+    await ElMessageBox.confirm('确定要删除该稿件吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    })
+
+    await creatorAudioApi.deleteAudio(audio.id)
+    ElMessage.success('删除成功')
+    await getAudioList()
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+const handleEditAudio = async (audio) => {
+  dialogTitle.value = '编辑稿件'
+  try {
+    const res = await creatorAudioApi.getAudioDetail(audio.id)
+    const data = res.data
+    audioForm.id = data.id
+    audioForm.title = data.title || ''
+    audioForm.coverUrl = data.coverUrl || ''
+    audioForm.description = data.description || ''
+    audioForm.trialDuration = data.trialDuration ?? 30
+    audioForm.isPaid = data.isPaid ?? false
+    audioForm.price = data.price ?? 0
+    audioForm.visibility = data.visibility || 'PUBLIC'
+    dialogVisible.value = true
+  } catch (error) {
+    ElMessage.error('获取稿件详情失败')
+  }
+}
+
+const beforeUploadCover = (file) => {
+  const isImage = file.type === 'image/jpeg' || file.type === 'image/png'
+  const isLt20M = file.size / 1024 / 1024 < 20
+
+  if (!isImage) {
+    ElMessage.error('只能上传 JPG/PNG 图片')
+    return false
+  }
+  if (!isLt20M) {
+    ElMessage.error('图片大小不能超过 20MB')
+    return false
+  }
+  return true
+}
+
+const handleCoverUpload = async (options) => {
+  const file = options.file
+  if (!file) {
+    ElMessage.error('请选择文件')
+    return
+  }
+  uploadingCover.value = true
+  try {
+    const res = await creatorAudioApi.uploadCover(file)
+    audioForm.coverUrl = res.data
+    ElMessage.success('封面上传成功')
+  } catch (error) {
+    ElMessage.error(error.response?.data?.msg || '封面上传失败')
+  } finally {
+    uploadingCover.value = false
+  }
+}
+
+const handleSubmit = async () => {
+  if (!audioForm.title.trim()) {
+    ElMessage.warning('请输入标题')
+    return
+  }
+
+  if (!audioForm.coverUrl) {
+    ElMessage.warning('请上传封面')
+    return
+  }
+
+  if (audioForm.isPaid && (!audioForm.price || audioForm.price <= 0)) {
+    ElMessage.warning('付费音频请设置价格')
+    return
+  }
+
+  submitting.value = true
+  try {
+    await creatorAudioApi.updateAudio({
+      id: audioForm.id,
+      title: audioForm.title,
+      coverUrl: audioForm.coverUrl,
+      description: audioForm.description,
+      trialDuration: audioForm.trialDuration,
+      isPaid: audioForm.isPaid,
+      price: audioForm.price,
+      visibility: audioForm.visibility,
+    })
+    ElMessage.success('保存成功')
+    dialogVisible.value = false
+    await getAudioList()
+  } catch (error) {
+    ElMessage.error(error.response?.data?.msg || '保存失败')
+  } finally {
+    submitting.value = false
+  }
+}
+
+const handleDialogClose = () => {
+  audioForm.id = null
+  audioForm.title = ''
+  audioForm.coverUrl = ''
+  audioForm.description = ''
+  audioForm.trialDuration = 30
+  audioForm.isPaid = false
+  audioForm.price = 0
+  audioForm.visibility = 'PUBLIC'
+}
+
+const getStatusConfig = (status) => {
+  const statusMap = {
+    PENDING_TRANSCODE: { text: '转码中', class: 'status-pending' },
+    TRANSCODING: { text: '转码中', class: 'status-pending' },
+    ONLINE: { text: '已发布', class: 'status-approved' },
+    FAILED: { text: '失败', class: 'status-rejected' },
+  }
+  return statusMap[status] || { text: '处理中', class: 'status-pending' }
+}
+
+onMounted(() => {
+  getAudioList()
+})
+</script>
 
 <style scoped>
 .my-audio-page {
@@ -687,6 +705,60 @@ onMounted(() => {
   border-color: #f5c2c2;
 }
 
+.card-ai-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 16px;
+  border-left: 1px solid #efeee8;
+  min-width: 140px;
+}
+
+.ai-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #8e8c84;
+  letter-spacing: 0.3px;
+}
+
+.ai-section-title .el-icon {
+  font-size: 14px;
+  color: #a28bc2;
+}
+
+.ai-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ai-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 40px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fcfbf7;
+  border: 1px solid #e8e6df;
+  color: #5a4a72;
+  white-space: nowrap;
+}
+
+.ai-action-btn:hover {
+  background: #f5f0fa;
+  border-color: #c8b8dc;
+  color: #4a3a62;
+  transform: translateY(-1px);
+}
+
 .pagination-wrapper {
   display: flex;
   justify-content: center;
@@ -912,6 +984,23 @@ onMounted(() => {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
+  }
+
+  .card-ai-section {
+    border-left: none;
+    border-top: 1px solid #efeee8;
+    padding-left: 0;
+    padding-top: 16px;
+    margin-top: 8px;
+    width: 100%;
+  }
+
+  .ai-buttons {
+    flex-direction: row;
+  }
+
+  .ai-action-btn {
+    flex: 1;
   }
 }
 </style>
