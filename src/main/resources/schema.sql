@@ -337,3 +337,15 @@ CREATE TABLE IF NOT EXISTS `ai_task` (
   INDEX idx_audio_id (audio_id),
   INDEX idx_status (status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI任务表';
+
+-- 音频摘要结果表
+CREATE TABLE IF NOT EXISTS `audio_summary` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `audio_id` bigint NOT NULL COMMENT '音频ID',
+  `task_id` varchar(64) COMMENT '关联的AI任务ID',
+  `summary` text NOT NULL COMMENT 'AI生成的中文摘要',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE INDEX uk_audio_id (audio_id),
+  INDEX idx_task_id (task_id),
+  CONSTRAINT fk_summary_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='音频摘要结果表';
