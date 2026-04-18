@@ -68,6 +68,9 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
         if (audio == null || !audio.getCreatorId().equals(userId)) {
             throw new BaseException(404, "音频不存在");
         }
+        if (!"ONLINE".equals(audio.getStatus())) {
+            throw new BaseException(400, "音频尚未发布，无法申请AI任务");
+        }
 
         // 生成任务ID
         String taskId = IdUtil.fastSimpleUUID();
@@ -135,6 +138,10 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
         AudioInfo audio = audioInfoService.getById(audioId);
         if (audio == null || !audio.getCreatorId().equals(userId)) {
             throw new BaseException(404, "音频不存在");
+        }
+        // 校验音频发布状态
+        if (!"ONLINE".equals(audio.getStatus())) {
+            throw new BaseException(400, "音频尚未发布，无法申请AI任务");
         }
 
         String taskId = IdUtil.fastSimpleUUID();
