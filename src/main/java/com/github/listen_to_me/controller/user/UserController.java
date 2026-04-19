@@ -1,10 +1,13 @@
 package com.github.listen_to_me.controller.user;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
@@ -26,6 +29,13 @@ public class UserController {
     @GetMapping("/profile")
     public Result<UserVO> getProfile() {
         return Result.success(sysUserService.findProfile());
+    }
+
+    @Operation(summary = "上传用户头像")
+    @PostMapping("/avatar/upload")
+    public Result<String> uploadAvatar(
+            @RequestPart("avatarFile") MultipartFile avatarFile) throws Exception {
+        return Result.success(sysUserService.uploadAvatar(avatarFile));
     }
 
     @Operation(summary = "修改个人资料")

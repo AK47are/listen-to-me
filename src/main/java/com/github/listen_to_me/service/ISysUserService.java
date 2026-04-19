@@ -2,6 +2,8 @@ package com.github.listen_to_me.service;
 
 import java.math.BigDecimal;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.github.listen_to_me.domain.dto.RechargeResultDTO;
@@ -23,6 +25,15 @@ public interface ISysUserService extends IService<SysUser> {
     UserVO findProfile();
 
     void modifyProfile(UserProfileUpdateDTO updateDTO);
+
+    /**
+     * 上传用户头像
+     * 
+     * @param avatarFile 头像文件
+     * @return 临时访问URL
+     * @throws Exception 上传失败时抛出异常
+     */
+    String uploadAvatar(MultipartFile avatarFile) throws Exception;
 
     /**
      * 获取用户余额统计信息

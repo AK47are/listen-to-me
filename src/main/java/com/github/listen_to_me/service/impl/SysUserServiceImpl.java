@@ -45,10 +45,13 @@ import com.github.listen_to_me.service.ICoinTransactionService;
 import com.github.listen_to_me.service.ISysUserService;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.codec.Base64;
+import cn.hutool.core.io.FileTypeUtil;
 import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -61,6 +64,32 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     private final AlipayConfig alipayConfig;
     private final UserRechargeOrderMapper userRechargeOrderMapper;
     private final CoinTransactionMapper coinTransactionMapper;
+
+    @Override
+    public String uploadAvatar(MultipartFile avatarFile) throws Exception {
+        log.debug("上传用户头像 - 文件名: {}, 大小: {}", avatarFile.getOriginalFilename(), avatarFile.getSize());
+        
+        // 1. 文件类型校验
+        String fileType = FileTypeUtil.getType(avatarFile.getInputStream());
+        if (fileType == null || !"jpg".equals(fileType) && !"jpeg".equals(fileType) && !"png".equals(fileType)) {
+            throw new BaseException(400, "仅支持上传 JPG、JPEG、PNG 格式头像");
+        }
+        
+        // 2. 上传到 Minio（temp 目录）
+        String objectName = MinioUtils.uploadFile(avatarFile, "temp", avatarFile.getOriginalFilename());
+        
+        // 3. 生成临时访问 URL
+        String tempUrl = MinioUtils.getPresignedUrl(objectName);
+        
+        // 4. Base64 编码临时 URL
+        String tempUrlBase64 = Base64.encode(tempUrl);
+        
+        // 5. 存储到 Redis：key=temp:avatar: + base64(tempUrl), value=objectName
+        RedisUtils.set(RedisKey.TEMP_AVATAR_URL, tempUrlBase64, objectName);
+        
+        log.debug("上传头像成功 - objectName: {}, tempUrl: {}", objectName, tempUrl);
+        return tempUrl;
+    }
 
     @Override
     public UserVO findProfile() {

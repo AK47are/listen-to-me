@@ -12,6 +12,7 @@ public enum RedisKey {
     VERIFY_CODE("captcha:verify:", 5L, TimeUnit.MINUTES),
     TEMP_AUDIO_URL("temp:audio:", 10L, TimeUnit.MINUTES),
     TEMP_COVER_URL("temp:cover:", 10L, TimeUnit.MINUTES),
+    TEMP_AVATAR_URL("temp:avatar:", 10L, TimeUnit.MINUTES),
     HOT_AUDIO_RANK("hot:audio:rank", 30L, TimeUnit.DAYS),
     ONLINE_RAW_URL("online:audio:raw:", 30L, TimeUnit.MINUTES),
     ONLINE_CLIP_URL("online:audio:clip:", 7L, TimeUnit.MINUTES),
