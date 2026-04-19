@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.Valid;
 
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
@@ -40,7 +41,7 @@ public class UserController {
 
     @Operation(summary = "修改个人资料")
     @PutMapping("/profile")
-    public Result<Void> updateProfile(@RequestBody UserProfileUpdateDTO updateDTO) {
+    public Result<Void> updateProfile(@Valid @RequestBody UserProfileUpdateDTO updateDTO) {
         sysUserService.modifyProfile(updateDTO);
         return Result.success();
     }
