@@ -74,6 +74,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
+    @Transactional
     public void modifyProfile(UserProfileUpdateDTO updateDTO) {
         Long currId = SecurityUtils.getCurrentUserId();
         SysUser sysUser = this.getById(currId);
