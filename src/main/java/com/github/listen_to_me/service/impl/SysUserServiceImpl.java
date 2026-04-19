@@ -10,6 +10,7 @@ import java.util.UUID;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.alipay.easysdk.factory.Factory;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
@@ -51,7 +52,6 @@ import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @Service
@@ -68,25 +68,25 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Override
     public String uploadAvatar(MultipartFile avatarFile) throws Exception {
         log.debug("上传用户头像 - 文件名: {}, 大小: {}", avatarFile.getOriginalFilename(), avatarFile.getSize());
-        
+
         // 1. 文件类型校验
         String fileType = FileTypeUtil.getType(avatarFile.getInputStream());
         if (fileType == null || !"jpg".equals(fileType) && !"jpeg".equals(fileType) && !"png".equals(fileType)) {
             throw new BaseException(400, "仅支持上传 JPG、JPEG、PNG 格式头像");
         }
-        
+
         // 2. 上传到 Minio（temp 目录）
         String objectName = MinioUtils.uploadFile(avatarFile, "temp", avatarFile.getOriginalFilename());
-        
+
         // 3. 生成临时访问 URL
         String tempUrl = MinioUtils.getPresignedUrl(objectName);
-        
+
         // 4. Base64 编码临时 URL
         String tempUrlBase64 = Base64.encode(tempUrl);
-        
+
         // 5. 存储到 Redis：key=temp:avatar: + base64(tempUrl), value=objectName
         RedisUtils.set(RedisKey.TEMP_AVATAR_URL, tempUrlBase64, objectName);
-        
+
         log.debug("上传头像成功 - objectName: {}, tempUrl: {}", objectName, tempUrl);
         return tempUrl;
     }
@@ -106,46 +106,88 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     @Transactional
     public void modifyProfile(UserProfileUpdateDTO updateDTO) {
         Long currId = SecurityUtils.getCurrentUserId();
+        log.debug("更新个人资料 - 开始处理，用户ID: {}", currId);
+
         SysUser sysUser = this.getById(currId);
+        if (sysUser == null) {
+            log.error("用户不存在 - ID: {}", currId);
+            throw new BaseException("用户不存在");
+        }
 
         String newPhone = updateDTO.getPhone();
         String newEmail = updateDTO.getEmail();
         String oldPhone = sysUser.getPhone();
         String oldEmail = sysUser.getEmail();
-        if (StrUtil.isBlank(newPhone) && StrUtil.isBlank(newEmail)) {
-            throw new BaseException(400, "手机号和邮箱不能同时为空");
-        }
 
-        boolean needUpdatePhone = StrUtil.isNotBlank(newPhone)
-                && !newPhone.equals(oldPhone);
-        boolean needUpdateEmail = StrUtil.isNotBlank(newEmail)
-                && !newEmail.equals(oldEmail);
+        boolean needUpdatePhone = newPhone != null && !newPhone.equals(oldPhone);
+        boolean needUpdateEmail = newEmail != null && !newEmail.equals(oldEmail);
+
         if (needUpdatePhone && needUpdateEmail) {
+            log.debug("手机号和邮箱不能同时更新 - 用户ID: {}", currId);
             throw new BaseException(400, "手机号和邮箱不能同时更新");
         }
 
         if (needUpdatePhone || needUpdateEmail) {
             String target = needUpdatePhone ? newPhone : newEmail;
             String cachedVerifyCode = RedisUtils.get(RedisKey.VERIFY_CODE, target);
+
             if (StrUtil.isBlank(cachedVerifyCode) || !cachedVerifyCode.equalsIgnoreCase(updateDTO.getVerifyCode())) {
-                throw new BaseException(400, "校验码错误或已过期");
+                log.debug("验证码错误或已过期 - 目标: {}, 用户ID: {}", target, currId);
+                throw new BaseException(400, "验证码错误或已过期");
             }
             RedisUtils.delete(RedisKey.VERIFY_CODE, target);
+            log.debug("验证码验证成功 - 目标: {}, 用户ID: {}", target, currId);
         }
 
         boolean needUpdatePassword = StrUtil.isNotBlank(updateDTO.getNewPassword());
-        if (needUpdatePassword && !passwordEncoder.matches(updateDTO.getOldPassword(), sysUser.getPassword())) {
-            throw new BaseException(400, "原密码错误");
-        }
-
-        BeanUtil.copyProperties(updateDTO, sysUser);
         if (needUpdatePassword) {
-            sysUser.setPassword(passwordEncoder.encode(updateDTO.getNewPassword()));
-            log.debug("用户更新密码，原密码-{}，新密码-{}", updateDTO.getOldPassword(), updateDTO.getNewPassword());
-        }
-        // TODO: 用户头像 url 处理
+            if (StrUtil.isBlank(updateDTO.getOldPassword())) {
+                log.debug("修改密码需要提供原密码 - 用户ID: {}", currId);
+                throw new BaseException(400, "修改密码需要提供原密码");
+            }
 
+            if (!passwordEncoder.matches(updateDTO.getOldPassword(), sysUser.getPassword())) {
+                log.debug("原密码错误 - 用户ID: {}", currId);
+                throw new BaseException(400, "原密码错误");
+            }
+
+            sysUser.setPassword(passwordEncoder.encode(updateDTO.getNewPassword()));
+            log.debug("密码更新成功 - 用户ID: {}", currId);
+        }
+
+        if (needUpdatePhone) {
+            sysUser.setPhone(newPhone);
+        }
+        if (needUpdateEmail) {
+            sysUser.setEmail(newEmail);
+        }
+        if (StrUtil.isNotBlank(updateDTO.getNickname())) {
+            sysUser.setNickname(updateDTO.getNickname());
+        }
+
+        String avatarUrl = updateDTO.getAvatar();
+        if (avatarUrl != null) {
+            String tempUrlBase64 = Base64.encode(avatarUrl);
+            String objectName = RedisUtils.get(RedisKey.TEMP_AVATAR_URL, tempUrlBase64);
+
+            if (StrUtil.isBlank(objectName)) {
+                log.error("无法获取头像的objectName - 用户ID: {}, URL: {}", currId, avatarUrl);
+                throw new BaseException("头像数据异常，请重新上传头像");
+            }
+
+            try {
+                String newObjectName = MinioUtils.copyFile(objectName, "avatar");
+                MinioUtils.removeFile(objectName);
+                sysUser.setAvatar(newObjectName);
+                RedisUtils.delete(RedisKey.TEMP_AVATAR_URL, tempUrlBase64);
+                log.debug("头像从临时目录移动到正式目录 - 用户ID: {}, 新路径: {}", currId, newObjectName);
+            } catch (Exception e) {
+                log.error("移动头像文件失败 - 用户ID: {}, 原路径: {}", currId, objectName, e);
+                throw new BaseException("头像处理失败，请重试");
+            }
+        }
         this.updateById(sysUser);
+        log.debug("个人资料更新完成 - 用户ID: {}", currId);
     }
 
     @Override
