@@ -9,9 +9,9 @@ export const profileApi = {
   },
   uploadAvatar(file) {
     const formData = new FormData()
-    formData.append('coverFile', file)
+    formData.append('avatarFile', file)
     return request({
-      url: '/creator/audio/cover/upload',
+      url: '/user/avatar/upload',
       method: 'post',
       data: formData,
       headers: { 'Content-Type': 'multipart/form-data' },
