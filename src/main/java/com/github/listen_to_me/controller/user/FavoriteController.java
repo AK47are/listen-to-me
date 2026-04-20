@@ -19,7 +19,7 @@ import com.github.listen_to_me.domain.query.FavoriteQuery;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.FolderVO;
 import com.github.listen_to_me.service.IAudioInfoService;
-import com.github.listen_to_me.service.ISysUserFolderService;
+import com.github.listen_to_me.service.IFolderService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @Tag(name = "收藏夹管理", description = "包含增删查收藏夹等接口")
 public class FavoriteController {
 
-    private final ISysUserFolderService sysUserFolderService;
+    private final IFolderService folderService;
     private final IAudioInfoService audioInfoService;
 
     @PostMapping("/folder")
@@ -42,14 +42,14 @@ public class FavoriteController {
     public Result<Void> saveFavoriteFolder(
             @AuthenticationPrincipal Long userId,
             @Valid @RequestBody FolderDTO folderDTO) {
-        sysUserFolderService.createFolder(userId, folderDTO);
+        folderService.createFolder(userId, folderDTO);
         return Result.success();
     }
 
     @GetMapping("/folder/list")
     @Operation(summary = "获取收藏夹列表")
-    public Result<List<FolderVO>> getFolderList() {
-        return Result.success(sysUserFolderService.getFolderList());
+    public Result<List<FolderVO>> getFolderList(@AuthenticationPrincipal Long userId) {
+        return Result.success(folderService.getFolderList(userId));
     }
 
     @GetMapping("/page")
@@ -63,7 +63,7 @@ public class FavoriteController {
     public Result<Void> deleteFavoriteFolder(
             @AuthenticationPrincipal Long userId,
             @PathVariable Long folderId) {
-        sysUserFolderService.deleteFolder(userId, folderId);
+        folderService.deleteFolder(userId, folderId);
         return Result.success();
     }
 

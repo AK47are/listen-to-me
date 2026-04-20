@@ -107,23 +107,15 @@ INSERT INTO `refund_apply` (`order_id`, `user_id`, `reason`, `status`, `reject_r
 -- 6. 收藏夹域 - 测试数据
 -- ----------------------------
 -- 用户3（听书小迷弟）的收藏夹
-INSERT INTO `folder` (`id`, `name`, `description`, `audio_count`) VALUES
-(1, '我的最爱', '超级喜欢的音频合集', 3),
-(2, '心理学专区', '心理学相关学习音频', 2),
-(3, '睡前故事', '睡前听的放松故事', 1);
+INSERT INTO `folder` (`id`, `user_id`, `name`, `description`, `audio_count`) VALUES
+(1, 3, '我的最爱', '超级喜欢的音频合集', 3),
+(2, 3, '心理学专区', '心理学相关学习音频', 2),
+(3, 3, '睡前故事', '睡前听的放松故事', 1);
 
 -- 用户4（深夜听众）的收藏夹
-INSERT INTO `folder` (`id`, `name`, `description`, `audio_count`) VALUES
-(4, '我的最爱', '超级喜欢的音频合集', 2),
-(5, '睡前故事', '睡前听的放松故事', 1);
-
--- 用户 - 收藏夹关联
-INSERT INTO `sys_user_folder` (`user_id`, `folder_id`) VALUES
-(3, 1),
-(3, 2),
-(3, 3),
-(4, 4),
-(4, 5);
+INSERT INTO `folder` (`id`, `user_id`, `name`, `description`, `audio_count`) VALUES
+(4, 4, '我的最爱', '超级喜欢的音频合集', 2),
+(5, 4, '睡前故事', '睡前听的放松故事', 1);
 
 -- 音频 - 收藏夹关联（用户3的收藏夹）
 INSERT INTO `audio_folder_relation` (`audio_id`, `folder_id`) VALUES

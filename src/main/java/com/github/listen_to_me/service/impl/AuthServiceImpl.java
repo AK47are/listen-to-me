@@ -22,17 +22,13 @@ import com.github.listen_to_me.domain.SysUserAdapter;
 import com.github.listen_to_me.domain.dto.LoginDTO;
 import com.github.listen_to_me.domain.dto.UserRegisterDTO;
 import com.github.listen_to_me.domain.dto.VerifyCodeDTO;
-import com.github.listen_to_me.domain.entity.Folder;
 import com.github.listen_to_me.domain.entity.SysRole;
 import com.github.listen_to_me.domain.entity.SysUser;
-import com.github.listen_to_me.domain.entity.SysUserFolder;
 import com.github.listen_to_me.domain.entity.SysUserRole;
 import com.github.listen_to_me.domain.vo.ImageCaptchaVO;
 import com.github.listen_to_me.domain.vo.LoginVO;
 import com.github.listen_to_me.domain.vo.UserVO;
-import com.github.listen_to_me.mapper.FolderMapper;
 import com.github.listen_to_me.mapper.SysRoleMapper;
-import com.github.listen_to_me.mapper.SysUserFolderMapper;
 import com.github.listen_to_me.mapper.SysUserRoleMapper;
 import com.github.listen_to_me.service.AuthService;
 import com.github.listen_to_me.service.ISysUserService;
@@ -55,8 +51,6 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final SysRoleMapper sysRoleMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
-    private final SysUserFolderMapper sysUserFolderMapper;
-    private final FolderMapper folderMapper;
 
     @Override
     public LoginVO loginUser(LoginDTO loginDTO) {
@@ -184,15 +178,5 @@ public class AuthServiceImpl implements AuthService {
         sysUserRoleMapper.insert(sysUserRole);
         log.debug("初始化用户角色关联 - 用户ID: {}, 角色ID: {}", sysUser.getId(), roleId);
 
-        Folder folder = new Folder();
-        folder.setName("默认收藏夹");
-        folder.setDescription(sysUser.getUsername() + "的默认收藏夹");
-        folderMapper.insert(folder);
-        SysUserFolder sysUserFolder = new SysUserFolder();
-        sysUserFolder.setUserId(sysUser.getId());
-        sysUserFolder.setFolderId(folder.getId());
-        sysUserFolderMapper.insert(sysUserFolder);
-        log.debug("初始化用户收藏夹关联 - 用户ID: {}, 收藏夹ID: {}",
-                sysUserFolder.getUserId(), sysUserFolder.getFolderId());
     }
 }

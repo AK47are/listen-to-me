@@ -12,8 +12,7 @@ public interface AudioFolderRelationMapper extends BaseMapper<AudioFolderRelatio
 
     @Select("SELECT f.* FROM folder f " +
             "INNER JOIN audio_folder_relation afr ON f.id = afr.folder_id " +
-            "INNER JOIN sys_user_folder sfu ON sfu.folder_id = f.id " +
             "WHERE afr.audio_id = #{audioId} " +
-            "AND sfu.user_id = #{userId}")
+            "AND f.user_id = #{userId}")
     List<FolderVO> selectAudioFolders(Long userId, Long audioId);
 }

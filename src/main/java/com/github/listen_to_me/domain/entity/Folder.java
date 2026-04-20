@@ -19,6 +19,7 @@ public class Folder {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
+    private Long userId;
     private String name;
     private String description;
     private Long audioCount;
