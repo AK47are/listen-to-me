@@ -30,7 +30,7 @@ request.interceptors.response.use(
   (error) => {
     if (error.response) {
       const { status, data } = error.response
-      
+
       // 统一处理不同状态码
       switch (status) {
         case 400:
@@ -39,7 +39,7 @@ request.interceptors.response.use(
         case 401:
           const userStore = useUserStore()
           userStore.logout()
-          ElMessage.error('登录失效, 请重新登录')
+          ElMessage.error('登录已过期，请重新登录')
           router.push('/login')
           break
         case 403:
@@ -67,4 +67,5 @@ request.interceptors.response.use(
     return Promise.reject(error)
   },
 )
+
 export default request

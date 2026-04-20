@@ -256,13 +256,42 @@ const handleMouseMove = (e) => {
   }
 }
 
+// --- 定时刷新用户信息（头像临时链接）---
+let refreshTimer = null
+const REFRESH_INTERVAL = 20 * 60 * 1000 // 20分钟
+
+const startRefreshTimer = () => {
+  if (refreshTimer) clearInterval(refreshTimer)
+  refreshTimer = setInterval(async () => {
+    if (isLogin.value) {
+      try {
+        await userStore.refreshUserInfo()
+      } catch (error) {
+        // 如果失败（比如网络问题或 token 恰好在这期间过期），静默处理
+        // token 过期后用户下次操作会触发 401 并登出
+        console.debug('定时刷新用户信息失败')
+      }
+    }
+  }, REFRESH_INTERVAL)
+}
+
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible' && isLogin.value) {
+    userStore.refreshUserInfo().catch(() => {})
+  }
+}
+// --- 定时刷新结束 ---
+
 onMounted(async () => {
   if (isLogin.value) {
     try {
-      await userStore.getUserInfo()
+      // 获取初始用户信息
+      await userStore.refreshUserInfo()
     } catch (error) {
       console.error('Account sync failed')
     }
+    startRefreshTimer()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
   }
   window.addEventListener('scroll', handleScroll)
   document.addEventListener('mousemove', handleMouseMove)
@@ -270,6 +299,8 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (refreshTimer) clearInterval(refreshTimer)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
   window.removeEventListener('scroll', handleScroll)
   document.removeEventListener('mousemove', handleMouseMove)
   if (hoverTimer) clearTimeout(hoverTimer)

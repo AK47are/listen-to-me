@@ -24,6 +24,24 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('userInfo')
   }
 
+  // 仅刷新用户信息（不刷新 token）
+  // 用于更新头像临时链接等动态信息
+  async function refreshUserInfo() {
+    try {
+      const { profileApi } = await import('@/api/user/profile')
+      const res = await profileApi.getProfile()
+      if (res.code === 200 && res.data) {
+        setUserInfo(res.data)
+        return res.data
+      }
+      return null
+    } catch (error) {
+      console.error('获取用户信息失败', error)
+      // 如果是 401，让 request 拦截器处理登出
+      throw error
+    }
+  }
+
   return {
     token,
     userInfo,
@@ -31,5 +49,6 @@ export const useUserStore = defineStore('user', () => {
     setToken,
     setUserInfo,
     logout,
+    refreshUserInfo,
   }
 })
