@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.houbb.sensitive.word.core.SensitiveWordHelper;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.CommentDTO;
 import com.github.listen_to_me.domain.entity.Comment;
 import com.github.listen_to_me.domain.query.CommentQuery;
@@ -34,8 +33,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     private final CommentLikeMapper commentLikeMapper;
 
     @Override
-    public void addComment(CommentDTO commentDTO) {
-        Long currId = SecurityUtils.getCurrentUserId();
+    public void addComment(Long userId, CommentDTO commentDTO) {
         if (audioInfoMapper.selectById(commentDTO.getAudioId()) == null) {
             throw new BaseException(404, "音频不存在");
         }
@@ -48,7 +46,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
             throw new BaseException(400, "评论内容包含敏感词");
         }
         Comment comment = new Comment();
-        comment.setUserId(currId);
+        comment.setUserId(userId);
         comment.setAudioId(commentDTO.getAudioId());
         comment.setParentId(commentDTO.getParentId());
         comment.setContent(commentDTO.getContent());
@@ -56,8 +54,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
     }
 
     @Override
-    public IPage<CommentVO> findCommentPage(CommentQuery commentQuery) {
-        Long currId = SecurityUtils.getCurrentUserId();
+    public IPage<CommentVO> findCommentPage(Long userId, CommentQuery commentQuery) {
         // 1. 查询所有顶级评论
         Page<CommentVO> topPage = new Page<>(commentQuery.getPageNum(), commentQuery.getPageSize());
         IPage<CommentVO> topPageResult = commentMapper.selectTopPage(topPage, commentQuery.getAudioId());
@@ -68,7 +65,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
                 .toList();
         List<CommentVO> replyComments = commentMapper.selectReplyComments(commentQuery.getAudioId(), topCommentIds);
         // 3. 查询当前用户的点赞ids, 并设置点赞状态
-        List<Long> likedCommentIds = commentLikeMapper.selectLikedIds(currId);
+        List<Long> likedCommentIds = commentLikeMapper.selectLikedIds(userId);
         topComments.forEach(commentVO -> {
             commentVO.setLikedByCurrentUser(likedCommentIds.contains(commentVO.getId()));
             commentVO.setAvatar(MinioUtils.getPresignedUrl(commentVO.getAvatar()));

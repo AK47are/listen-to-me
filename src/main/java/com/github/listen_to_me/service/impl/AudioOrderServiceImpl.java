@@ -12,7 +12,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.github.listen_to_me.domain.entity.AudioOrder;
 import com.github.listen_to_me.domain.query.PageQuery;
@@ -41,8 +40,7 @@ public class AudioOrderServiceImpl extends ServiceImpl<AudioOrderMapper, AudioOr
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public AudioOrderVO purchaseAudio(Long audioId) {
-        Long userId = SecurityUtils.getCurrentUserId();
+    public AudioOrderVO purchaseAudio(Long userId, Long audioId) {
         AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
         if (audioInfo == null) {
             throw new BaseException(404, "音频不存在或已下架");
@@ -102,8 +100,7 @@ public class AudioOrderServiceImpl extends ServiceImpl<AudioOrderMapper, AudioOr
     }
 
     @Override
-    public IPage<AudioOrderVO> queryAudioOrderPage(PageQuery query) {
-        Long userId = SecurityUtils.getCurrentUserId();
+    public IPage<AudioOrderVO> queryAudioOrderPage(Long userId, PageQuery query) {
         IPage<AudioOrderVO> page = new Page<>(query.getPageNum(), query.getPageSize());
         IPage<AudioOrderVO> audioOrderPage = audioOrderMapper.selectPageByUserId(page, userId);
         audioOrderPage.getRecords().forEach(vo -> {

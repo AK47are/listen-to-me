@@ -1,5 +1,6 @@
 package com.github.listen_to_me.controller.user;
 
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,14 +27,15 @@ public class CreatorApplyController {
 
     @Operation(summary = "提交创作者申请")
     @PostMapping
-    public Result<Void> applyCreator(@Valid @RequestBody CreatorApplyDTO creatorApplyDTO) {
-        creatorApplyService.addCreatorApply(creatorApplyDTO);
+    public Result<Void> applyCreator(@AuthenticationPrincipal Long userId,
+            @Valid @RequestBody CreatorApplyDTO creatorApplyDTO) {
+        creatorApplyService.addCreatorApply(userId, creatorApplyDTO);
         return Result.success();
     }
 
     @Operation(summary = "查询创作者申请状态")
     @GetMapping("/status")
-    public Result<CreatorApplyVO> getApplyStatus() {
-        return Result.success(creatorApplyService.findApplyStatus());
+    public Result<CreatorApplyVO> getApplyStatus(@AuthenticationPrincipal Long userId) {
+        return Result.success(creatorApplyService.findApplyStatus(userId));
     }
 }

@@ -1,6 +1,7 @@
 package com.github.listen_to_me.controller.user;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,8 +30,8 @@ public class AudioOrderController {
 
     @PostMapping("/{audioId}/purchase")
     @Operation(summary = "购买音频")
-    public Result<AudioOrderVO> purchaseAudio(@PathVariable Long audioId) {
-        return Result.success(audioOrderService.purchaseAudio(audioId));
+    public Result<AudioOrderVO> purchaseAudio(@AuthenticationPrincipal Long userId, @PathVariable Long audioId) {
+        return Result.success(audioOrderService.purchaseAudio(userId, audioId));
     }
 
     @GetMapping("/order/{sn}")
@@ -41,7 +42,8 @@ public class AudioOrderController {
 
     @GetMapping("/order/page")
     @Operation(summary = "查询音频订单列表")
-    public Result<IPage<AudioOrderVO>> queryAudioOrderPage(@ParameterObject PageQuery query) {
-        return Result.success(audioOrderService.queryAudioOrderPage(query));
+    public Result<IPage<AudioOrderVO>> queryAudioOrderPage(@AuthenticationPrincipal Long userId,
+            @ParameterObject PageQuery query) {
+        return Result.success(audioOrderService.queryAudioOrderPage(userId, query));
     }
 }

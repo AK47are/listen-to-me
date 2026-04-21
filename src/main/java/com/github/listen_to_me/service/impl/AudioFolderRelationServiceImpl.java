@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.ConflictException;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
 import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.domain.vo.FolderVO;
@@ -55,8 +54,7 @@ public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelat
     }
 
     @Override
-    public List<FolderVO> getAudioFolders(Long audioId) {
-        Long currId = SecurityUtils.getCurrentUserId();
-        return audioFolderRelationMapper.selectAudioFolders(currId, audioId);
+    public List<FolderVO> getAudioFolders(Long userId, Long audioId) {
+        return audioFolderRelationMapper.selectAudioFolders(userId, audioId);
     }
 }

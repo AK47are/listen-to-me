@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.CommentLikeDTO;
 import com.github.listen_to_me.domain.entity.Comment;
 import com.github.listen_to_me.domain.entity.CommentLike;
@@ -24,8 +23,7 @@ public class CommentLikeServiceImpl extends ServiceImpl<CommentLikeMapper, Comme
 
     @Override
     @Transactional
-    public void likeComment(CommentLikeDTO commentLikeDTO) {
-        Long currId = SecurityUtils.getCurrentUserId();
+    public void likeComment(Long userId, CommentLikeDTO commentLikeDTO) {
         Comment comment = commentMapper.selectById(commentLikeDTO.getCommentId());
         if (comment == null) {
             throw new BaseException(404, "评论不存在");
@@ -33,7 +31,7 @@ public class CommentLikeServiceImpl extends ServiceImpl<CommentLikeMapper, Comme
         if ("LIKE".equals(commentLikeDTO.getAction())) {
             CommentLike commentLike = new CommentLike();
             commentLike.setCommentId(commentLikeDTO.getCommentId());
-            commentLike.setUserId(currId);
+            commentLike.setUserId(userId);
             this.save(commentLike);
             commentMapper.update(Wrappers.lambdaUpdate(Comment.class)
                     .set(Comment::getLikeCount, comment.getLikeCount() + 1)
@@ -41,13 +39,13 @@ public class CommentLikeServiceImpl extends ServiceImpl<CommentLikeMapper, Comme
         } else if ("UNLIKE".equals(commentLikeDTO.getAction())) {
             CommentLike commentLike = commentLikeMapper.selectOne(Wrappers.lambdaQuery(CommentLike.class)
                     .eq(CommentLike::getCommentId, commentLikeDTO.getCommentId())
-                    .eq(CommentLike::getUserId, currId));
+                    .eq(CommentLike::getUserId, userId));
             if (commentLike == null) {
                 throw new BaseException(400, "未点赞该评论");
             }
             commentLikeMapper.delete(Wrappers.lambdaQuery(CommentLike.class)
                     .eq(CommentLike::getCommentId, commentLikeDTO.getCommentId())
-                    .eq(CommentLike::getUserId, currId));
+                    .eq(CommentLike::getUserId, userId));
             commentMapper.update(Wrappers.lambdaUpdate(Comment.class)
                     .set(Comment::getLikeCount, comment.getLikeCount() - 1)
                     .eq(Comment::getId, comment.getId()));

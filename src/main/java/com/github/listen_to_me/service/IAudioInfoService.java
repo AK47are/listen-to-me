@@ -38,7 +38,7 @@ public interface IAudioInfoService extends IService<AudioInfo> {
 
     String uploadCover(MultipartFile coverFile) throws Exception;
 
-    AudioPublishVO saveAudio(AudioDTO audioDTO);
+    AudioPublishVO saveAudio(Long userId, AudioDTO audioDTO);
 
     void MoveAudioToOnline(Long audioId) throws Exception;
 
@@ -46,9 +46,9 @@ public interface IAudioInfoService extends IService<AudioInfo> {
 
     CreatorAudioDetailVO getCreatorAudioDetail(Long creatorId, Long audioId);
 
-    AudioStatusVO getAudioStatus(Long id);
+    AudioStatusVO getAudioStatus(Long userId, Long id);
 
-    void updateAudio(AudioUpdateDTO audioUpdateDTO);
+    void updateAudio(Long userId, AudioUpdateDTO audioUpdateDTO);
 
     void removeAudioInfo(Long creatorId, Long audioId);
 
@@ -56,7 +56,7 @@ public interface IAudioInfoService extends IService<AudioInfo> {
 
     IPage<AudioVO> searchAudio(AudioSearchQuery audioSearchQuery);
 
-    String getStreamSign(Long audioId);
+    String getStreamSign(Long userId, Long audioId);
 
     AudioDetailVO getAudioDetail(Long userId, Long audioId);
 
@@ -73,5 +73,5 @@ public interface IAudioInfoService extends IService<AudioInfo> {
      */
     IPage<AudioVO> getCreatorAudioPage(Long creatorId, PageQuery pageQuery);
 
-    IPage<AudioVO> getRecommendList(PageQuery pageQuery);
+    IPage<AudioVO> getRecommendList(Long userId, PageQuery pageQuery);
 }

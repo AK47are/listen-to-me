@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.FolderDTO;
 import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.domain.entity.Folder;
@@ -32,16 +31,14 @@ public class FolderServiceImpl extends ServiceImpl<FolderMapper, Folder> impleme
     private final AudioFolderRelationMapper audioFolderRelationMapper;
 
     @Override
-    public List<FolderVO> getUserFolders() {
-        Long userId = SecurityUtils.getCurrentUserId();
+    public List<FolderVO> getUserFolders(Long userId) {
         List<Folder> folders = folderMapper.selectList(Wrappers.lambdaQuery(Folder.class)
                 .eq(Folder::getUserId, userId));
         return folders.stream().map(this::convertToVO).collect(Collectors.toList());
     }
 
     @Override
-    public FolderVO createFolder(String name) {
-        Long userId = SecurityUtils.getCurrentUserId();
+    public FolderVO createFolder(Long userId, String name) {
         Folder folder = new Folder();
         folder.setUserId(userId);
         folder.setName(name);

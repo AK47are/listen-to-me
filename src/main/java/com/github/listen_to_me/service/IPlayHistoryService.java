@@ -9,9 +9,9 @@ import com.github.listen_to_me.domain.vo.AudioVO;
 
 public interface IPlayHistoryService extends IService<PlayHistory> {
 
-    void addPlayHistory(HistoryProgressDTO historyProgressDTO);
+    void addPlayHistory(Long userId, HistoryProgressDTO historyProgressDTO);
 
-    IPage<AudioVO> getHistoryPage(PageQuery pageQuery);
+    IPage<AudioVO> getHistoryPage(Long userId, PageQuery pageQuery);
 
-    Integer findPlayHistory(Long audioId);
+    Integer findPlayHistory(Long userId, Long audioId);
 }

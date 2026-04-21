@@ -25,7 +25,6 @@ import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.RechargeResultDTO;
 import com.github.listen_to_me.domain.dto.UserProfileUpdateDTO;
 import com.github.listen_to_me.domain.entity.CoinTransaction;
@@ -92,25 +91,23 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public UserVO findProfile() {
-        Long currId = SecurityUtils.getCurrentUserId();
-        log.debug("查询详情 - ID: {}", currId);
-        SysUser sysUser = this.getById(currId);
+    public UserVO findProfile(Long userId) {
+        log.debug("查询详情 - ID: {}", userId);
+        SysUser sysUser = this.getById(userId);
         sysUser.setAvatar(MinioUtils.getPresignedUrl(sysUser.getAvatar()));
         UserVO userVO = BeanUtil.copyProperties(sysUser, UserVO.class);
-        log.debug("查询详情 - ID: {}, 用户信息: {}", currId, userVO);
+        log.debug("查询详情 - ID: {}, 用户信息: {}", userId, userVO);
         return userVO;
     }
 
     @Override
     @Transactional
-    public void modifyProfile(UserProfileUpdateDTO updateDTO) {
-        Long currId = SecurityUtils.getCurrentUserId();
-        log.debug("更新个人资料 - 开始处理，用户ID: {}", currId);
+    public void modifyProfile(Long userId, UserProfileUpdateDTO updateDTO) {
+        log.debug("更新个人资料 - 开始处理，用户ID: {}", userId);
 
-        SysUser sysUser = this.getById(currId);
+        SysUser sysUser = this.getById(userId);
         if (sysUser == null) {
-            log.error("用户不存在 - ID: {}", currId);
+            log.error("用户不存在 - ID: {}", userId);
             throw new BaseException("用户不存在");
         }
 
@@ -123,7 +120,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         boolean needUpdateEmail = newEmail != null && !newEmail.equals(oldEmail);
 
         if (needUpdatePhone && needUpdateEmail) {
-            log.debug("手机号和邮箱不能同时更新 - 用户ID: {}", currId);
+            log.debug("手机号和邮箱不能同时更新 - 用户ID: {}", userId);
             throw new BaseException(400, "手机号和邮箱不能同时更新");
         }
 
@@ -132,27 +129,27 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             String cachedVerifyCode = RedisUtils.get(RedisKey.VERIFY_CODE, target);
 
             if (StrUtil.isBlank(cachedVerifyCode) || !cachedVerifyCode.equalsIgnoreCase(updateDTO.getVerifyCode())) {
-                log.debug("验证码错误或已过期 - 目标: {}, 用户ID: {}", target, currId);
+                log.debug("验证码错误或已过期 - 目标: {}, 用户ID: {}", target, userId);
                 throw new BaseException(400, "验证码错误或已过期");
             }
             RedisUtils.delete(RedisKey.VERIFY_CODE, target);
-            log.debug("验证码验证成功 - 目标: {}, 用户ID: {}", target, currId);
+            log.debug("验证码验证成功 - 目标: {}, 用户ID: {}", target, userId);
         }
 
         boolean needUpdatePassword = StrUtil.isNotBlank(updateDTO.getNewPassword());
         if (needUpdatePassword) {
             if (StrUtil.isBlank(updateDTO.getOldPassword())) {
-                log.debug("修改密码需要提供原密码 - 用户ID: {}", currId);
+                log.debug("修改密码需要提供原密码 - 用户ID: {}", userId);
                 throw new BaseException(400, "修改密码需要提供原密码");
             }
 
             if (!passwordEncoder.matches(updateDTO.getOldPassword(), sysUser.getPassword())) {
-                log.debug("原密码错误 - 用户ID: {}", currId);
+                log.debug("原密码错误 - 用户ID: {}", userId);
                 throw new BaseException(400, "原密码错误");
             }
 
             sysUser.setPassword(passwordEncoder.encode(updateDTO.getNewPassword()));
-            log.debug("密码更新成功 - 用户ID: {}", currId);
+            log.debug("密码更新成功 - 用户ID: {}", userId);
         }
 
         if (needUpdatePhone) {
@@ -171,7 +168,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             String objectName = RedisUtils.get(RedisKey.TEMP_AVATAR_URL, tempUrlBase64);
 
             if (StrUtil.isBlank(objectName)) {
-                log.error("无法获取头像的objectName - 用户ID: {}, URL: {}", currId, avatarUrl);
+                log.error("无法获取头像的objectName - 用户ID: {}, URL: {}", userId, avatarUrl);
                 throw new BaseException("头像数据异常，请重新上传头像");
             }
 
@@ -180,14 +177,14 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 MinioUtils.removeFile(objectName);
                 sysUser.setAvatar(newObjectName);
                 RedisUtils.delete(RedisKey.TEMP_AVATAR_URL, tempUrlBase64);
-                log.debug("头像从临时目录移动到正式目录 - 用户ID: {}, 新路径: {}", currId, newObjectName);
+                log.debug("头像从临时目录移动到正式目录 - 用户ID: {}, 新路径: {}", userId, newObjectName);
             } catch (Exception e) {
-                log.error("移动头像文件失败 - 用户ID: {}, 原路径: {}", currId, objectName, e);
+                log.error("移动头像文件失败 - 用户ID: {}, 原路径: {}", userId, objectName, e);
                 throw new BaseException("头像处理失败，请重试");
             }
         }
         this.updateById(sysUser);
-        log.debug("个人资料更新完成 - 用户ID: {}", currId);
+        log.debug("个人资料更新完成 - 用户ID: {}", userId);
     }
 
     @Override
@@ -384,7 +381,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public RechargeResultVO recharge(RechargeResultDTO rechargeResultDTO) throws Exception {
+    public RechargeResultVO recharge(Long userId, RechargeResultDTO rechargeResultDTO) throws Exception {
         log.debug("充值 - 金额: {}, 支付方式: {}", rechargeResultDTO.getAmount(), rechargeResultDTO.getPaymentMethod());
 
         if (rechargeResultDTO.getAmount() > 10000) {
@@ -395,7 +392,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         }
         UserRechargeOrder order = new UserRechargeOrder();
         order.setRechargeSn(generateRechargeSn());
-        order.setUserId(SecurityUtils.getCurrentUserId());
+        order.setUserId(userId);
         order.setRechargeAmount(rechargeResultDTO.getAmount());
         order.setPayStatus("PENDING");
         order.setPayChannel(rechargeResultDTO.getPaymentMethod());
@@ -456,11 +453,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public IPage<RechargeOrderVO> getRechargePage(RechargeOrderQuery query) {
-        Long currId = SecurityUtils.getCurrentUserId();
+    public IPage<RechargeOrderVO> getRechargePage(Long userId, RechargeOrderQuery query) {
         Page<UserRechargeOrder> page = new Page<>(query.getPageNum(), query.getPageSize());
         Wrapper<UserRechargeOrder> wrapper = Wrappers.<UserRechargeOrder>lambdaQuery()
-                .eq(UserRechargeOrder::getUserId, currId)
+                .eq(UserRechargeOrder::getUserId, userId)
                 .eq(query.getStatus() != null,
                         UserRechargeOrder::getPayStatus,
                         query.getStatus())
@@ -479,11 +475,10 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
     }
 
     @Override
-    public IPage<CoinTransactionVO> getTransactionPage(TransactionPageQuery query) {
-        Long currId = SecurityUtils.getCurrentUserId();
+    public IPage<CoinTransactionVO> getTransactionPage(Long userId, TransactionPageQuery query) {
         Page<CoinTransaction> page = new Page<>(query.getPageNum(), query.getPageSize());
         Wrapper<CoinTransaction> wrapper = Wrappers.<CoinTransaction>lambdaQuery()
-                .eq(CoinTransaction::getUserId, currId)
+                .eq(CoinTransaction::getUserId, userId)
                 .eq(query.getType() != null,
                         CoinTransaction::getType,
                         query.getType())

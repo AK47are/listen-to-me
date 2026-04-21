@@ -1,6 +1,7 @@
 package com.github.listen_to_me.controller.user;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,7 +28,8 @@ public class LikeController {
 
     @GetMapping("/page")
     @Operation(summary = "获取喜欢音频列表")
-    public Result<IPage<AudioVO>> getLikePage(@ParameterObject PageQuery pageQuery) {
-        return Result.success(audioLikeService.getLikePage(pageQuery));
+    public Result<IPage<AudioVO>> getLikePage(@AuthenticationPrincipal Long userId,
+            @ParameterObject PageQuery pageQuery) {
+        return Result.success(audioLikeService.getLikePage(userId, pageQuery));
     }
 }

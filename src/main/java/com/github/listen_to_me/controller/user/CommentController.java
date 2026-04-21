@@ -1,6 +1,7 @@
 package com.github.listen_to_me.controller.user;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -31,21 +32,23 @@ public class CommentController {
 
     @PostMapping
     @Operation(summary = "发布评论")
-    public Result<Void> saveComment(@Valid @RequestBody CommentDTO commentDTO) {
-        commentService.addComment(commentDTO);
+    public Result<Void> saveComment(@AuthenticationPrincipal Long userId, @Valid @RequestBody CommentDTO commentDTO) {
+        commentService.addComment(userId, commentDTO);
         return Result.success();
     }
 
     @Operation(summary = "获取评论分页")
     @GetMapping("/page")
-    public Result<IPage<CommentVO>> getCommentPage(@ParameterObject CommentQuery commentQuery) {
-        return Result.success(commentService.findCommentPage(commentQuery));
+    public Result<IPage<CommentVO>> getCommentPage(@AuthenticationPrincipal Long userId,
+            @ParameterObject CommentQuery commentQuery) {
+        return Result.success(commentService.findCommentPage(userId, commentQuery));
     }
 
     @Operation(summary = "点赞/取消点赞评论")
     @PostMapping("/like")
-    public Result<Void> likeComment(@Valid @RequestBody CommentLikeDTO commentLikeDTO) {
-        commentLikeService.likeComment(commentLikeDTO);
+    public Result<Void> likeComment(@AuthenticationPrincipal Long userId,
+            @Valid @RequestBody CommentLikeDTO commentLikeDTO) {
+        commentLikeService.likeComment(userId, commentLikeDTO);
         return Result.success();
     }
 }

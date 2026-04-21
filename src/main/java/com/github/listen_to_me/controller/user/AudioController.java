@@ -50,8 +50,8 @@ public class AudioController {
 
     @PostMapping("/like")
     @Operation(summary = "喜欢/取消喜欢音频")
-    public Result<Void> saveAudioLike(@RequestBody LikeActionDTO likeActionDTO) {
-        audioLikeService.modifyAudioLike(likeActionDTO);
+    public Result<Void> saveAudioLike(@AuthenticationPrincipal Long userId, @RequestBody LikeActionDTO likeActionDTO) {
+        audioLikeService.modifyAudioLike(userId, likeActionDTO);
         return Result.success();
     }
 
@@ -84,13 +84,15 @@ public class AudioController {
 
     @GetMapping("/recommend")
     @Operation(summary = "推荐音频")
-    public Result<IPage<AudioVO>> getRecommendList(@ParameterObject PageQuery pageQuery) {
-        return Result.success(audioInfoService.getRecommendList(pageQuery));
+    public Result<IPage<AudioVO>> getRecommendList(
+            @AuthenticationPrincipal Long userId,
+            @ParameterObject PageQuery pageQuery) {
+        return Result.success(audioInfoService.getRecommendList(userId, pageQuery));
     }
 
     @GetMapping("/{audioId}/folders")
     @Operation(summary = "获取音频收藏文件夹列表")
-    public Result<List<FolderVO>> getAudioFolders(@PathVariable Long audioId) {
-        return Result.success(audioFolderRelationService.getAudioFolders(audioId));
+    public Result<List<FolderVO>> getAudioFolders(@AuthenticationPrincipal Long userId, @PathVariable Long audioId) {
+        return Result.success(audioFolderRelationService.getAudioFolders(userId, audioId));
     }
 }
