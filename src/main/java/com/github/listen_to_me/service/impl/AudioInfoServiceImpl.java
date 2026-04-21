@@ -27,7 +27,6 @@ import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.producer.AudioTranscodeProducer;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.AudioAuditDTO;
 import com.github.listen_to_me.domain.dto.AudioDTO;
 import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
@@ -158,8 +157,8 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     }
 
     @Override
-    public AudioPublishVO saveAudio(AudioDTO audioDTO) {
-        log.info("保存音频 - audioDTO: {}", audioDTO);
+    public AudioPublishVO saveAudio(Long userId, AudioDTO audioDTO) {
+        log.info("保存音频 - userId: {}, audioDTO: {}", userId, audioDTO);
         String audioUrlBase64 = Base64.encode(audioDTO.getAudioUrl());
         String coverUrlBase64 = Base64.encode(audioDTO.getCoverUrl());
         Map<String, Object> audioMap = RedisUtils.getJson(RedisKey.TEMP_AUDIO_URL, audioUrlBase64);
@@ -173,7 +172,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         audioInfo.setCoverPath(coverPath);
         audioInfo.setRawPath((String) audioMap.get("objectName"));
         audioInfo.setDuration(((BigDecimal) audioMap.get("duration")).intValue());
-        audioInfo.setCreatorId(SecurityUtils.getCurrentUserId());
+        audioInfo.setCreatorId(userId);
         audioInfo.setStatus("PENDING_TRANSCODE");
         audioInfoMapper.insert(audioInfo);
         AudioPublishVO audioPublishVO = new AudioPublishVO();
@@ -230,8 +229,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     }
 
     @Override
-    public AudioStatusVO getAudioStatus(Long id) {
-        Long userId = SecurityUtils.getCurrentUserId();
+    public AudioStatusVO getAudioStatus(Long userId, Long id) {
         AudioInfo audioInfo = audioInfoMapper.selectById(id);
         if (audioInfo == null || !audioInfo.getCreatorId().equals(userId)) {
             throw new BaseException(404, "稿件不存在");
@@ -246,9 +244,9 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     }
 
     @Override
-    public void updateAudio(AudioUpdateDTO audioUpdateDTO) {
+    public void updateAudio(Long userId, AudioUpdateDTO audioUpdateDTO) {
         AudioInfo audioInfo = audioInfoMapper.selectById(audioUpdateDTO.getId());
-        if (audioInfo == null || !audioInfo.getCreatorId().equals(SecurityUtils.getCurrentUserId())) {
+        if (audioInfo == null || !audioInfo.getCreatorId().equals(userId)) {
             throw new BaseException(404, "稿件不存在");
         }
         if (audioUpdateDTO.getCoverUrl() != null && !audioUpdateDTO.getCoverUrl().equals(audioInfo.getCoverPath())) {
@@ -327,12 +325,10 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
 
     @Transactional
     @Override
-    public String getStreamSign(Long audioId) {
+    public String getStreamSign(Long userId, Long audioId) {
         if (audioId == null) {
             throw new BaseException(400, "音频ID不能为空");
         }
-
-        Long userId = SecurityUtils.getCurrentUserId();
 
         AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
         if (audioInfo == null) {
@@ -475,9 +471,8 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     }
 
     @Override
-    public IPage<AudioVO> getRecommendList(PageQuery pageQuery) {
-        Long currId = SecurityUtils.getCurrentUserId();
-        List<AudioVO> recommendList = audioVOMapper.selectLikedRecommendByUserId(currId);
+    public IPage<AudioVO> getRecommendList(Long userId, PageQuery pageQuery) {
+        List<AudioVO> recommendList = audioVOMapper.selectLikedRecommendByUserId(userId);
         if (recommendList == null) {
             recommendList = new ArrayList<>();
         }

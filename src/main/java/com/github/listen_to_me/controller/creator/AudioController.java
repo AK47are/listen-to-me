@@ -52,8 +52,9 @@ public class AudioController {
     @PostMapping
     @Operation(summary = "发布音频稿件", description = "创建音频稿件，提交后进入转码流程")
     public Result<AudioPublishVO> saveAudio(
+            @AuthenticationPrincipal Long creatorId,
             @Parameter(description = "音频稿件信息", required = true) @RequestBody AudioDTO audioDTO) throws Exception {
-        return Result.success(audioInfoService.saveAudio(audioDTO));
+        return Result.success(audioInfoService.saveAudio(creatorId, audioDTO));
     }
 
     @GetMapping("/page")
@@ -74,14 +75,16 @@ public class AudioController {
 
     @GetMapping("/{id}/status")
     @Operation(summary = "查询稿件状态", description = "获取音频稿件的发布状态（待转码/转码中/已上线/失败）")
-    public Result<AudioStatusVO> getAudioStatus(@PathVariable Long id) {
-        return Result.success(audioInfoService.getAudioStatus(id));
+    public Result<AudioStatusVO> getAudioStatus(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long id) {
+        return Result.success(audioInfoService.getAudioStatus(userId, id));
     }
 
     @PutMapping
     @Operation(summary = "修改音频配置", description = "修改音频稿件的标题、简介、价格、可见性等配置")
-    public Result<Void> updateAudio(@RequestBody AudioUpdateDTO audioUpdateDTO) {
-        audioInfoService.updateAudio(audioUpdateDTO);
+    public Result<Void> updateAudio(@AuthenticationPrincipal Long userId, @RequestBody AudioUpdateDTO audioUpdateDTO) {
+        audioInfoService.updateAudio(userId, audioUpdateDTO);
         return Result.success();
     }
 

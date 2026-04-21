@@ -1,6 +1,5 @@
 package com.github.listen_to_me.service.impl;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +13,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.ConflictException;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.SlotDTO;
 import com.github.listen_to_me.domain.entity.ConsultSlot;
 import com.github.listen_to_me.domain.query.SlotPageQuery;
@@ -38,8 +36,7 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
 
     @Override
     @Transactional
-    public void saveSlotBatch(List<SlotDTO> slotDTOList) {
-        Long creatorId = SecurityUtils.getCurrentUserId();
+    public void saveSlotBatch(Long creatorId, List<SlotDTO> slotDTOList) {
         log.debug("批量生成时间槽 - 创作者ID: {}, 数量: {}", creatorId, slotDTOList.size());
 
         // 校验时间顺序业务规则
@@ -75,8 +72,7 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
     }
 
     @Override
-    public IPage<SlotVO> getCreatorSlotPage(SlotPageQuery query) {
-        Long creatorId = SecurityUtils.getCurrentUserId();
+    public IPage<SlotVO> getCreatorSlotPage(Long creatorId, SlotPageQuery query) {
         log.debug("创作者端分页查询时间槽 - 创作者ID: {}, 开始时间: {}, 结束时间: {}",
                 creatorId, query.getStartTime(), query.getEndTime());
 
@@ -107,8 +103,7 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
 
     @Override
     @Transactional
-    public void updateSlotStatus(Long slotId, String status) {
-        Long creatorId = SecurityUtils.getCurrentUserId();
+    public void updateSlotStatus(Long creatorId, Long slotId, String status) {
         log.debug("修改时间槽状态 - 时间槽ID: {}, 目标状态: {}", slotId, status);
 
         // 校验目标状态是否合法
@@ -148,8 +143,7 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
 
     @Override
     @Transactional
-    public void removeSlot(Long slotId) {
-        Long creatorId = SecurityUtils.getCurrentUserId();
+    public void removeSlot(Long creatorId, Long slotId) {
         log.debug("删除时间槽 - 时间槽ID: {}", slotId);
 
         // 校验时间槽是否存在且属于当前用户
@@ -205,37 +199,4 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
         }
     }
 
-    @Override
-    public IPage<SlotVO> getCreatorSlotPage(Long creatorId, SlotPageQuery query) {
-        log.debug("分页查询创作者时间槽 - 创作者ID: {}, 开始时间: {}, 结束时间: {}",
-                creatorId, query.getStartTime(), query.getEndTime());
-
-        Page<ConsultSlot> page = new Page<>(query.getPageNum(), query.getPageSize());
-        LambdaQueryWrapper<ConsultSlot> wrapper = Wrappers.<ConsultSlot>lambdaQuery()
-                .eq(ConsultSlot::getCreatorId, creatorId)
-                .eq(ConsultSlot::getStatus, "AVAILABLE")
-                .gt(ConsultSlot::getStartTime, LocalDateTime.now());
-
-        if (query.getStartTime() != null) {
-            wrapper.ge(ConsultSlot::getStartTime, query.getStartTime());
-        }
-        if (query.getEndTime() != null) {
-            wrapper.le(ConsultSlot::getEndTime, query.getEndTime());
-        }
-
-        wrapper.orderByAsc(ConsultSlot::getStartTime);
-
-        IPage<ConsultSlot> slotPage = page(page, wrapper);
-
-        return slotPage.convert(slot -> {
-            SlotVO vo = new SlotVO();
-            vo.setId(slot.getId());
-            vo.setStartTime(slot.getStartTime());
-            vo.setEndTime(slot.getEndTime());
-            vo.setPrice(slot.getPrice());
-            vo.setAddress(null);
-            vo.setStatus(slot.getStatus());
-            return vo;
-        });
-    }
 }

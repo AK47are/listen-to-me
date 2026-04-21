@@ -10,5 +10,5 @@ import com.github.listen_to_me.domain.vo.FolderVO;
 public interface IAudioFolderRelationService extends IService<AudioFolderRelation> {
     public void saveAudioAction(FavoriteActionDTO favoriteActionDTO);
 
-    List<FolderVO> getAudioFolders(Long audioId);
+    List<FolderVO> getAudioFolders(Long userId, Long audioId);
 }

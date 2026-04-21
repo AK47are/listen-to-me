@@ -1,6 +1,7 @@
 package com.github.listen_to_me.controller.user;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,20 +30,22 @@ public class HistoryController {
 
     @PostMapping
     @Operation(summary = "记录播放历史")
-    public Result<Void> saveHistory(@Valid @RequestBody HistoryProgressDTO historyProgressDTO) {
-        playHistoryService.addPlayHistory(historyProgressDTO);
+    public Result<Void> saveHistory(@AuthenticationPrincipal Long userId,
+            @Valid @RequestBody HistoryProgressDTO historyProgressDTO) {
+        playHistoryService.addPlayHistory(userId, historyProgressDTO);
         return Result.success();
     }
 
     @GetMapping("/page")
     @Operation(summary = "分页查询历史记录")
-    public Result<IPage<AudioVO>> getHistoryPage(@ParameterObject PageQuery pageQuery) {
-        return Result.success(playHistoryService.getHistoryPage(pageQuery));
+    public Result<IPage<AudioVO>> getHistoryPage(@AuthenticationPrincipal Long userId,
+            @ParameterObject PageQuery pageQuery) {
+        return Result.success(playHistoryService.getHistoryPage(userId, pageQuery));
     }
 
     @GetMapping("/{audioId}")
     @Operation(summary = "获取播放历史")
-    public Result<Integer> getHistory(@PathVariable Long audioId) {
-        return Result.success(playHistoryService.findPlayHistory(audioId));
+    public Result<Integer> getHistory(@AuthenticationPrincipal Long userId, @PathVariable Long audioId) {
+        return Result.success(playHistoryService.findPlayHistory(userId, audioId));
     }
 }

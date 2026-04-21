@@ -8,7 +8,7 @@ import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioVO;
 
 public interface IAudioLikeService extends IService<AudioLike> {
-    void modifyAudioLike(LikeActionDTO likeActionDTO);
+    void modifyAudioLike(Long userId, LikeActionDTO likeActionDTO);
 
-    IPage<AudioVO> getLikePage(PageQuery pageQuery);
+    IPage<AudioVO> getLikePage(Long userId, PageQuery pageQuery);
 }

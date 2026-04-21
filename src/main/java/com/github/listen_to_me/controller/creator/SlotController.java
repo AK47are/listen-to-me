@@ -3,6 +3,7 @@ package com.github.listen_to_me.controller.creator;
 import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,31 +38,34 @@ public class SlotController {
 
     @PostMapping("/slots")
     @Operation(summary = "批量生成时间槽")
-    public Result<Void> saveSlotBatch(@Valid @RequestBody List<SlotDTO> slotDTOList) {
+    public Result<Void> saveSlotBatch(@AuthenticationPrincipal Long creatorId,
+            @Valid @RequestBody List<SlotDTO> slotDTOList) {
         log.debug("批量生成时间槽 - 请求数量: {}", slotDTOList.size());
-        slotService.saveSlotBatch(slotDTOList);
+        slotService.saveSlotBatch(creatorId, slotDTOList);
         return Result.success();
     }
 
     @GetMapping("/slots/page")
     @Operation(summary = "分页查询时间槽")
-    public Result<IPage<SlotVO>> getSlotPage(@ParameterObject SlotPageQuery query) {
-        return Result.success(slotService.getCreatorSlotPage(query));
+    public Result<IPage<SlotVO>> getSlotPage(@AuthenticationPrincipal Long creatorId,
+            @ParameterObject SlotPageQuery query) {
+        return Result.success(slotService.getCreatorSlotPage(creatorId, query));
     }
 
     @PutMapping("/slots/{id}")
     @Operation(summary = "修改时间槽状态")
-    public Result<Void> updateSlotStatus(@PathVariable Long id, @RequestParam String status) {
+    public Result<Void> updateSlotStatus(@AuthenticationPrincipal Long creatorId, @PathVariable Long id,
+            @RequestParam String status) {
         log.debug("修改时间槽状态 - ID: {}, 状态: {}", id, status);
-        slotService.updateSlotStatus(id, status);
+        slotService.updateSlotStatus(creatorId, id, status);
         return Result.success();
     }
 
     @DeleteMapping("/slots/{id}")
     @Operation(summary = "删除时间槽")
-    public Result<Void> removeSlot(@PathVariable Long id) {
+    public Result<Void> removeSlot(@AuthenticationPrincipal Long creatorId, @PathVariable Long id) {
         log.debug("删除时间槽 - ID: {}", id);
-        slotService.removeSlot(id);
+        slotService.removeSlot(creatorId, id);
         return Result.success();
     }
 }

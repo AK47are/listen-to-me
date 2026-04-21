@@ -10,7 +10,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.ConflictException;
 import com.github.listen_to_me.common.util.MinioUtils;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.LikeActionDTO;
 import com.github.listen_to_me.domain.entity.AudioLike;
 import com.github.listen_to_me.domain.query.PageQuery;
@@ -29,17 +28,16 @@ public class AudioLikeServiceImpl extends ServiceImpl<AudioLikeMapper, AudioLike
     private final AudioVOMapper audioVOMapper;
 
     @Override
-    public void modifyAudioLike(LikeActionDTO likeActionDTO) {
-        Long currId = SecurityUtils.getCurrentUserId();
+    public void modifyAudioLike(Long userId, LikeActionDTO likeActionDTO) {
         Wrapper<AudioLike> wrapper = Wrappers.lambdaQuery(AudioLike.class)
-                .eq(AudioLike::getUserId, currId)
+                .eq(AudioLike::getUserId, userId)
                 .eq(AudioLike::getAudioId, likeActionDTO.getAudioId());
         if (likeActionDTO.getAction().equals("LIKE")) {
             if (audioLikeMapper.selectOne(wrapper) != null) {
                 throw new ConflictException("音频已喜欢");
             }
             AudioLike audioLike = new AudioLike();
-            audioLike.setUserId(currId);
+            audioLike.setUserId(userId);
             audioLike.setAudioId(likeActionDTO.getAudioId());
             audioLikeMapper.insert(audioLike);
         } else if (likeActionDTO.getAction().equals("UNLIKE")) {
@@ -53,8 +51,7 @@ public class AudioLikeServiceImpl extends ServiceImpl<AudioLikeMapper, AudioLike
     }
 
     @Override
-    public IPage<AudioVO> getLikePage(PageQuery pageQuery) {
-        Long userId = SecurityUtils.getCurrentUserId();
+    public IPage<AudioVO> getLikePage(Long userId, PageQuery pageQuery) {
         Page<AudioVO> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
         IPage<AudioVO> result = audioVOMapper.selectByLikeUserId(page, userId);
 

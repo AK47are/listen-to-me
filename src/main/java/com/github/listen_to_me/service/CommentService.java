@@ -8,7 +8,7 @@ import com.github.listen_to_me.domain.query.CommentQuery;
 import com.github.listen_to_me.domain.vo.CommentVO;
 
 public interface CommentService extends IService<Comment> {
-    void addComment(CommentDTO commentDTO);
+    void addComment(Long userId, CommentDTO commentDTO);
 
-    IPage<CommentVO> findCommentPage(CommentQuery commentQuery);
+    IPage<CommentVO> findCommentPage(Long userId, CommentQuery commentQuery);
 }

@@ -22,13 +22,13 @@ import jakarta.servlet.http.HttpServletRequest;
 
 public interface ISysUserService extends IService<SysUser> {
 
-    UserVO findProfile();
+    UserVO findProfile(Long userId);
 
-    void modifyProfile(UserProfileUpdateDTO updateDTO);
+    void modifyProfile(Long userId, UserProfileUpdateDTO updateDTO);
 
     /**
      * 上传用户头像
-     * 
+     *
      * @param avatarFile 头像文件
      * @return 临时访问URL
      * @throws Exception 上传失败时抛出异常
@@ -103,11 +103,11 @@ public interface ISysUserService extends IService<SysUser> {
      */
     IPage<UserVO> getUserPage(UserPageQuery query);
 
-    RechargeResultVO recharge(RechargeResultDTO rechargeResultDTO) throws Exception;
+    RechargeResultVO recharge(Long userId, RechargeResultDTO rechargeResultDTO) throws Exception;
 
     String alipayNotify(HttpServletRequest request) throws Exception;
 
-    IPage<RechargeOrderVO> getRechargePage(RechargeOrderQuery query);
+    IPage<RechargeOrderVO> getRechargePage(Long userId, RechargeOrderQuery query);
 
-    IPage<CoinTransactionVO> getTransactionPage(TransactionPageQuery query);
+    IPage<CoinTransactionVO> getTransactionPage(Long userId, TransactionPageQuery query);
 }

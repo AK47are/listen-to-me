@@ -17,9 +17,9 @@ import com.github.listen_to_me.domain.vo.AudioOrderVO;
  */
 public interface IAudioOrderService extends IService<AudioOrder> {
 
-    AudioOrderVO purchaseAudio(Long audioId);
+    AudioOrderVO purchaseAudio(Long userId, Long audioId);
 
     AudioOrderDetailVO queryAudioOrderDetail(String sn);
 
-    IPage<AudioOrderVO> queryAudioOrderPage(PageQuery query);
+    IPage<AudioOrderVO> queryAudioOrderPage(Long userId, PageQuery query);
 }

@@ -7,7 +7,6 @@ import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
-import com.github.listen_to_me.common.util.SecurityUtils;
 import com.github.listen_to_me.domain.dto.HistoryProgressDTO;
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.github.listen_to_me.domain.entity.PlayHistory;
@@ -30,8 +29,7 @@ public class PlayHistoryServiceImpl extends ServiceImpl<PlayHistoryMapper, PlayH
     private final AudioVOMapper audioVOMapper;
 
     @Override
-    public void addPlayHistory(HistoryProgressDTO historyProgressDTO) {
-        Long currId = SecurityUtils.getCurrentUserId();
+    public void addPlayHistory(Long userId, HistoryProgressDTO historyProgressDTO) {
         Long audioId = historyProgressDTO.getAudioId();
         AudioInfo audioInfo = audioInfoMapper.selectById(audioId);
         if (audioInfo == null) {
@@ -42,16 +40,15 @@ public class PlayHistoryServiceImpl extends ServiceImpl<PlayHistoryMapper, PlayH
         }
         PlayHistory history = new PlayHistory();
         history.setAudioId(audioId);
-        history.setUserId(currId);
+        history.setUserId(userId);
         history.setLastPosition(historyProgressDTO.getLastPosition());
-        String historySuffix = currId.toString() + ":" + audioId.toString();
+        String historySuffix = userId.toString() + ":" + audioId.toString();
         RedisUtils.set(RedisKey.USER_HISTORY, historySuffix, historyProgressDTO.getLastPosition());
         playHistoryMapper.insertOrUpdate(history);
     }
 
     @Override
-    public IPage<AudioVO> getHistoryPage(PageQuery pageQuery) {
-        Long userId = SecurityUtils.getCurrentUserId();
+    public IPage<AudioVO> getHistoryPage(Long userId, PageQuery pageQuery) {
         Page<AudioVO> page = new Page<>(pageQuery.getPageNum(), pageQuery.getPageSize());
         IPage<AudioVO> result = audioVOMapper.selectHistoryByUserId(page, userId);
 
@@ -61,16 +58,15 @@ public class PlayHistoryServiceImpl extends ServiceImpl<PlayHistoryMapper, PlayH
     }
 
     @Override
-    public Integer findPlayHistory(Long audioId) {
-        Long currId = SecurityUtils.getCurrentUserId();
-        String historySuffix = currId.toString() + ":" + audioId.toString();
+    public Integer findPlayHistory(Long userId, Long audioId) {
+        String historySuffix = userId.toString() + ":" + audioId.toString();
         Integer lastPosition = RedisUtils.get(RedisKey.USER_HISTORY, historySuffix);
         if (lastPosition != null) {
             return lastPosition;
         }
         // TODO 后续改成异步 Redis 方式，让数据库定时向 Redis 读取更新数据
         PlayHistory history = playHistoryMapper.selectOne(Wrappers.lambdaQuery(PlayHistory.class)
-                .eq(PlayHistory::getUserId, currId)
+                .eq(PlayHistory::getUserId, userId)
                 .eq(PlayHistory::getAudioId, audioId));
         if (history == null) {
             return null;

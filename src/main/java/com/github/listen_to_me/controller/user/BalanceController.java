@@ -44,8 +44,8 @@ public class BalanceController {
 
     @PostMapping("/recharge")
     @Operation(summary = "充值")
-    public Result<RechargeResultVO> recharge(@Valid @RequestBody RechargeResultDTO rechargeResultDTO) throws Exception {
-        return Result.success(sysUserService.recharge(rechargeResultDTO));
+    public Result<RechargeResultVO> recharge(@AuthenticationPrincipal Long userId, @Valid @RequestBody RechargeResultDTO rechargeResultDTO) throws Exception {
+        return Result.success(sysUserService.recharge(userId, rechargeResultDTO));
     }
 
     @PostMapping("/callback/alipay")
@@ -56,13 +56,13 @@ public class BalanceController {
 
     @GetMapping("/recharge/page")
     @Operation(summary = "分页查询充值订单")
-    public Result<IPage<RechargeOrderVO>> getRechargePage(@ParameterObject RechargeOrderQuery query) {
-        return Result.success(sysUserService.getRechargePage(query));
+    public Result<IPage<RechargeOrderVO>> getRechargePage(@AuthenticationPrincipal Long userId, @ParameterObject RechargeOrderQuery query) {
+        return Result.success(sysUserService.getRechargePage(userId, query));
     }
 
     @GetMapping("/transaction/page")
     @Operation(summary = "分页查询虚拟币流水")
-    public Result<IPage<CoinTransactionVO>> getTransactionPage(@ParameterObject TransactionPageQuery query) {
-        return Result.success(sysUserService.getTransactionPage(query));
+    public Result<IPage<CoinTransactionVO>> getTransactionPage(@AuthenticationPrincipal Long userId, @ParameterObject TransactionPageQuery query) {
+        return Result.success(sysUserService.getTransactionPage(userId, query));
     }
 }

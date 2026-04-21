@@ -10,9 +10,9 @@ import com.github.listen_to_me.domain.vo.AuditApplyVO;
 import com.github.listen_to_me.domain.vo.CreatorApplyVO;
 
 public interface CreatorApplyService extends IService<CreatorApply> {
-    void addCreatorApply(CreatorApplyDTO creatorApplyDTO);
+    void addCreatorApply(Long userId, CreatorApplyDTO creatorApplyDTO);
 
-    CreatorApplyVO findApplyStatus();
+    CreatorApplyVO findApplyStatus(Long userId);
 
     IPage<AuditApplyVO> findAuditApplyPage(AuditQuery query);
 

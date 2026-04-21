@@ -8,9 +8,9 @@ import com.github.listen_to_me.domain.entity.Folder;
 import com.github.listen_to_me.domain.vo.FolderVO;
 
 public interface IFolderService extends IService<Folder> {
-    List<FolderVO> getUserFolders();
+    List<FolderVO> getUserFolders(Long userId);
 
-    FolderVO createFolder(String name);
+    FolderVO createFolder(Long userId, String name);
 
     void createFolder(Long userId, FolderDTO folderDTO);
 
