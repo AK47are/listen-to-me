@@ -43,8 +43,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = authHeader.substring(7);
 
-        if (JwtUtils.validateToken(token)) {
-            Claims claims = JwtUtils.parseToken(token);
+        Claims claims = JwtUtils.validateToken(token);
+        if (claims != null) {
             Long userId = Long.parseLong(claims.getSubject());
 
             // 检查用户状态, 不用担心效率，单表 + 索引查询超级快
