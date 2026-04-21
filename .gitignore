@@ -1,5 +1,8 @@
+application-dev.yaml
 HELP.md
+.claude/
 CLAUDE.md
+RESEARCH.md
 PLAN.md
 target/
 .mvn/wrapper/maven-wrapper.jar
