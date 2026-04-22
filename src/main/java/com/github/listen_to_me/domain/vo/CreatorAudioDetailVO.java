@@ -1,4 +1,4 @@
-package com.github.listen_to_me.domain.dto;
+package com.github.listen_to_me.domain.vo;
 
 import java.math.BigDecimal;
 

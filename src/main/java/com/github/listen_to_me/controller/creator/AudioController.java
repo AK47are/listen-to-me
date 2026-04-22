@@ -16,10 +16,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
 import com.github.listen_to_me.domain.dto.AudioDTO;
 import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
-import com.github.listen_to_me.domain.dto.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioPublishVO;
 import com.github.listen_to_me.domain.vo.AudioStatusVO;
+import com.github.listen_to_me.domain.vo.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.vo.CreatorAudioVO;
 import com.github.listen_to_me.service.IAudioInfoService;
 
