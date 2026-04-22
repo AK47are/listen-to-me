@@ -28,7 +28,7 @@ public class AudioClipUtils {
                     seconds,
                     outputPath);
 
-            Process process = Runtime.getRuntime().exec(command);
+            Process process = Runtime.getRuntime().exec(new String[] { command });
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
             String line;
             while ((line = reader.readLine()) != null) {

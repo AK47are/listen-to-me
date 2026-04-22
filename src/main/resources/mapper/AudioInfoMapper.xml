@@ -7,9 +7,9 @@
         WHERE id = #{audioId} AND is_deleted = 0
     </update>
 
-    <update id="updateStatusAndClipPathById">
+    <update id="completeTranscode">
         UPDATE audio_info
-        SET status = #{status}, clip_path = #{clipPath}
+        SET status = 'ONLINE', clip_path = #{clipPath}, duration = #{duration}
         WHERE id = #{audioId} AND is_deleted = 0
     </update>
 

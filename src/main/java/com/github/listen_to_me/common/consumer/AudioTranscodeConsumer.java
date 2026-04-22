@@ -1,6 +1,8 @@
 package com.github.listen_to_me.common.consumer;
 
 import java.io.File;
+import net.bramp.ffmpeg.FFprobe;
+import net.bramp.ffmpeg.probe.FFmpegProbeResult;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
@@ -61,9 +63,17 @@ public class AudioTranscodeConsumer {
             // 3. 上传片段到 MinIO
             String clipMinioPath = MinioUtils.uploadLocalFile(clipPath, "/online/audio/clip");
 
+            Integer fullDuration = null;
+            try {
+                FFprobe ffprobe = new FFprobe();
+                FFmpegProbeResult probeResult = ffprobe.probe(sourcePath);
+                fullDuration = (int) Math.ceil(probeResult.getFormat().duration);
+            } catch (Exception e) {
+                log.warn("解析完整音频时长失败 - audioId:{}", audioId, e);
+            }
+
             log.debug("音频片段生成成功 - audioId:{}", audioId);
-            // 3. 更新数据库状态为 已上线 (ONLINE)，并写入新的播放地址
-            audioInfoMapper.updateStatusAndClipPathById(audioId, "ONLINE", clipMinioPath);
+            audioInfoMapper.completeTranscode(audioId, clipMinioPath, fullDuration);
             audioInfoService.MoveAudioToOnline(audioId);
             log.debug("转码任务完成 - audioId:{}", audioId);
 
