@@ -25,7 +25,7 @@ public interface AudioInfoMapper extends BaseMapper<AudioInfo> {
 
     void updateStatusById(Long audioId, String status);
 
-    void updateStatusAndClipPathById(Long audioId, String status, String clipPath);
+    void completeTranscode(Long audioId, String clipPath, Integer duration);
 
     @Select("SELECT a.* FROM audio_info a WHERE  a.creator_id = #{userId} AND a.is_deleted = 0 ORDER BY a.create_time DESC")
     IPage<AudioInfo> selectByCreatorId(Long userId, Page<AudioInfo> page);
