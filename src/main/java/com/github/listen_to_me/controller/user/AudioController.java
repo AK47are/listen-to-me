@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,8 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.github.listen_to_me.common.Result;
-import com.github.listen_to_me.domain.dto.FavoriteActionDTO;
-import com.github.listen_to_me.domain.dto.LikeActionDTO;
+import com.github.listen_to_me.domain.dto.CollectAudioRequest;
 import com.github.listen_to_me.domain.query.AudioSearchQuery;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioDetailVO;
@@ -41,17 +41,43 @@ public class AudioController {
     private final IAudioInfoService audioInfoService;
     private final IAudioFolderRelationService audioFolderRelationService;
 
-    @PostMapping("/action")
-    @Operation(summary = "收藏/取消收藏音频")
-    public Result<Void> saveAudioAction(@RequestBody FavoriteActionDTO favoriteActionDTO) {
-        audioFolderRelationService.saveAudioAction(favoriteActionDTO);
+    @PostMapping("/{audioId}/collect")
+    @Operation(summary = "收藏音频")
+    public Result<Void> collectAudio(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long audioId,
+            @RequestBody(required = false) CollectAudioRequest request) {
+        Long folderId = request != null ? request.getFolderId() : null;
+        audioFolderRelationService.collectAudio(userId, audioId, folderId);
         return Result.success();
     }
 
-    @PostMapping("/like")
-    @Operation(summary = "喜欢/取消喜欢音频")
-    public Result<Void> saveAudioLike(@AuthenticationPrincipal Long userId, @RequestBody LikeActionDTO likeActionDTO) {
-        audioLikeService.modifyAudioLike(userId, likeActionDTO);
+    @DeleteMapping("/{audioId}/collect")
+    @Operation(summary = "取消收藏音频")
+    public Result<Void> uncollectAudio(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long audioId,
+            @RequestBody(required = false) CollectAudioRequest request) {
+        Long folderId = request != null ? request.getFolderId() : null;
+        audioFolderRelationService.uncollectAudio(userId, audioId, folderId);
+        return Result.success();
+    }
+
+    @PostMapping("/{audioId}/like")
+    @Operation(summary = "喜欢音频")
+    public Result<Void> likeAudio(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long audioId) {
+        audioLikeService.likeAudio(userId, audioId);
+        return Result.success();
+    }
+
+    @DeleteMapping("/{audioId}/like")
+    @Operation(summary = "取消喜欢音频")
+    public Result<Void> unlikeAudio(
+            @AuthenticationPrincipal Long userId,
+            @PathVariable Long audioId) {
+        audioLikeService.unlikeAudio(userId, audioId);
         return Result.success();
     }
 
