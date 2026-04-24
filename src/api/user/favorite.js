@@ -1,8 +1,11 @@
 import request from '@/utils/request'
 
 export const favoriteApi = {
-  saveAudioAction(data) {
-    return request({ url: '/user/audio/action', method: 'post', data })
+  collectAudio(audioId, folderId) {
+    return request({ url: `/user/audio/${audioId}/collect`, method: 'post', data: { folderId } })
+  },
+  uncollectAudio(audioId, folderId) {
+    return request({ url: `/user/audio/${audioId}/collect`, method: 'delete', data: { folderId } })
   },
   saveFavoriteFolder(data) {
     return request({ url: '/user/favorite/folder', method: 'post', data })

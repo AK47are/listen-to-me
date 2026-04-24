@@ -426,18 +426,10 @@ const saveFolderChanges = async () => {
   savingFolders.value = true
   try {
     for (const folderId of toAdd) {
-      await favoriteApi.saveAudioAction({
-        audioId: audioId.value,
-        folderId: folderId,
-        action: 'COLLECT',
-      })
+      await favoriteApi.collectAudio(audioId.value, folderId)
     }
     for (const folderId of toRemove) {
-      await favoriteApi.saveAudioAction({
-        audioId: audioId.value,
-        folderId: folderId,
-        action: 'UNCOLLECT',
-      })
+      await favoriteApi.uncollectAudio(audioId.value, folderId)
     }
     await loadCollectedFolderIds()
     if (audioDetail.value?.stats) {
@@ -496,10 +488,11 @@ const handleLike = async () => {
     audioDetail.value.stats.likeCount += isLiked.value ? 1 : -1
   }
   try {
-    await likeApi.saveAudioLike({
-      audioId: audioId.value,
-      action: isLiked.value ? 'LIKE' : 'UNLIKE',
-    })
+    if (isLiked.value) {
+      await likeApi.likeAudio(audioId.value)
+    } else {
+      await likeApi.unlikeAudio(audioId.value)
+    }
     ElMessage.success(isLiked.value ? '已添加到喜欢' : '已取消喜欢')
   } catch (error) {
     isLiked.value = originState

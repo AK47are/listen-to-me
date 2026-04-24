@@ -263,11 +263,7 @@ const handleRemoveFavorite = async (audioId) => {
       cancelButtonText: '取消',
       type: 'warning',
     })
-    await favoriteApi.saveAudioAction({
-      audioId,
-      folderId: currentFolderId.value,
-      action: 'UNCOLLECT',
-    })
+    await favoriteApi.uncollectAudio(audioId, currentFolderId.value)
     ElMessage.success('移除成功')
     await getFavoriteList()
   } catch (error) {
