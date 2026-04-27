@@ -90,6 +90,10 @@ minio:
   raw-expiration: 1 # 原始文件临时 URL 过期时间 (1 小时)
   clip-expiration: 15 # 剪辑文件临时 URL 过期时间 (15 分钟)
 
+play-history:
+  sync:
+    interval: 30000
+
 alipay:
   appId: ${ALIPAY_APP_ID}
   privateKey: ${ALIPAY_PRIVATE_KEY}

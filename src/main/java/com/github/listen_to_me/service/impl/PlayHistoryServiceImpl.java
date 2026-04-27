@@ -38,13 +38,9 @@ public class PlayHistoryServiceImpl extends ServiceImpl<PlayHistoryMapper, PlayH
         if (audioInfo.getDuration() < historyProgressDTO.getLastPosition()) {
             throw new BaseException(400, "播放进度不能大于音频时长");
         }
-        PlayHistory history = new PlayHistory();
-        history.setAudioId(audioId);
-        history.setUserId(userId);
-        history.setLastPosition(historyProgressDTO.getLastPosition());
         String historySuffix = userId.toString() + ":" + audioId.toString();
         RedisUtils.set(RedisKey.USER_HISTORY, historySuffix, historyProgressDTO.getLastPosition());
-        playHistoryMapper.insertOrUpdate(history);
+        RedisUtils.addToSet(RedisKey.USER_HISTORY_DIRTY, "", historySuffix);
     }
 
     @Override
@@ -64,7 +60,6 @@ public class PlayHistoryServiceImpl extends ServiceImpl<PlayHistoryMapper, PlayH
         if (lastPosition != null) {
             return lastPosition;
         }
-        // TODO 后续改成异步 Redis 方式，让数据库定时向 Redis 读取更新数据
         PlayHistory history = playHistoryMapper.selectOne(Wrappers.lambdaQuery(PlayHistory.class)
                 .eq(PlayHistory::getUserId, userId)
                 .eq(PlayHistory::getAudioId, audioId));
