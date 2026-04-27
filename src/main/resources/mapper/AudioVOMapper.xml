@@ -9,7 +9,7 @@
             ai.cover_path AS coverUrl,
             u.nickname AS creatorName,
             ai.play_count AS playCount,
-            (SELECT COUNT(*) FROM audio_folder_relation WHERE audio_id = ai.id) AS collectCount
+            ai.collect_count AS collectCount
         FROM audio_info ai
         INNER JOIN sys_user u ON ai.creator_id = u.id
         WHERE ai.is_deleted = 0
@@ -88,7 +88,7 @@
             ai.cover_path AS coverUrl,
             u.nickname AS creatorName,
             ai.play_count AS playCount,
-            (SELECT COUNT(*) FROM audio_folder_relation WHERE audio_id = ai.id) AS collectCount
+            ai.collect_count AS collectCount
         FROM audio_info ai
         INNER JOIN sys_user u ON ai.creator_id = u.id
         INNER JOIN (

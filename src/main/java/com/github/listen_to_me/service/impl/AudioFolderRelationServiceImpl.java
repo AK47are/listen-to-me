@@ -14,6 +14,7 @@ import com.github.listen_to_me.domain.entity.AudioFolderRelation;
 import com.github.listen_to_me.domain.entity.Folder;
 import com.github.listen_to_me.domain.vo.FolderVO;
 import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
+import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.mapper.FolderMapper;
 import com.github.listen_to_me.service.IAudioFolderRelationService;
 
@@ -26,6 +27,7 @@ public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelat
 
     private final AudioFolderRelationMapper audioFolderRelationMapper;
     private final FolderMapper folderMapper;
+    private final AudioInfoMapper audioInfoMapper;
 
     @Override
     @Transactional
@@ -57,6 +59,7 @@ public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelat
         audioFolderRelation.setFolderId(folderId);
         audioFolderRelationMapper.insert(audioFolderRelation);
         folderMapper.incrementAudioCount(folderId, 1);
+        audioInfoMapper.incrementCollectCount(audioId, 1);
     }
 
     @Override
@@ -82,6 +85,7 @@ public class AudioFolderRelationServiceImpl extends ServiceImpl<AudioFolderRelat
         }
         audioFolderRelationMapper.delete(wrapper);
         folderMapper.incrementAudioCount(folderId, -1);
+        audioInfoMapper.incrementCollectCount(audioId, -1);
     }
 
     @Override
