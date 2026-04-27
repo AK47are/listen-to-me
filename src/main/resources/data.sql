@@ -1,9 +1,6 @@
 -- 关闭外键检查（避免导入顺序问题，执行完后开启）
 SET FOREIGN_KEY_CHECKS = 0;
 
--- ----------------------------
--- 1. RBAC权限域 - 测试数据
--- ----------------------------
 -- 系统角色
 INSERT INTO `sys_role` (`role_name`, `role_code`) VALUES
 ('超级管理员', 'ROLE_ADMIN'),
@@ -38,26 +35,20 @@ INSERT INTO `sys_role_permission` (`role_id`, `perm_id`) VALUES
 (2, 1), (2, 2),
 (3, 1);
 
--- ----------------------------
--- 2. 音频资产域 - 测试数据
--- ----------------------------
 -- 音频信息
-INSERT INTO `audio_info` (`creator_id`, `title`,`description`, `cover_path`, `raw_path`, `clip_path`, `is_paid`, `price`, `trial_duration`, `duration`, `audit_status`, `play_count`) VALUES
-(2, '心理学入门30讲', '这是一个心理学入门的课程，包含心理学的定义、研究对象、认知心理学入门等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 29.90, 60, 60, 'APPROVED', 2),
-(2, '职场沟通技巧', '这是一个职场沟通技巧的课程，包含沟通的核心、有效倾听、职场表达的3个技巧等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 19.90, 45, 240, 'APPROVED', 2),
-(5, '民间故事大全', '这是一个民间故事的课程，包含民间的狐仙故事、民间的狼妖传说等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3',1, 9.90, 30, 300, 'APPROVED', 2),
-(5, '悬疑短篇合集', '这是一个悬疑短篇的课程，包含悬疑的狐仙故事、悬疑的狼妖传说等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 15.90, 40, 480, 'APPROVED', 2),
-(2, '负能量清理指南', '这是一个负能量清理指南的课程，包含负能量的定义、清理的方法、清理的注意事项等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 12.90, 30, 300, 'APPROVED', 2);
+INSERT INTO `audio_info` (`creator_id`, `title`,`description`, `cover_path`, `raw_path`, `clip_path`, `is_paid`, `price`, `trial_duration`, `duration`, `audit_status`, `status`, `is_deleted`, `visibility`, `play_count`, `like_count`, `collect_count`, `comment_count`) VALUES
+(2, '心理学入门30讲', '这是一个心理学入门的课程，包含心理学的定义、研究对象、认知心理学入门等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 29.90, 60, 60, 'APPROVED', 'ONLINE', 0, 'PUBLIC', 2, 2, 3, 4),
+(2, '职场沟通技巧', '这是一个职场沟通技巧的课程，包含沟通的核心、有效倾听、职场表达的3个技巧等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 19.90, 45, 240, 'APPROVED', 'ONLINE', 0, 'PUBLIC', 2, 3, 2, 5),
+(5, '民间故事大全', '这是一个民间故事的课程，包含民间的狐仙故事、民间的狼妖传说等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3',1, 9.90, 30, 300, 'APPROVED', 'ONLINE', 0, 'PUBLIC', 2, 1, 3, 3),
+(5, '悬疑短篇合集', '这是一个悬疑短篇的课程，包含悬疑的狐仙故事、悬疑的狼妖传说等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 15.90, 40, 480, 'APPROVED', 'ONLINE', 0, 'PUBLIC', 2, 0, 0, 1),
+(2, '负能量清理指南', '这是一个负能量清理指南的课程，包含负能量的定义、清理的方法、清理的注意事项等', 'online/cover/20260401/987df0b1-4254-4618-aa8a-51a2b9410dcb_b_fd2f1f7cc2e6138a9de0a078385c2b81.jpg', 'online/audio/20260401/9231c36e-28a9-431c-8726-5881f4707d33_周杰伦 - 兰亭序.mp3', 'online/audio/clip/20260401/clip_9_5152756370235071512.mp3', 1, 12.90, 30, 300, 'APPROVED', 'ONLINE', 0, 'PUBLIC', 2, 2, 0, 3);
 
 -- 音频转写
-INSERT INTO `audio_transcript` (`audio_id`, `full_text`, `segment_json`) VALUES
-(1, '大家好，今天我们开始心理学入门的第一讲，首先来了解什么是心理学...（全文省略）', '[{"time":0,"title":"第1讲：心理学的定义"},{"time":300,"title":"第1讲：心理学的研究对象"},{"time":600,"title":"第2讲：认知心理学入门"}]'),
-(2, '职场沟通中，倾听是最重要的环节，很多人沟通失败的原因是不会听...（全文省略）', '[{"time":0,"title":"沟通的核心：有效倾听"},{"time":240,"title":"职场表达的3个技巧"}]'),
-(3, '今天给大家讲一个民间的狐仙故事，这个故事发生在民国时期的北方小镇...（全文省略）', '[{"time":0,"title":"民国狐仙故事"},{"time":480,"title":"山村狼妖传说"}]');
+INSERT INTO `audio_transcript` (`audio_id`, `task_id`, `full_text`, `segment_json`) VALUES
+(1, 'test_task_001', '大家好，今天我们开始心理学入门的第一讲，首先来了解什么是心理学...（全文省略）', '[{"time":0,"title":"第1讲：心理学的定义"},{"time":300,"title":"第1讲：心理学的研究对象"},{"time":600,"title":"第2讲：认知心理学入门"}]'),
+(2, 'test_task_002', '职场沟通中，倾听是最重要的环节，很多人沟通失败的原因是不会听...（全文省略）', '[{"time":0,"title":"沟通的核心：有效倾听"},{"time":240,"title":"职场表达的3个技巧"}]'),
+(3, 'test_task_003', '今天给大家讲一个民间的狐仙故事，这个故事发生在民国时期的北方小镇...（全文省略）', '[{"time":0,"title":"民国狐仙故事"},{"time":480,"title":"山村狼妖传说"}]');
 
--- ----------------------------
--- 3. 交易业务域 - 测试数据
--- ----------------------------
 -- 订单信息（订单编号格式：YYYYMMDD+6位随机数）
 INSERT INTO `audio_order` (`order_sn`, `user_id`, `audio_id`, `pay_amount`, `pay_status`, `pay_channel`, `pay_time`) VALUES
 ('20250520123456', 3, 1, 29.90, 1, 'wechat', '2025-05-20 14:30:25'),
@@ -74,9 +65,20 @@ INSERT INTO `play_history` (`user_id`, `audio_id`, `last_position`) VALUES
 (4, 1, 320),
 (3, 4, 180);
 
--- ----------------------------
--- 5. 咨询服务域 - 测试数据
--- ----------------------------
+INSERT INTO `audio_like` (`user_id`, `audio_id`) VALUES
+-- 音频1 点赞用户：1, 2
+(1, 1),
+(2, 1),
+-- 音频2 点赞用户：1, 3, 4
+(1, 2),
+(3, 2),
+(4, 2),
+-- 音频3 点赞用户：5
+(5, 3),
+-- 音频5 点赞用户：3, 4
+(3, 5),
+(4, 5);
+
 -- 咨询时段
 INSERT INTO `consult_slot` (`creator_id`, `start_time`, `end_time`, `price`, `address`, `status`) VALUES
 (2, '2025-05-25 10:00:00', '2025-05-25 11:00:00', 50.00, '腾讯会议链接：https://meeting.tencent.com/dm/abc123', 'BOOKED'),
@@ -87,9 +89,6 @@ INSERT INTO `consult_slot` (`creator_id`, `start_time`, `end_time`, `price`, `ad
 (2, '2025-05-28 16:00:00', '2025-05-28 17:00:00', 55.00, '腾讯会议链接：https://meeting.tencent.com/dm/pqr678', 'EXPIRED'),
 (5, '2025-05-29 20:00:00', '2025-05-29 21:30:00', 90.00, '腾讯会议链接：https://meeting.tencent.com/dm/stu901', 'AVAILABLE');
 
--- ----------------------------
--- 5. 咨询服务域 - 测试数据（预约订单）
--- ----------------------------
 -- 预约订单
 INSERT INTO `consult_order` (`slot_id`, `user_id`, `creator_id`, `message`, `status`, `address`, `pay_amount`, `create_time`) VALUES
 (1, 3, 2, '想咨询一下心理学入门相关的问题', 'CONFIRMED', '腾讯会议链接：https://meeting.tencent.com/dm/abc123', 50.00, '2025-05-20 10:00:00'),
@@ -103,9 +102,6 @@ INSERT INTO `refund_apply` (`order_id`, `user_id`, `reason`, `status`, `reject_r
 (1, 3, '咨询内容与预期不符', 'PROCESSED', NULL, '2025-05-25 10:00:00'),
 (4, 4, '创作者未按时回复', 'PENDING', NULL, '2025-05-26 14:00:00');
 
--- ----------------------------
--- 6. 收藏夹域 - 测试数据
--- ----------------------------
 -- 用户3（听书小迷弟）的收藏夹
 INSERT INTO `folder` (`id`, `user_id`, `name`, `description`, `audio_count`) VALUES
 (1, 3, '我的最爱', '超级喜欢的音频合集', 3),
@@ -114,7 +110,7 @@ INSERT INTO `folder` (`id`, `user_id`, `name`, `description`, `audio_count`) VAL
 
 -- 用户4（深夜听众）的收藏夹
 INSERT INTO `folder` (`id`, `user_id`, `name`, `description`, `audio_count`) VALUES
-(4, 4, '我的最爱', '超级喜欢的音频合集', 2),
+(4, 4, '我的最爱', '超级喜欢的音频合集', 1),
 (5, 4, '睡前故事', '睡前听的放松故事', 1);
 
 -- 音频 - 收藏夹关联（用户3的收藏夹）
@@ -152,10 +148,6 @@ INSERT INTO `coin_transaction` (`user_id`, `type`, `biz_type`, `amount`, `balanc
 (4, 'EXPENSE', 'AUDIO', 19.90, 100.00, 80.10, '20250522987654', '购买音频：职场沟通技巧'),
 (4, 'EXPENSE', 'AUDIO', 12.90, 80.10, 67.20, '20250523456789', '购买音频：负能量清理指南');
 
-
--- -------------------------------------
--- 评论表测试数据
--- -------------------------------------
 INSERT INTO comments (id,audio_id, parent_id, user_id, content, like_count) VALUES
 -- 1. 音频1 顶级评论 (parent_id=0)
 (1,1, 0, 1, '音频1的第一条顶级评论，支持一下！', 2),
@@ -182,49 +174,28 @@ INSERT INTO comments (id,audio_id, parent_id, user_id, content, like_count) VALU
 (13,5, 0, 3, '音频5非常专业', 1),
 (14,5, 0, 4, '已三连', 1),
 (15,5, 0, 5, '坐等更新', 0),
--- 11. 音频4 三级评论 (回复id=12)
 (16,2, 8, 1,'支持',0);
 
--- 评论点赞表批量插入（与comments.like_count精准匹配，共18条点赞记录）
 INSERT INTO comment_likes (comment_id, user_id) VALUES
--- 评论1 (like_count=2)：用户2、3点赞
 (1, 2), (1, 3),
--- 评论2 (like_count=1)：用户1点赞
 (2, 1),
--- 评论3 (like_count=1)：用户5点赞
 (3, 5),
--- 评论5 (like_count=3)：用户1、3、4点赞
 (5, 1), (5, 3), (5, 4),
--- 评论6 (like_count=2)：用户2、5点赞
 (6, 2), (6, 5),
--- 评论7 (like_count=1)：用户4点赞
 (7, 4),
--- 评论9 (like_count=1)：用户2点赞
 (9, 2),
--- 评论10 (like_count=1)：用户3点赞
 (10, 3),
--- 评论12 (like_count=2)：用户1、5点赞
 (12, 1), (12, 5),
--- 评论13 (like_count=1)：用户1点赞
 (13, 1),
--- 评论14 (like_count=1)：用户2点赞
 (14, 2);
--- 开启外键检查
 
+INSERT INTO creator_apply (user_id, real_name, phone, status, intro, attachment, reason) VALUES
+(2, '陈梓菱', '13800138001', 'APPROVED', NULL, NULL, NULL),
+(5, '张宏', '13800138004', 'APPROVED', NULL, NULL, NULL);
 
--- 创作者申请测试数据
--- 批量插入创作者申请记录（已通过审核）
-INSERT INTO creator_apply (user_id, real_name, phone, status) VALUES
-(2, '陈梓菱', '13800138001', 'APPROVED'),
-(5, '张宏', '13800138004', 'APPROVED');
-
--- 用户关注创作者记录
 INSERT INTO user_follow (user_id, creator_id, create_time) VALUES
--- 听书小迷弟 (user_id=3) 关注了 有声的小雅 (creator_id=2)
 (3, 2, '2025-05-20 10:30:00'),
--- 听书小迷弟 (user_id=3) 关注了 老杨说故事 (creator_id=5)
 (3, 5, '2025-05-21 14:20:00'),
--- 深夜听众 (user_id=4) 关注了 有声的小雅 (creator_id=2)
 (4, 2, '2025-05-22 09:15:00');
 
 INSERT INTO `creator_profile` (`user_id`, `intro`) VALUES
