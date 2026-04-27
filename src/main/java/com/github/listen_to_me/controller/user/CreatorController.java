@@ -18,10 +18,14 @@ import com.github.listen_to_me.service.ICreatorProfileService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
+@Validated
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user/creator")
@@ -33,21 +37,21 @@ public class CreatorController {
 
     @GetMapping("/page")
     @Operation(summary = "分页查询创作者列表")
-    public Result<IPage<CreatorVO>> getCreatorPage(@ParameterObject CreatorPageQuery query,
+    public Result<IPage<CreatorVO>> getCreatorPage(@Valid @ParameterObject CreatorPageQuery query,
             @AuthenticationPrincipal Long userId) {
         return Result.success(creatorProfileService.getCreatorPage(userId, query));
     }
 
     @GetMapping("/{creatorId}/slots/page")
     @Operation(summary = "分页查询创作者时间槽")
-    public Result<IPage<SlotVO>> getCreatorSlotPage(@PathVariable Long creatorId,
-            @ParameterObject SlotPageQuery slotPageQuery) {
+    public Result<IPage<SlotVO>> getCreatorSlotPage(@PathVariable @Positive Long creatorId,
+            @Valid @ParameterObject SlotPageQuery slotPageQuery) {
         return Result.success(iConsultSlotService.getCreatorSlotPage(creatorId, slotPageQuery));
     }
 
     @GetMapping("/{creatorId}")
     @Operation(summary = "获取创作者详情")
-    public Result<CreatorVO> getCreatorDetail(@PathVariable Long creatorId,
+    public Result<CreatorVO> getCreatorDetail(@PathVariable @Positive Long creatorId,
             @AuthenticationPrincipal Long userId) {
         return Result.success(creatorProfileService.getCreatorDetail(creatorId, userId));
     }

@@ -18,10 +18,14 @@ import com.github.listen_to_me.service.IUserFollowService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
+@Validated
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user/creator")
@@ -32,7 +36,7 @@ public class FollowController {
 
     @PostMapping("/{creatorId}/follow")
     @Operation(summary = "关注创作者")
-    public Result<Void> follow(@PathVariable Long creatorId,
+    public Result<Void> follow(@PathVariable @Positive Long creatorId,
             @AuthenticationPrincipal Long userId) {
         userFollowService.follow(userId, creatorId);
         return Result.success();
@@ -40,7 +44,7 @@ public class FollowController {
 
     @DeleteMapping("/{creatorId}/follow")
     @Operation(summary = "取消关注")
-    public Result<Void> unfollow(@PathVariable Long creatorId,
+    public Result<Void> unfollow(@PathVariable @Positive Long creatorId,
             @AuthenticationPrincipal Long userId) {
         userFollowService.unfollow(userId, creatorId);
         return Result.success();
@@ -48,7 +52,7 @@ public class FollowController {
 
     @GetMapping("/follow/page")
     @Operation(summary = "分页查询关注的创作者列表")
-    public Result<IPage<CreatorVO>> getFollowPage(@ParameterObject PageQuery pageQuery,
+    public Result<IPage<CreatorVO>> getFollowPage(@Valid @ParameterObject PageQuery pageQuery,
             @AuthenticationPrincipal Long userId) {
         return Result.success(userFollowService.getFollowPage(userId, pageQuery));
     }
@@ -56,7 +60,7 @@ public class FollowController {
     @GetMapping("/{creatorId}/fans/page")
     @Operation(summary = "分页查询创作者的粉丝列表")
     public Result<IPage<FansVO>> getFansPage(@PathVariable Long creatorId,
-            @ParameterObject PageQuery pageQuery) {
+            @Valid @ParameterObject PageQuery pageQuery) {
         return Result.success(userFollowService.getFansPage(creatorId, pageQuery));
     }
 }

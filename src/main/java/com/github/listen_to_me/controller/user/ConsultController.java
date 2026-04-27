@@ -46,7 +46,7 @@ public class ConsultController {
     @Operation(summary = "查询我的预约")
     public Result<IPage<ConsultOrderVO>> getMyConsultPage(
             @AuthenticationPrincipal Long userId,
-            @ParameterObject ConsultPageQuery query) {
+            @Valid @ParameterObject ConsultPageQuery query) {
         return Result.success(consultOrderService.getUserConsultPage(userId, query));
     }
 

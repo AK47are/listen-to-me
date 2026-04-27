@@ -32,7 +32,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "密码登录", description = "提交用户名密码，返回 JWT 令牌及用户信息")
-    public Result<LoginVO> login(@RequestBody LoginDTO loginDTO) {
+    public Result<LoginVO> login(@Valid @RequestBody LoginDTO loginDTO) {
         return Result.success(authService.loginUser(loginDTO));
     }
 
@@ -50,7 +50,7 @@ public class AuthController {
 
     @PostMapping("/verify-code")
     @Operation(summary = "发送校验码")
-    public Result<Void> sendVerifyCode(@RequestBody VerifyCodeDTO verifyCodeDTO) {
+    public Result<Void> sendVerifyCode(@Valid @RequestBody VerifyCodeDTO verifyCodeDTO) {
         authService.sendVerifyCode(verifyCodeDTO);
         return Result.success();
     }

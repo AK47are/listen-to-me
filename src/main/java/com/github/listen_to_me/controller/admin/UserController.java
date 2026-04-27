@@ -15,13 +15,17 @@ import com.github.listen_to_me.service.ISysUserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Tag(name = "用户管理")
 @RequiredArgsConstructor
 @RequestMapping("/admin/user")
+@Validated
 @RestController("adminUserController")
 public class UserController {
 
@@ -29,20 +33,20 @@ public class UserController {
 
     @GetMapping("/page")
     @Operation(summary = "分页查询用户")
-    public Result<IPage<UserVO>> getUserPage(@ParameterObject UserPageQuery query) {
+    public Result<IPage<UserVO>> getUserPage(@Valid @ParameterObject UserPageQuery query) {
         return Result.success(sysUserService.getUserPage(query));
     }
 
     @PutMapping("/{userId}/ban")
     @Operation(summary = "封禁用户")
-    public Result<Void> banUser(@PathVariable Long userId) {
+    public Result<Void> banUser(@PathVariable @Positive Long userId) {
         sysUserService.banUser(userId);
         return Result.success();
     }
 
     @PutMapping("/{userId}/unban")
     @Operation(summary = "解封用户")
-    public Result<Void> unbanUser(@PathVariable Long userId) {
+    public Result<Void> unbanUser(@PathVariable @Positive Long userId) {
         sysUserService.unbanUser(userId);
         return Result.success();
     }

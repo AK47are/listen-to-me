@@ -19,9 +19,12 @@ import com.github.listen_to_me.service.IPlayHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 
 @Tag(name = "用户播放历史")
+@Validated
 @RestController
 @RequestMapping("/user/history")
 @RequiredArgsConstructor
@@ -39,13 +42,13 @@ public class HistoryController {
     @GetMapping("/page")
     @Operation(summary = "分页查询历史记录")
     public Result<IPage<AudioVO>> getHistoryPage(@AuthenticationPrincipal Long userId,
-            @ParameterObject PageQuery pageQuery) {
+            @Valid @ParameterObject PageQuery pageQuery) {
         return Result.success(playHistoryService.getHistoryPage(userId, pageQuery));
     }
 
     @GetMapping("/{audioId}")
     @Operation(summary = "获取播放历史")
-    public Result<Integer> getHistory(@AuthenticationPrincipal Long userId, @PathVariable Long audioId) {
+    public Result<Integer> getHistory(@AuthenticationPrincipal Long userId, @PathVariable @Positive Long audioId) {
         return Result.success(playHistoryService.findPlayHistory(userId, audioId));
     }
 }

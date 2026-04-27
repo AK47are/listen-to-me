@@ -17,13 +17,17 @@ import com.github.listen_to_me.service.IConsultOrderService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @RequiredArgsConstructor
 @RequestMapping("/creator/consult")
 @Tag(name = "预约订单管理")
+@Validated
 @RestController("creatorConsultController")
 public class ConsultController {
 
@@ -33,7 +37,7 @@ public class ConsultController {
     @Operation(summary = "分页查询预约订单")
     public Result<IPage<ConsultOrderVO>> getConsultPage(
             @AuthenticationPrincipal Long creatorId,
-            @ParameterObject ConsultPageQuery query) {
+            @Valid @ParameterObject ConsultPageQuery query) {
         return Result.success(consultOrderService.getCreatorConsultPage(creatorId, query));
     }
 
@@ -41,7 +45,7 @@ public class ConsultController {
     @Operation(summary = "确认预约")
     public Result<Void> confirmConsult(
             @AuthenticationPrincipal Long creatorId,
-            @PathVariable Long id,
+            @PathVariable @Positive Long id,
             @RequestParam(required = false) String address) {
         consultOrderService.confirmConsult(creatorId, id, address);
         return Result.success();
@@ -51,7 +55,7 @@ public class ConsultController {
     @Operation(summary = "拒绝预约")
     public Result<Void> rejectConsult(
             @AuthenticationPrincipal Long creatorId,
-            @PathVariable Long id) {
+            @PathVariable @Positive Long id) {
         consultOrderService.rejectConsult(creatorId, id);
         return Result.success();
     }
@@ -60,7 +64,7 @@ public class ConsultController {
     @Operation(summary = "标记完成")
     public Result<Void> completeConsult(
             @AuthenticationPrincipal Long creatorId,
-            @PathVariable Long id) {
+            @PathVariable @Positive Long id) {
         consultOrderService.completeConsult(creatorId, id);
         return Result.success();
     }

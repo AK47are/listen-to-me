@@ -29,7 +29,7 @@ public class AudioController {
 
     @GetMapping("/page")
     @Operation(summary = "获取音频审核分页列表")
-    public Result<IPage<AuditAudioVO>> getAuditAudioPage(@ParameterObject AuditQuery auditQuery) {
+    public Result<IPage<AuditAudioVO>> getAuditAudioPage(@Valid @ParameterObject AuditQuery auditQuery) {
         return Result.success(audioInfoService.getAuditAudioPage(auditQuery));
     }
 

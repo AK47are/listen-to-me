@@ -26,6 +26,7 @@ import com.github.listen_to_me.service.IAudioInfoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -53,7 +54,7 @@ public class AudioController {
     @Operation(summary = "发布音频稿件", description = "创建音频稿件，提交后进入转码流程")
     public Result<AudioPublishVO> saveAudio(
             @AuthenticationPrincipal Long creatorId,
-            @Parameter(description = "音频稿件信息", required = true) @RequestBody AudioDTO audioDTO) throws Exception {
+            @Parameter(description = "音频稿件信息", required = true) @Valid @RequestBody AudioDTO audioDTO) throws Exception {
         return Result.success(audioInfoService.saveAudio(creatorId, audioDTO));
     }
 
@@ -61,7 +62,7 @@ public class AudioController {
     @Operation(summary = "分页查询我的稿件", description = "分页获取当前创作者的所有音频稿件")
     public Result<IPage<CreatorAudioVO>> getAudioPage(
             @AuthenticationPrincipal Long userId,
-            @ParameterObject PageQuery pageQuery) {
+            @Valid @ParameterObject PageQuery pageQuery) {
         return Result.success(audioInfoService.getAudioPage(userId, pageQuery));
     }
 
@@ -83,7 +84,7 @@ public class AudioController {
 
     @PutMapping
     @Operation(summary = "修改音频配置", description = "修改音频稿件的标题、简介、价格、可见性等配置")
-    public Result<Void> updateAudio(@AuthenticationPrincipal Long userId, @RequestBody AudioUpdateDTO audioUpdateDTO) {
+    public Result<Void> updateAudio(@AuthenticationPrincipal Long userId, @Valid @RequestBody AudioUpdateDTO audioUpdateDTO) {
         audioInfoService.updateAudio(userId, audioUpdateDTO);
         return Result.success();
     }

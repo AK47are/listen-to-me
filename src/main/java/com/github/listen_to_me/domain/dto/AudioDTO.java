@@ -7,10 +7,10 @@ import lombok.Data;
 public class AudioDTO {
     @NotBlank(message = "标题不能为空")
     private String title;
-    @NotBlank(message = "封面不能为空不能为空")
+    @NotBlank(message = "封面不能为空")
     private String coverUrl;
     private String description;
-    @NotBlank(message = "音频不能为空不能为空")
+    @NotBlank(message = "音频不能为空")
     private String audioUrl;
 
     private Integer trialDuration;

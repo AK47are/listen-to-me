@@ -40,7 +40,7 @@ public class CommentController {
     @Operation(summary = "获取评论分页")
     @GetMapping("/page")
     public Result<IPage<CommentVO>> getCommentPage(@AuthenticationPrincipal Long userId,
-            @ParameterObject CommentQuery commentQuery) {
+            @Valid @ParameterObject CommentQuery commentQuery) {
         return Result.success(commentService.findCommentPage(userId, commentQuery));
     }
 

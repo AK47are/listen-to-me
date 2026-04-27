@@ -11,6 +11,7 @@ import com.github.listen_to_me.common.enumeration.UniqueIndexEnum;
 import com.github.listen_to_me.common.util.ExceptionUtils;
 
 import cn.hutool.http.HttpStatus;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -44,6 +45,15 @@ public class GlobalExceptionHandler {
             return Result.fail(HttpStatus.HTTP_BAD_REQUEST, message);
         }
         return Result.fail(HttpStatus.HTTP_BAD_REQUEST, "参数校验失败");
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public Result<?> handleConstraintViolation(ConstraintViolationException e) {
+        String message = e.getConstraintViolations().stream()
+            .findFirst()
+            .map(v -> v.getMessage())
+            .orElse("参数校验失败");
+        return Result.fail(HttpStatus.HTTP_BAD_REQUEST, message);
     }
 
     // 必须放最后，否则会提前捕获

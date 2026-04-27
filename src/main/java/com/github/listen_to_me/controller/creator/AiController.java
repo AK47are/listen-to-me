@@ -19,6 +19,7 @@ import com.github.listen_to_me.service.IAiTaskService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -52,7 +53,7 @@ public class AiController {
     @PostMapping("/slots")
     @Operation(summary = "AI 智能排期（预览）")
     public Result<List<SlotVO>> generateSlots(@AuthenticationPrincipal Long userId,
-            @RequestBody SlotsGenerateDTO dto) {
+            @Valid @RequestBody SlotsGenerateDTO dto) {
         return Result.success(aiService.generateSlots(userId, dto.getDescription()));
     }
 
