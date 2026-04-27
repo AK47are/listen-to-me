@@ -24,10 +24,13 @@ import com.github.listen_to_me.service.IConsultSlotService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
+@Validated
 @RestController
 @RequestMapping("/creator")
 @RequiredArgsConstructor
@@ -48,13 +51,13 @@ public class SlotController {
     @GetMapping("/slots/page")
     @Operation(summary = "分页查询时间槽")
     public Result<IPage<SlotVO>> getSlotPage(@AuthenticationPrincipal Long creatorId,
-            @ParameterObject SlotPageQuery query) {
+            @Valid @ParameterObject SlotPageQuery query) {
         return Result.success(slotService.getCreatorSlotPage(creatorId, query));
     }
 
     @PutMapping("/slots/{id}")
     @Operation(summary = "修改时间槽状态")
-    public Result<Void> updateSlotStatus(@AuthenticationPrincipal Long creatorId, @PathVariable Long id,
+    public Result<Void> updateSlotStatus(@AuthenticationPrincipal Long creatorId, @PathVariable @Positive Long id,
             @RequestParam String status) {
         log.debug("修改时间槽状态 - ID: {}, 状态: {}", id, status);
         slotService.updateSlotStatus(creatorId, id, status);
@@ -63,7 +66,7 @@ public class SlotController {
 
     @DeleteMapping("/slots/{id}")
     @Operation(summary = "删除时间槽")
-    public Result<Void> removeSlot(@AuthenticationPrincipal Long creatorId, @PathVariable Long id) {
+    public Result<Void> removeSlot(@AuthenticationPrincipal Long creatorId, @PathVariable @Positive Long id) {
         log.debug("删除时间槽 - ID: {}", id);
         slotService.removeSlot(creatorId, id);
         return Result.success();

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,12 +28,14 @@ import com.github.listen_to_me.service.IAudioLikeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @AllArgsConstructor
 @RequestMapping("/user/audio")
+@Validated
 @RestController("userAudioController")
 @Tag(name = "音频稿件管理", description = "包含收藏、点赞音频等接口")
 public class AudioController {
@@ -56,7 +59,7 @@ public class AudioController {
     @Operation(summary = "取消收藏音频")
     public Result<Void> uncollectAudio(
             @AuthenticationPrincipal Long userId,
-            @PathVariable Long audioId,
+            @PathVariable @Positive Long audioId,
             @RequestBody(required = false) CollectAudioRequest request) {
         Long folderId = request != null ? request.getFolderId() : null;
         audioFolderRelationService.uncollectAudio(userId, audioId, folderId);
@@ -67,7 +70,7 @@ public class AudioController {
     @Operation(summary = "喜欢音频")
     public Result<Void> likeAudio(
             @AuthenticationPrincipal Long userId,
-            @PathVariable Long audioId) {
+            @PathVariable @Positive Long audioId) {
         audioLikeService.likeAudio(userId, audioId);
         return Result.success();
     }
@@ -76,7 +79,7 @@ public class AudioController {
     @Operation(summary = "取消喜欢音频")
     public Result<Void> unlikeAudio(
             @AuthenticationPrincipal Long userId,
-            @PathVariable Long audioId) {
+            @PathVariable @Positive Long audioId) {
         audioLikeService.unlikeAudio(userId, audioId);
         return Result.success();
     }
@@ -97,14 +100,14 @@ public class AudioController {
     @Operation(summary = "获取音频详情")
     public Result<AudioDetailVO> getAudioDetail(
             @AuthenticationPrincipal Long userId,
-            @PathVariable Long audioId) {
+            @PathVariable @Positive Long audioId) {
         return Result.success(audioInfoService.getAudioDetail(userId, audioId));
     }
 
     @GetMapping("/creator/{creatorId}/page")
     @Operation(summary = "分页查询创作者作品")
     public Result<IPage<AudioVO>> getCreatorAudioPage(@PathVariable Long creatorId,
-            @ParameterObject PageQuery pageQuery) {
+            @Valid @ParameterObject PageQuery pageQuery) {
         return Result.success(audioInfoService.getCreatorAudioPage(creatorId, pageQuery));
     }
 
@@ -112,7 +115,7 @@ public class AudioController {
     @Operation(summary = "推荐音频")
     public Result<IPage<AudioVO>> getRecommendList(
             @AuthenticationPrincipal Long userId,
-            @ParameterObject PageQuery pageQuery) {
+            @Valid @ParameterObject PageQuery pageQuery) {
         return Result.success(audioInfoService.getRecommendList(userId, pageQuery));
     }
 

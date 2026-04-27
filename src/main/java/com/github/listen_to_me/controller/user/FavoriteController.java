@@ -24,10 +24,13 @@ import com.github.listen_to_me.service.IFolderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 
 @Slf4j
+@Validated
 @RestController
 @AllArgsConstructor
 @RequestMapping("/user/favorite")
@@ -54,7 +57,7 @@ public class FavoriteController {
 
     @GetMapping("/page")
     @Operation(summary = "获取收藏音频列表")
-    public Result<IPage<AudioVO>> getFavoritePage(@ParameterObject FavoriteQuery favoriteQuery) {
+    public Result<IPage<AudioVO>> getFavoritePage(@Valid @ParameterObject FavoriteQuery favoriteQuery) {
         return Result.success(audioInfoService.getFavoriteAudioPage(favoriteQuery));
     }
 
@@ -62,7 +65,7 @@ public class FavoriteController {
     @Operation(summary = "删除收藏夹")
     public Result<Void> deleteFavoriteFolder(
             @AuthenticationPrincipal Long userId,
-            @PathVariable Long folderId) {
+            @PathVariable @Positive Long folderId) {
         folderService.deleteFolder(userId, folderId);
         return Result.success();
     }

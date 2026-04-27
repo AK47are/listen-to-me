@@ -56,13 +56,13 @@ public class BalanceController {
 
     @GetMapping("/recharge/page")
     @Operation(summary = "分页查询充值订单")
-    public Result<IPage<RechargeOrderVO>> getRechargePage(@AuthenticationPrincipal Long userId, @ParameterObject RechargeOrderQuery query) {
+    public Result<IPage<RechargeOrderVO>> getRechargePage(@AuthenticationPrincipal Long userId, @Valid @ParameterObject RechargeOrderQuery query) {
         return Result.success(sysUserService.getRechargePage(userId, query));
     }
 
     @GetMapping("/transaction/page")
     @Operation(summary = "分页查询虚拟币流水")
-    public Result<IPage<CoinTransactionVO>> getTransactionPage(@AuthenticationPrincipal Long userId, @ParameterObject TransactionPageQuery query) {
+    public Result<IPage<CoinTransactionVO>> getTransactionPage(@AuthenticationPrincipal Long userId, @Valid @ParameterObject TransactionPageQuery query) {
         return Result.success(sysUserService.getTransactionPage(userId, query));
     }
 }

@@ -16,6 +16,7 @@ import com.github.listen_to_me.service.IRefundApplyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -30,13 +31,13 @@ public class RefundController {
 
     @GetMapping("/page")
     @Operation(summary = "退款申请分页")
-    public Result<IPage<RefundApplyVO>> getRefundApplyPage(@ParameterObject RefundPageQuery query) {
+    public Result<IPage<RefundApplyVO>> getRefundApplyPage(@Valid @ParameterObject RefundPageQuery query) {
         return Result.success(refundApplyService.getRefundApplyPage(query));
     }
 
     @PutMapping("/audit")
     @Operation(summary = "审核退款")
-    public Result<Void> auditRefund(@RequestBody RefundAuditDTO refundAuditDTO) {
+    public Result<Void> auditRefund(@Valid @RequestBody RefundAuditDTO refundAuditDTO) {
         refundApplyService.auditRefund(refundAuditDTO);
         return Result.success();
     }

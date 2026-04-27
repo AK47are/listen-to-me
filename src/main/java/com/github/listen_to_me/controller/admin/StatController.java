@@ -12,6 +12,7 @@ import com.github.listen_to_me.service.IStatService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -24,7 +25,7 @@ public class StatController {
 
     @GetMapping("/dashboard")
     @Operation(summary = "全站数据大盘")
-    public Result<DashboardVO> getDashboard(@ParameterObject DashboardQuery query) {
+    public Result<DashboardVO> getDashboard(@Valid @ParameterObject DashboardQuery query) {
         return Result.success(statService.getDashboard(query));
     }
 }

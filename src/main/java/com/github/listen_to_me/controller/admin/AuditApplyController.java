@@ -16,6 +16,7 @@ import com.github.listen_to_me.service.CreatorApplyService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "审核创作者申请")
@@ -28,13 +29,13 @@ public class AuditApplyController {
 
     @Operation(summary = "创作者申请分页")
     @GetMapping("/page")
-    public Result<IPage<AuditApplyVO>> getAuditApplyPage(@ParameterObject AuditQuery query) {
+    public Result<IPage<AuditApplyVO>> getAuditApplyPage(@Valid @ParameterObject AuditQuery query) {
         return Result.success(creatorApplyService.findAuditApplyPage(query));
     }
 
     @PutMapping
     @Operation(summary = "执行申请审核")
-    public Result<Void> auditApply(@RequestBody ApplyAuditDTO applyAuditDTO) {
+    public Result<Void> auditApply(@Valid @RequestBody ApplyAuditDTO applyAuditDTO) {
         creatorApplyService.auditApply(applyAuditDTO);
         return Result.success();
     }

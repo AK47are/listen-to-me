@@ -14,6 +14,7 @@ import com.github.listen_to_me.service.IAudioLikeService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,7 +30,7 @@ public class LikeController {
     @GetMapping("/page")
     @Operation(summary = "获取喜欢音频列表")
     public Result<IPage<AudioVO>> getLikePage(@AuthenticationPrincipal Long userId,
-            @ParameterObject PageQuery pageQuery) {
+            @Valid @ParameterObject PageQuery pageQuery) {
         return Result.success(audioLikeService.getLikePage(userId, pageQuery));
     }
 }
