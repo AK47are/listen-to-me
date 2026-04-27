@@ -13,14 +13,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * <p>
- * 
- * </p>
- *
- * @author baomidou
- * @since 2026-03-25
- */
 @Getter
 @Setter
 @TableName("audio_info")
@@ -50,6 +42,12 @@ public class AudioInfo implements Serializable {
     private String status;
     @Schema(description = "点击量/热度基数")
     private Integer playCount;
+    @Schema(description = "点赞数")
+    private Integer likeCount;
+    @Schema(description = "收藏数")
+    private Integer collectCount;
+    @Schema(description = "评论数")
+    private Integer commentCount;
     private LocalDateTime createTime;
     @Schema(description = "逻辑删除：0-未删除 1-已删除")
     @TableLogic

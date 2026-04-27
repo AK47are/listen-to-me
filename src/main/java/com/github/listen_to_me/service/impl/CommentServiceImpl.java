@@ -51,6 +51,7 @@ public class CommentServiceImpl extends ServiceImpl<CommentMapper, Comment> impl
         comment.setParentId(commentDTO.getParentId());
         comment.setContent(commentDTO.getContent());
         commentMapper.insert(comment);
+        audioInfoMapper.incrementCommentCount(commentDTO.getAudioId(), 1);
     }
 
     @Override

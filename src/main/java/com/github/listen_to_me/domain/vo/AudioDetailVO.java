@@ -36,5 +36,6 @@ public class AudioDetailVO {
         private Long playCount;
         private Long likeCount;
         private Long collectCount;
+        private Long commentCount;
     }
 }

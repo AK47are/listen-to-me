@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -13,14 +14,6 @@ import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.github.listen_to_me.domain.vo.AuditAudioVO;
 import com.github.listen_to_me.domain.vo.CreatorAudioVO;
 
-/**
- * <p>
- * Mapper 接口
- * </p>
- *
- * @author kun
- * @since 2026-03-24
- */
 public interface AudioInfoMapper extends BaseMapper<AudioInfo> {
 
     void updateStatusById(Long audioId, String status);
@@ -33,9 +26,9 @@ public interface AudioInfoMapper extends BaseMapper<AudioInfo> {
     @Select("SELECT " +
             "ai.id, " +
             "ai.play_count AS playCount, " +
-            "(SELECT COUNT(*) FROM audio_like WHERE audio_id = ai.id) AS likeCount, " +
-            "(SELECT COUNT(*) FROM audio_folder_relation WHERE audio_id = ai.id) AS collectCount, " +
-            "(SELECT COUNT(*) FROM comments WHERE audio_id = ai.id) AS commentCount " +
+            "ai.like_count AS likeCount, " +
+            "ai.collect_count AS collectCount, " +
+            "ai.comment_count AS commentCount " +
             "FROM audio_info ai " +
             "WHERE ai.create_time >= #{oneMonthAgo} " +
             "AND ai.is_deleted = 0 " +
@@ -45,4 +38,16 @@ public interface AudioInfoMapper extends BaseMapper<AudioInfo> {
     IPage<AuditAudioVO> selectAuditAudioPage(Page<AuditAudioVO> page, String status);
 
     IPage<CreatorAudioVO> selectCreatorAudioPage(Page<CreatorAudioVO> page, Long userId);
+
+    @Update("UPDATE audio_info SET play_count = play_count + #{delta} WHERE id = #{audioId}")
+    void incrementPlayCount(Long audioId, int delta);
+
+    @Update("UPDATE audio_info SET like_count = like_count + #{delta} WHERE id = #{audioId}")
+    void incrementLikeCount(Long audioId, int delta);
+
+    @Update("UPDATE audio_info SET collect_count = collect_count + #{delta} WHERE id = #{audioId}")
+    void incrementCollectCount(Long audioId, int delta);
+
+    @Update("UPDATE audio_info SET comment_count = comment_count + #{delta} WHERE id = #{audioId}")
+    void incrementCommentCount(Long audioId, int delta);
 }

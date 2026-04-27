@@ -28,7 +28,7 @@ import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.domain.dto.AudioAuditDTO;
 import com.github.listen_to_me.domain.dto.AudioDTO;
 import com.github.listen_to_me.domain.dto.AudioUpdateDTO;
-import com.github.listen_to_me.domain.entity.AudioFolderRelation;
+
 import com.github.listen_to_me.domain.entity.AudioInfo;
 import com.github.listen_to_me.domain.entity.AudioLike;
 import com.github.listen_to_me.domain.entity.AudioOrder;
@@ -47,7 +47,6 @@ import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.domain.vo.AuditAudioVO;
 import com.github.listen_to_me.domain.vo.CreatorAudioDetailVO;
 import com.github.listen_to_me.domain.vo.CreatorAudioVO;
-import com.github.listen_to_me.mapper.AudioFolderRelationMapper;
 import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.mapper.AudioLikeMapper;
 import com.github.listen_to_me.mapper.AudioOrderMapper;
@@ -78,7 +77,6 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     private final AudioOrderMapper audioOrderMapper;
     private final SysUserMapper sysUserMapper;
     private final AudioLikeMapper audioLikeMapper;
-    private final AudioFolderRelationMapper audioFolderRelationMapper;
     private final AudioTranscriptMapper audioTranscriptMapper;
     private final UserFollowMapper userFollowMapper;
     private final AudioSummaryMapper audioSummaryMapper;
@@ -303,8 +301,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         Object cache = RedisUtils.get(RedisKey.USER_PLAY_COUNTED, suffix);
         if (cache == null) {
             RedisUtils.set(RedisKey.USER_PLAY_COUNTED, suffix, "1");
-            audioInfo.setPlayCount(audioInfo.getPlayCount() + 1);
-            audioInfoMapper.updateById(audioInfo);
+            audioInfoMapper.incrementPlayCount(audioId, 1);
         }
         Wrapper<AudioOrder> wrapper = Wrappers.lambdaQuery(AudioOrder.class)
                 .eq(AudioOrder::getAudioId, audioId)
@@ -367,10 +364,9 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         // 统计数据
         AudioDetailVO.StatsInfo statsInfo = new AudioDetailVO.StatsInfo();
         statsInfo.setPlayCount(Long.valueOf(audioInfo.getPlayCount()));
-        statsInfo.setLikeCount(Long.valueOf(audioLikeMapper.selectCount(
-                Wrappers.lambdaQuery(AudioLike.class).eq(AudioLike::getAudioId, audioId))));
-        statsInfo.setCollectCount(Long.valueOf(audioFolderRelationMapper.selectCount(
-                Wrappers.lambdaQuery(AudioFolderRelation.class).eq(AudioFolderRelation::getAudioId, audioId))));
+        statsInfo.setLikeCount(Long.valueOf(audioInfo.getLikeCount()));
+        statsInfo.setCollectCount(Long.valueOf(audioInfo.getCollectCount()));
+        statsInfo.setCommentCount(Long.valueOf(audioInfo.getCommentCount()));
         audioDetailVO.setStats(statsInfo);
 
         // 转写和摘要（仅免费音频或已购买用户可见）

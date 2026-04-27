@@ -14,6 +14,7 @@ import com.github.listen_to_me.domain.entity.AudioLike;
 import com.github.listen_to_me.domain.query.PageQuery;
 import com.github.listen_to_me.domain.vo.AudioVO;
 import com.github.listen_to_me.mapper.AudioLikeMapper;
+import com.github.listen_to_me.mapper.AudioInfoMapper;
 import com.github.listen_to_me.mapper.AudioVOMapper;
 import com.github.listen_to_me.service.IAudioLikeService;
 
@@ -25,6 +26,7 @@ public class AudioLikeServiceImpl extends ServiceImpl<AudioLikeMapper, AudioLike
 
     private final AudioLikeMapper audioLikeMapper;
     private final AudioVOMapper audioVOMapper;
+    private final AudioInfoMapper audioInfoMapper;
 
     @Override
     public void likeAudio(Long userId, Long audioId) {
@@ -38,6 +40,7 @@ public class AudioLikeServiceImpl extends ServiceImpl<AudioLikeMapper, AudioLike
         audioLike.setUserId(userId);
         audioLike.setAudioId(audioId);
         audioLikeMapper.insert(audioLike);
+        audioInfoMapper.incrementLikeCount(audioId, 1);
     }
 
     @Override
@@ -49,6 +52,7 @@ public class AudioLikeServiceImpl extends ServiceImpl<AudioLikeMapper, AudioLike
             throw new BaseException(404, "喜欢记录不存在");
         }
         audioLikeMapper.delete(wrapper);
+        audioInfoMapper.incrementLikeCount(audioId, -1);
     }
 
     @Override
