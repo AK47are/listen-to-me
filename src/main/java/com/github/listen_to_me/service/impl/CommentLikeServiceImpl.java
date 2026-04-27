@@ -33,9 +33,7 @@ public class CommentLikeServiceImpl extends ServiceImpl<CommentLikeMapper, Comme
             commentLike.setCommentId(commentLikeDTO.getCommentId());
             commentLike.setUserId(userId);
             this.save(commentLike);
-            commentMapper.update(Wrappers.lambdaUpdate(Comment.class)
-                    .set(Comment::getLikeCount, comment.getLikeCount() + 1)
-                    .eq(Comment::getId, comment.getId()));
+            commentMapper.incrementLikeCount(comment.getId(), 1);
         } else if ("UNLIKE".equals(commentLikeDTO.getAction())) {
             CommentLike commentLike = commentLikeMapper.selectOne(Wrappers.lambdaQuery(CommentLike.class)
                     .eq(CommentLike::getCommentId, commentLikeDTO.getCommentId())
@@ -46,9 +44,7 @@ public class CommentLikeServiceImpl extends ServiceImpl<CommentLikeMapper, Comme
             commentLikeMapper.delete(Wrappers.lambdaQuery(CommentLike.class)
                     .eq(CommentLike::getCommentId, commentLikeDTO.getCommentId())
                     .eq(CommentLike::getUserId, userId));
-            commentMapper.update(Wrappers.lambdaUpdate(Comment.class)
-                    .set(Comment::getLikeCount, comment.getLikeCount() - 1)
-                    .eq(Comment::getId, comment.getId()));
+            commentMapper.incrementLikeCount(comment.getId(), -1);
         } else {
             throw new BaseException(400, "操作类型错误");
         }
