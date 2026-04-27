@@ -17,7 +17,8 @@ public enum RedisKey {
     ONLINE_RAW_URL("online:audio:raw:", 30L, TimeUnit.MINUTES),
     ONLINE_CLIP_URL("online:audio:clip:", 7L, TimeUnit.MINUTES),
     ONLINE_IMG_URL("online:img:", 18L, TimeUnit.HOURS),
-    USER_PLAY_COUNTED("user:play:counted", 1L, TimeUnit.HOURS);
+    USER_PLAY_COUNTED("user:play:counted", 1L, TimeUnit.HOURS),
+    USER_HISTORY_DIRTY("user:history:dirty", 24L, TimeUnit.HOURS);
 
     private final String prefix;
     private final Long expire;

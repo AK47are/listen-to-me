@@ -96,4 +96,44 @@ public class RedisUtils {
         redisTemplate.delete(key);
         log.debug("ZSet删除 - Key: {}", key);
     }
+
+    /**
+     * 向集合（Set）中添加元素
+     *
+     * @param redisKey RedisKey枚举
+     * @param suffix   后缀
+     * @param value    元素
+     */
+    public static void addToSet(RedisKey redisKey, String suffix, Object value) {
+        String key = redisKey.join(suffix);
+        redisTemplate.opsForSet().add(key, value);
+        log.debug("Set添加 - Key: {}, 值: {}", key, value);
+    }
+
+    /**
+     * 获取集合（Set）中的所有成员
+     *
+     * @param redisKey RedisKey枚举
+     * @param suffix   后缀
+     * @return 成员集合
+     */
+    public static Set<Object> getSetMembers(RedisKey redisKey, String suffix) {
+        String key = redisKey.join(suffix);
+        Set<Object> members = redisTemplate.opsForSet().members(key);
+        log.debug("Set查询 - Key: {}, 数量: {}", key, members != null ? members.size() : 0);
+        return members;
+    }
+
+    /**
+     * 从集合（Set）中移除指定元素
+     *
+     * @param redisKey RedisKey枚举
+     * @param suffix   后缀
+     * @param values   要移除的元素
+     */
+    public static void removeFromSet(RedisKey redisKey, String suffix, Object... values) {
+        String key = redisKey.join(suffix);
+        redisTemplate.opsForSet().remove(key, values);
+        log.debug("Set移除 - Key: {}, 值: {}", key, values);
+    }
 }
