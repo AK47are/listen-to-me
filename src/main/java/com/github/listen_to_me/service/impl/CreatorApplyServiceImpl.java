@@ -94,13 +94,13 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
             sysUserRoleMapper.update(Wrappers.lambdaUpdate(SysUserRole.class)
                     .set(SysUserRole::getRoleId, role_id)
                     .eq(SysUserRole::getUserId, creatorApply.getUserId()));
-            // TODO 通知用户审核通过
+            // TODO: 通知用户审核通过
 
         } else if ("REJECTED".equals(applyAuditDTO.getStatus())) {
             creatorApply.setStatus("REJECTED");
             creatorApply.setReason(applyAuditDTO.getRejectReason());
             this.updateById(creatorApply);
-            // TODO 通知用户驳回原因
+            // TODO: 通知用户驳回原因
         } else {
             throw new BaseException(400, "状态错误");
         }
