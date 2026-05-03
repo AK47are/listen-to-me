@@ -409,9 +409,9 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         }
         if ("APPROVED".equals(audioAuditDTO.getStatus())) {
             audioInfo.setAuditStatus("APPROVED");
-            // TODO 触发上线通知、推荐索引更新等
+            // TODO: 触发上线通知、推荐索引更新等
         } else if ("REJECTED".equals(audioAuditDTO.getStatus())) {
-            // TODO 通知创作者驳回原因
+            // TODO: 通知创作者驳回原因
             audioInfo.setAuditStatus("REJECTED");
             audioInfo.setRejectReason(audioAuditDTO.getRejectReason());
         } else {

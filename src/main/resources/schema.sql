@@ -345,3 +345,18 @@ CREATE TABLE IF NOT EXISTS `audio_summary` (
   INDEX idx_task_id (task_id),
   CONSTRAINT fk_summary_audio FOREIGN KEY (`audio_id`) REFERENCES `audio_info` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='音频摘要结果表';
+
+CREATE TABLE IF NOT EXISTS `notification` (
+  `id` bigint PRIMARY KEY AUTO_INCREMENT,
+  `recipient_id` bigint NOT NULL COMMENT '接收者用户ID',
+  `type` varchar(32) NOT NULL COMMENT '通知类型: AUDIT_PASS/AUDIT_REJECT/CREATOR_VERIFY_PASS/CREATOR_VERIFY_REJECT/SYSTEM',
+  `title` varchar(128) NOT NULL COMMENT '通知标题',
+  `content` varchar(500) NOT NULL COMMENT '通知内容',
+  `related_id` bigint COMMENT '关联业务ID（如音频ID、申请ID等）',
+  `is_read` tinyint DEFAULT 0 COMMENT '0-未读 1-已读',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_recipient_read (recipient_id, is_read),
+  INDEX idx_recipient_time (recipient_id, create_time),
+  INDEX idx_create_time (create_time),
+  CONSTRAINT fk_notification_user FOREIGN KEY (`recipient_id`) REFERENCES `sys_user` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='站内通知表';
