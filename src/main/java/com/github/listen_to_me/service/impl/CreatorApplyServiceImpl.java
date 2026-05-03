@@ -23,6 +23,7 @@ import com.github.listen_to_me.mapper.SysRoleMapper;
 import com.github.listen_to_me.mapper.SysUserMapper;
 import com.github.listen_to_me.mapper.SysUserRoleMapper;
 import com.github.listen_to_me.service.CreatorApplyService;
+import com.github.listen_to_me.service.NotificationService;
 
 import cn.hutool.core.bean.BeanUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
     private final SysUserMapper sysUserMapper;
     private final SysUserRoleMapper sysUserRoleMapper;
     private final SysRoleMapper sysRoleMapper;
+    private final NotificationService notificationService;
 
     @Override
     public void addCreatorApply(Long userId, CreatorApplyDTO creatorApplyDTO) {
@@ -94,13 +96,17 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
             sysUserRoleMapper.update(Wrappers.lambdaUpdate(SysUserRole.class)
                     .set(SysUserRole::getRoleId, role_id)
                     .eq(SysUserRole::getUserId, creatorApply.getUserId()));
-            // TODO: 通知用户审核通过
+            notificationService.send(creatorApply.getUserId(), "CREATOR_VERIFY_PASS",
+                    "创作者申请已通过", "恭喜，您的创作者申请已通过审核，现在可以上传音频作品了",
+                    creatorApply.getId());
 
         } else if ("REJECTED".equals(applyAuditDTO.getStatus())) {
             creatorApply.setStatus("REJECTED");
             creatorApply.setReason(applyAuditDTO.getRejectReason());
             this.updateById(creatorApply);
-            // TODO: 通知用户驳回原因
+            notificationService.send(creatorApply.getUserId(), "CREATOR_VERIFY_REJECT",
+                    "创作者申请未通过", "您的创作者申请未通过审核，原因：" + applyAuditDTO.getRejectReason(),
+                    creatorApply.getId());
         } else {
             throw new BaseException(400, "状态错误");
         }
