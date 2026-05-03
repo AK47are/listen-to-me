@@ -57,6 +57,7 @@ import com.github.listen_to_me.mapper.SysUserMapper;
 import com.github.listen_to_me.mapper.UserFollowMapper;
 import com.github.listen_to_me.service.HotRankService;
 import com.github.listen_to_me.service.IAudioInfoService;
+import com.github.listen_to_me.service.NotificationService;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.codec.Base64;
@@ -80,6 +81,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     private final AudioTranscriptMapper audioTranscriptMapper;
     private final UserFollowMapper userFollowMapper;
     private final AudioSummaryMapper audioSummaryMapper;
+    private final NotificationService notificationService;
 
     @Override
     public IPage<AudioVO> getFavoriteAudioPage(FavoriteQuery favoriteQuery) {
@@ -409,9 +411,13 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         }
         if ("APPROVED".equals(audioAuditDTO.getStatus())) {
             audioInfo.setAuditStatus("APPROVED");
-            // TODO: 触发上线通知、推荐索引更新等
+            notificationService.send(audioInfo.getCreatorId(), "AUDIT_PASS",
+                    "音频审核通过", "您的音频《" + audioInfo.getTitle() + "》已通过审核，现已上线",
+                    audioInfo.getId());
         } else if ("REJECTED".equals(audioAuditDTO.getStatus())) {
-            // TODO: 通知创作者驳回原因
+            notificationService.send(audioInfo.getCreatorId(), "AUDIT_REJECT",
+                    "音频审核未通过", "您的音频《" + audioInfo.getTitle() + "》未通过审核，原因：" + audioAuditDTO.getRejectReason(),
+                    audioInfo.getId());
             audioInfo.setAuditStatus("REJECTED");
             audioInfo.setRejectReason(audioAuditDTO.getRejectReason());
         } else {

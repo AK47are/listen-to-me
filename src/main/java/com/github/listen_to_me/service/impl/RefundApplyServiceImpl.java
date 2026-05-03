@@ -22,6 +22,7 @@ import com.github.listen_to_me.service.IConsultOrderService;
 import com.github.listen_to_me.service.IConsultSlotService;
 import com.github.listen_to_me.service.IRefundApplyService;
 import com.github.listen_to_me.service.ISysUserService;
+import com.github.listen_to_me.service.NotificationService;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
     private final IConsultSlotService iConsultSlotService;
     private final ISysUserService iSysUserService;
     private final RefundApplyMapper refundApplyMapper;
+    private final NotificationService notificationService;
 
     @Lazy
     @Autowired
@@ -92,6 +94,9 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
 
             apply.setStatus("PROCESSED");
             updateById(apply);
+            notificationService.send(apply.getUserId(), "REFUND_PASS",
+                    "退款申请已通过", "您的退款申请已通过审核，金额 " + order.getPayAmount() + " 元已退回账户余额",
+                    apply.getId());
             log.debug("退款审核通过 - 申请ID: {}, 订单ID: {}", auditDTO.getApplyId(), order.getId());
         } else {
             // 拒绝：校验拒绝原因
@@ -104,6 +109,9 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
             apply.setStatus("PROCESSED");
             apply.setRejectReason(auditDTO.getRejectReason());
             updateById(apply);
+            notificationService.send(apply.getUserId(), "REFUND_REJECT",
+                    "退款申请未通过", "您的退款申请未通过审核，原因：" + auditDTO.getRejectReason(),
+                    apply.getId());
             log.debug("退款审核拒绝 - 申请ID: {}, 原因: {}", auditDTO.getApplyId(), auditDTO.getRejectReason());
         }
     }
