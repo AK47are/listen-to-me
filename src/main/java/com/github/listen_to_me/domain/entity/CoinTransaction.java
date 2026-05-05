@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import com.github.listen_to_me.common.enumeration.CoinBizType;
+import com.github.listen_to_me.common.enumeration.CoinTransactionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,11 +31,11 @@ public class CoinTransaction implements Serializable {
     @Schema(description = "用户ID")
     private Long userId;
 
-    @Schema(description = "交易类型: INCOME(收入), EXPENSE(支出)")
-    private String type;
+    @Schema(description = CoinTransactionType.SCHEMA_DESC)
+    private CoinTransactionType type;
 
-    @Schema(description = "来源/去向: RECHARGE(充值), AUDIO(音频购买), CONSULT(咨询预约), REFUND(退款)")
-    private String bizType;
+    @Schema(description = CoinBizType.SCHEMA_DESC)
+    private CoinBizType bizType;
 
     @Schema(description = "变动金额（正数）")
     private BigDecimal amount;

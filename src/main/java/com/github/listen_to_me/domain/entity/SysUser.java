@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import com.github.listen_to_me.common.enumeration.UserStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -53,8 +54,8 @@ public class SysUser implements Serializable {
     @Schema(description = "账期内冻结金额")
     private BigDecimal frozenBalance;
 
-    @Schema(description = "状态: NORMAL(正常), BANNED(封禁)")
-    private String status;
+    @Schema(description = UserStatus.SCHEMA_DESC)
+    private UserStatus status;
 
     private LocalDateTime createTime;
 

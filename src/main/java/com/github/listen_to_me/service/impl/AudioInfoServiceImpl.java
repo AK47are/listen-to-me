@@ -20,6 +20,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.common.enumeration.AudioAuditStatus;
+import com.github.listen_to_me.common.enumeration.AudioPublishStatus;
+import com.github.listen_to_me.common.enumeration.AudioVisibility;
+import com.github.listen_to_me.common.enumeration.PayStatus;
 import com.github.listen_to_me.common.enumeration.RedisKey;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.producer.AudioTranscodeProducer;
@@ -138,11 +142,11 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         audioInfo.setCoverPath(coverPath);
         audioInfo.setRawPath(objectName);
         audioInfo.setCreatorId(userId);
-        audioInfo.setStatus("PENDING_TRANSCODE");
+        audioInfo.setStatus(AudioPublishStatus.PENDING_TRANSCODE);
         audioInfoMapper.insert(audioInfo);
         AudioPublishVO audioPublishVO = new AudioPublishVO();
         audioPublishVO.setAudioId(audioInfo.getId());
-        audioPublishVO.setStatus("PENDING_TRANSCODE");
+        audioPublishVO.setStatus(AudioPublishStatus.PENDING_TRANSCODE.getCode());
         RedisUtils.delete(RedisKey.TEMP_AUDIO_URL, audioUrlBase64);
         RedisUtils.delete(RedisKey.TEMP_COVER_URL, coverUrlBase64);
 
@@ -188,7 +192,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         vo.setTrialDuration(audioInfo.getTrialDuration());
         vo.setIsPaid(audioInfo.getIsPaid());
         vo.setPrice(audioInfo.getPrice());
-        vo.setVisibility(audioInfo.getVisibility());
+        vo.setVisibility(audioInfo.getVisibility().getCode());
 
         return vo;
     }
@@ -201,8 +205,8 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         }
         AudioStatusVO audioStatusVO = new AudioStatusVO();
         audioStatusVO.setAudioId(id);
-        audioStatusVO.setStatus(audioInfo.getStatus());
-        if ("FAILED".equals(audioInfo.getStatus())) {
+        audioStatusVO.setStatus(audioInfo.getStatus().getCode());
+        if (AudioPublishStatus.FAILED.equals(audioInfo.getStatus())) {
             audioStatusVO.setFailReason("转码失败");
         }
         return audioStatusVO;
@@ -224,7 +228,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
 
         if (audioUpdateDTO.getTrialDuration() != null
                 && !audioUpdateDTO.getTrialDuration().equals(audioInfo.getTrialDuration())) {
-            audioInfo.setStatus("PENDING_TRANSCODE");
+            audioInfo.setStatus(AudioPublishStatus.PENDING_TRANSCODE);
             audioTranscodeProducer.sendTranscodeTask(audioUpdateDTO.getId(), audioInfo.getRawPath(),
                     audioInfo.getTrialDuration());
         }
@@ -232,7 +236,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
         audioInfo.setDescription(audioUpdateDTO.getDescription());
         audioInfo.setIsPaid(audioUpdateDTO.getIsPaid());
         audioInfo.setPrice(new BigDecimal(audioUpdateDTO.getPrice()));
-        audioInfo.setVisibility(audioUpdateDTO.getVisibility());
+        audioInfo.setVisibility(AudioVisibility.valueOf(audioUpdateDTO.getVisibility()));
         audioInfoMapper.updateById(audioInfo);
     }
 
@@ -310,9 +314,9 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
                 .eq(AudioOrder::getUserId, userId);
 
         AudioOrder audioOrder = audioOrderMapper.selectOne(wrapper);
-        if (audioInfo.getIsPaid() == false || (audioOrder != null && audioOrder.getPayStatus() == 1)) {
+        if (audioInfo.getIsPaid() == false || (audioOrder != null && PayStatus.PAID.equals(audioOrder.getPayStatus()))) {
             return MinioUtils.getPresignedUrl(audioInfo.getRawPath());
-        } else if (audioInfo.getTrialDuration() != null && audioInfo.getStatus().equals("ONLINE")) {
+        } else if (audioInfo.getTrialDuration() != null && AudioPublishStatus.ONLINE.equals(audioInfo.getStatus())) {
             return MinioUtils.getPresignedUrl(audioInfo.getClipPath());
         } else {
             throw new BaseException(403, "请购买后收听完整版");
@@ -337,7 +341,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
             Wrapper<AudioOrder> orderWrapper = Wrappers.lambdaQuery(AudioOrder.class)
                     .eq(AudioOrder::getAudioId, audioId)
                     .eq(AudioOrder::getUserId, userId)
-                    .eq(AudioOrder::getPayStatus, 1);
+                    .eq(AudioOrder::getPayStatus, PayStatus.PAID);
             audioDetailVO.setIsPurchased(audioOrderMapper.selectCount(orderWrapper) > 0);
         }
 
@@ -405,12 +409,12 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
     public void auditAudio(AudioAuditDTO audioAuditDTO) {
         AudioInfo audioInfo = this.getById(audioAuditDTO.getAudioId());
         if (audioInfo == null
-                || !"PENDING".equals(audioInfo.getAuditStatus())
+                || !AudioAuditStatus.PENDING.equals(audioInfo.getAuditStatus())
                 || audioInfo.getIsDeleted() == 1) {
             throw new BaseException(400, "音频不存在或已处理");
         }
         if ("APPROVED".equals(audioAuditDTO.getStatus())) {
-            audioInfo.setAuditStatus("APPROVED");
+            audioInfo.setAuditStatus(AudioAuditStatus.APPROVED);
             notificationService.send(audioInfo.getCreatorId(), "AUDIT_PASS",
                     "音频审核通过", "您的音频《" + audioInfo.getTitle() + "》已通过审核，现已上线",
                     audioInfo.getId());
@@ -418,7 +422,7 @@ public class AudioInfoServiceImpl extends ServiceImpl<AudioInfoMapper, AudioInfo
             notificationService.send(audioInfo.getCreatorId(), "AUDIT_REJECT",
                     "音频审核未通过", "您的音频《" + audioInfo.getTitle() + "》未通过审核，原因：" + audioAuditDTO.getRejectReason(),
                     audioInfo.getId());
-            audioInfo.setAuditStatus("REJECTED");
+            audioInfo.setAuditStatus(AudioAuditStatus.REJECTED);
             audioInfo.setRejectReason(audioAuditDTO.getRejectReason());
         } else {
             throw new BaseException(400, "审核状态无效，仅支持 APPROVED、REJECTED");

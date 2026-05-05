@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.github.listen_to_me.common.enumeration.RedisKey;
+import com.github.listen_to_me.common.enumeration.UserStatus;
 import com.github.listen_to_me.common.util.JwtUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
 import com.github.listen_to_me.domain.entity.SysUser;
@@ -56,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.getWriter().write("{\"code\":401,\"data\":null,\"msg\":\"用户不存在\"}");
                 return;
             }
-            if ("BANNED".equals(user.getStatus())) {
+            if (UserStatus.BANNED.equals(user.getStatus())) {
                 log.debug("用户已被封禁 - ID: {}", userId);
                 response.setStatus(HttpStatus.HTTP_FORBIDDEN);
                 response.setContentType("application/json;charset=UTF-8");

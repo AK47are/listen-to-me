@@ -10,6 +10,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.common.enumeration.ConsultOrderStatus;
+import com.github.listen_to_me.common.enumeration.ConsultSlotStatus;
+import com.github.listen_to_me.common.enumeration.RefundStatus;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.domain.dto.ConsultDTO;
@@ -50,7 +53,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         if (slot == null) {
             throw new BaseException(404, "时间槽不存在");
         }
-        if (!"AVAILABLE".equals(slot.getStatus())) {
+        if (!ConsultSlotStatus.AVAILABLE.equals(slot.getStatus())) {
             throw new BaseException(400, "时间槽不可用");
         }
         if (slot.getStartTime().isBefore(LocalDateTime.now())) {
@@ -63,7 +66,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         order.setUserId(userId);
         order.setCreatorId(slot.getCreatorId());
         order.setMessage(consultDTO.getMessage());
-        order.setStatus("PENDING_CONFIRM");
+        order.setStatus(ConsultOrderStatus.PENDING_CONFIRM);
         order.setPayAmount(slot.getPrice());
         save(order);
 
@@ -74,8 +77,8 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
             throw new BaseException(400, "余额不足");
         }
 
-        // 更新时间槽状态为 BOOKED
-        slot.setStatus("BOOKED");
+        // 更新时间槽状态为 ConsultSlotStatus.BOOKED
+        slot.setStatus(ConsultSlotStatus.BOOKED);
         consultSlotService.updateById(slot);
 
         log.debug("发起预约成功 - 订单ID: {}", order.getId());
@@ -97,7 +100,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         vo.setStartTime(slot.getStartTime());
         vo.setEndTime(slot.getEndTime());
         vo.setPrice(slot.getPrice());
-        vo.setStatus(order.getStatus());
+        vo.setStatus(order.getStatus().getCode());
         vo.setAddress(null);
         vo.setCreatorId(slot.getCreatorId());
         vo.setCreatorName(creatorName);
@@ -136,7 +139,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         }
 
         // 校验订单状态
-        if (!"PENDING_CONFIRM".equals(order.getStatus())) {
+        if (!ConsultOrderStatus.PENDING_CONFIRM.equals(order.getStatus())) {
             throw new BaseException(400, "当前状态无法取消");
         }
 
@@ -146,14 +149,14 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
             throw new BaseException("退还余额失败");
         }
 
-        // 更新订单状态为 CANCELLED
-        order.setStatus("CANCELLED");
+        // 更新订单状态为 ConsultOrderStatus.CANCELLED
+        order.setStatus(ConsultOrderStatus.CANCELLED);
         updateById(order);
 
-        // 释放时间槽状态为 AVAILABLE
+        // 释放时间槽状态为 ConsultSlotStatus.AVAILABLE
         ConsultSlot slot = consultSlotService.getById(order.getSlotId());
         if (slot != null) {
-            slot.setStatus("AVAILABLE");
+            slot.setStatus(ConsultSlotStatus.AVAILABLE);
             consultSlotService.updateById(slot);
         }
 
@@ -175,15 +178,15 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         }
 
         // 校验订单状态
-        String status = order.getStatus();
-        if (!"CONFIRMED".equals(status) && !"COMPLETED".equals(status)) {
+        ConsultOrderStatus status = order.getStatus();
+        if (!ConsultOrderStatus.CONFIRMED.equals(status) && !ConsultOrderStatus.COMPLETED.equals(status)) {
             throw new BaseException(400, "当前状态无法申请退款");
         }
 
         // 检查是否已有进行中的退款申请
         LambdaQueryWrapper<RefundApply> wrapper = Wrappers.<RefundApply>lambdaQuery()
                 .eq(RefundApply::getOrderId, orderId)
-                .eq(RefundApply::getStatus, "PENDING");
+                .eq(RefundApply::getStatus, RefundStatus.PENDING);
         long count = refundApplyService.count(wrapper);
         if (count > 0) {
             throw new BaseException(400, "已有退款申请处理中");
@@ -194,11 +197,11 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         apply.setOrderId(orderId);
         apply.setUserId(userId);
         apply.setReason(refundApplyDTO.getReason());
-        apply.setStatus("PENDING");
+        apply.setStatus(RefundStatus.PENDING);
         refundApplyService.save(apply);
 
-        // 更新订单状态为 REFUND_PENDING
-        order.setStatus("REFUND_PENDING");
+        // 更新订单状态为 ConsultOrderStatus.REFUND_PENDING
+        order.setStatus(ConsultOrderStatus.REFUND_PENDING);
         updateById(order);
 
         log.debug("申请退款成功 - 订单ID: {}, 退款申请ID: {}", orderId, apply.getId());
@@ -234,12 +237,12 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         }
 
         // 校验订单状态
-        if (!"PENDING_CONFIRM".equals(order.getStatus())) {
+        if (!ConsultOrderStatus.PENDING_CONFIRM.equals(order.getStatus())) {
             throw new BaseException(400, "订单已处理，无法确认");
         }
 
-        // 更新订单状态为 CONFIRMED
-        order.setStatus("CONFIRMED");
+        // 更新订单状态为 ConsultOrderStatus.CONFIRMED
+        order.setStatus(ConsultOrderStatus.CONFIRMED);
         updateById(order);
 
         // 更新地址（如果传入新地址）
@@ -269,7 +272,7 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         }
 
         // 校验订单状态
-        if (!"PENDING_CONFIRM".equals(order.getStatus())) {
+        if (!ConsultOrderStatus.PENDING_CONFIRM.equals(order.getStatus())) {
             throw new BaseException(400, "订单已处理，无法拒绝");
         }
 
@@ -280,14 +283,14 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
             throw new BaseException("退还余额失败");
         }
 
-        // 更新订单状态为 CANCELLED
-        order.setStatus("CANCELLED");
+        // 更新订单状态为 ConsultOrderStatus.CANCELLED
+        order.setStatus(ConsultOrderStatus.CANCELLED);
         updateById(order);
 
         // 释放时间槽
         ConsultSlot slot = consultSlotService.getById(order.getSlotId());
         if (slot != null) {
-            slot.setStatus("AVAILABLE");
+            slot.setStatus(ConsultSlotStatus.AVAILABLE);
             consultSlotService.updateById(slot);
         }
 
@@ -309,12 +312,12 @@ public class ConsultOrderServiceImpl extends ServiceImpl<ConsultOrderMapper, Con
         }
 
         // 校验订单状态
-        if (!"CONFIRMED".equals(order.getStatus())) {
+        if (!ConsultOrderStatus.CONFIRMED.equals(order.getStatus())) {
             throw new BaseException(400, "订单未确认，无法标记完成");
         }
 
-        // 更新订单状态为 COMPLETED
-        order.setStatus("COMPLETED");
+        // 更新订单状态为 ConsultOrderStatus.COMPLETED
+        order.setStatus(ConsultOrderStatus.COMPLETED);
         updateById(order);
 
         log.debug("标记完成成功 - 订单ID: {}", orderId);

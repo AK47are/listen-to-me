@@ -21,7 +21,12 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.github.listen_to_me.common.config.AlipayConfig;
+import com.github.listen_to_me.common.enumeration.CoinBizType;
+import com.github.listen_to_me.common.enumeration.CoinTransactionType;
+import com.github.listen_to_me.common.enumeration.PayChannel;
+import com.github.listen_to_me.common.enumeration.RechargePayStatus;
 import com.github.listen_to_me.common.enumeration.RedisKey;
+import com.github.listen_to_me.common.enumeration.UserStatus;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.common.util.RedisUtils;
@@ -203,8 +208,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         // 查询累计充值
         LambdaQueryWrapper<CoinTransaction> rechargeWrapper = Wrappers.<CoinTransaction>lambdaQuery()
                 .eq(CoinTransaction::getUserId, userId)
-                .eq(CoinTransaction::getType, "INCOME")
-                .eq(CoinTransaction::getBizType, "RECHARGE");
+                .eq(CoinTransaction::getType, CoinTransactionType.INCOME)
+                .eq(CoinTransaction::getBizType, CoinBizType.RECHARGE);
         BigDecimal totalRecharge = iCoinTransactionService.list(rechargeWrapper).stream()
                 .map(CoinTransaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -213,8 +218,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         // 查询累计消费
         LambdaQueryWrapper<CoinTransaction> expenseWrapper = Wrappers.<CoinTransaction>lambdaQuery()
                 .eq(CoinTransaction::getUserId, userId)
-                .eq(CoinTransaction::getType, "EXPENSE")
-                .in(CoinTransaction::getBizType, List.of("AUDIO", "CONSULT"));
+                .eq(CoinTransaction::getType, CoinTransactionType.EXPENSE)
+                .in(CoinTransaction::getBizType, List.of(CoinBizType.AUDIO, CoinBizType.CONSULT));
         BigDecimal totalSpent = iCoinTransactionService.list(expenseWrapper).stream()
                 .map(CoinTransaction::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -262,8 +267,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         // 记录流水
         CoinTransaction transaction = new CoinTransaction();
         transaction.setUserId(userId);
-        transaction.setType("EXPENSE");
-        transaction.setBizType(bizType);
+        transaction.setType(CoinTransactionType.EXPENSE);
+        transaction.setBizType(CoinBizType.valueOf(bizType));
         transaction.setAmount(amount);
         transaction.setBalanceBefore(balanceBefore);
         transaction.setBalanceAfter(balanceAfter);
@@ -306,8 +311,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         // 记录流水
         CoinTransaction transaction = new CoinTransaction();
         transaction.setUserId(userId);
-        transaction.setType("INCOME");
-        transaction.setBizType(bizType);
+        transaction.setType(CoinTransactionType.INCOME);
+        transaction.setBizType(CoinBizType.valueOf(bizType));
         transaction.setAmount(amount);
         transaction.setBalanceBefore(balanceBefore);
         transaction.setBalanceAfter(balanceAfter);
@@ -326,11 +331,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (user == null) {
             throw new BaseException(404, "用户不存在");
         }
-        if ("BANNED".equals(user.getStatus())) {
+        if (UserStatus.BANNED.equals(user.getStatus())) {
             throw new BaseException(400, "用户已是封禁状态");
         }
 
-        user.setStatus("BANNED");
+        user.setStatus(UserStatus.BANNED);
         updateById(user);
 
         log.debug("封禁用户成功 - 用户ID: {}", userId);
@@ -344,11 +349,11 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         if (user == null) {
             throw new BaseException(404, "用户不存在");
         }
-        if ("NORMAL".equals(user.getStatus())) {
+        if (UserStatus.NORMAL.equals(user.getStatus())) {
             throw new BaseException(400, "用户已是正常状态");
         }
 
-        user.setStatus("NORMAL");
+        user.setStatus(UserStatus.NORMAL);
         updateById(user);
 
         log.debug("解封用户成功 - 用户ID: {}", userId);
@@ -370,7 +375,7 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             vo.setUsername(sysUser.getUsername());
             vo.setNickname(sysUser.getNickname());
             vo.setAvatar(MinioUtils.getPresignedUrl(sysUser.getAvatar()));
-            vo.setStatus(sysUser.getStatus());
+            vo.setStatus(sysUser.getStatus().getCode());
             vo.setCreateTime(sysUser.getCreateTime());
             return vo;
         });
@@ -394,8 +399,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         order.setRechargeSn(generateRechargeSn());
         order.setUserId(userId);
         order.setRechargeAmount(rechargeResultDTO.getAmount());
-        order.setPayStatus("PENDING");
-        order.setPayChannel(rechargeResultDTO.getPaymentMethod());
+        order.setPayStatus(RechargePayStatus.PENDING);
+        order.setPayChannel(PayChannel.valueOf(rechargeResultDTO.getPaymentMethod()));
         userRechargeOrderMapper.insert(order);
 
         String payUrl = Factory.Payment.Page()
@@ -431,16 +436,16 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             throw new BaseException(400, "订单不存在");
         }
 
-        if (order.getPayStatus().equals("SUCCESS")) {
+        if (RechargePayStatus.SUCCESS.equals(order.getPayStatus())) {
             return "success";
         }
 
-        if (!order.getPayStatus().equals("PENDING")) {
+        if (!RechargePayStatus.PENDING.equals(order.getPayStatus())) {
             return "fail";
         }
 
         if ("TRADE_SUCCESS".equals(tradeStatus)) {
-            order.setPayStatus("SUCCESS");
+            order.setPayStatus(RechargePayStatus.SUCCESS);
             userRechargeOrderMapper.updateById(order);
 
             addBalance(order.getUserId(), BigDecimal.valueOf(order.getRechargeAmount()), "RECHARGE",
@@ -459,15 +464,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
                 .eq(UserRechargeOrder::getUserId, userId)
                 .eq(query.getStatus() != null,
                         UserRechargeOrder::getPayStatus,
-                        query.getStatus())
+                        query.getStatus() != null ? RechargePayStatus.valueOf(query.getStatus()) : null)
                 .orderByDesc(UserRechargeOrder::getCreateTime);
         IPage<UserRechargeOrder> pageResult = userRechargeOrderMapper.selectPage(page, wrapper);
         return pageResult.convert(order -> {
             RechargeOrderVO vo = new RechargeOrderVO();
             vo.setOrderSn(order.getRechargeSn());
             vo.setAmount(order.getRechargeAmount());
-            vo.setStatus(order.getPayStatus());
-            vo.setPayChannel(order.getPayChannel());
+            vo.setStatus(order.getPayStatus().getCode());
+            vo.setPayChannel(order.getPayChannel().getCode());
             vo.setPayTime(order.getPayTime());
             vo.setCreateTime(order.getCreateTime());
             return vo;

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.github.listen_to_me.common.enumeration.NotificationType;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.domain.entity.Notification;
 import com.github.listen_to_me.domain.query.PageQuery;
@@ -28,7 +29,7 @@ public class NotificationServiceImpl implements NotificationService {
     public void send(Long recipientId, String type, String title, String content, Long relatedId) {
         Notification notification = new Notification();
         notification.setRecipientId(recipientId);
-        notification.setType(type);
+        notification.setType(NotificationType.valueOf(type));
         notification.setTitle(title);
         notification.setContent(content);
         notification.setRelatedId(relatedId);

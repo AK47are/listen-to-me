@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.github.listen_to_me.common.config.AiTaskMqConfig;
+import com.github.listen_to_me.common.enumeration.AiTaskStatus;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.domain.entity.AiTask;
 import com.github.listen_to_me.domain.entity.AudioInfo;
@@ -40,7 +41,7 @@ public class SummarizationConsumer {
             return;
         }
 
-        task.setStatus("PROCESSING");
+        task.setStatus(AiTaskStatus.PROCESSING);
         aiTaskMapper.updateById(task);
 
         try {
@@ -63,14 +64,14 @@ public class SummarizationConsumer {
                     .set("summary", chineseSummary)
                     .set("original", englishSummary);
 
-            task.setStatus("SUCCESS");
+            task.setStatus(AiTaskStatus.SUCCESS);
             task.setResult(result.toString());
             aiTaskMapper.updateById(task);
 
             log.debug("摘要任务成功 - taskId: {}", taskId);
         } catch (Exception e) {
             log.error("摘要任务失败 - taskId: {}", taskId, e);
-            task.setStatus("FAILED");
+            task.setStatus(AiTaskStatus.FAILED);
             task.setFailReason(e.getMessage());
             aiTaskMapper.updateById(task);
         }

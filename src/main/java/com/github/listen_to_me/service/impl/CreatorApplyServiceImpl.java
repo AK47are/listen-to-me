@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.common.enumeration.CreatorApplyStatus;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.ConflictException;
 import com.github.listen_to_me.domain.dto.ApplyAuditDTO;
@@ -43,10 +44,10 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
     public void addCreatorApply(Long userId, CreatorApplyDTO creatorApplyDTO) {
         CreatorApply creatorApply = getOne(Wrappers.lambdaQuery(CreatorApply.class)
                 .eq(CreatorApply::getUserId, userId));
-        if (creatorApply != null && "APPROVED".equals(creatorApply.getStatus())) {
+        if (creatorApply != null && CreatorApplyStatus.APPROVED.equals(creatorApply.getStatus())) {
             throw new BaseException(400, "您已是创作者");
         }
-        if (creatorApply != null && "PENDING".equals(creatorApply.getStatus())) {
+        if (creatorApply != null && CreatorApplyStatus.PENDING.equals(creatorApply.getStatus())) {
             throw new ConflictException("已有申请正在审核中");
         }
         if (creatorApply == null) {
@@ -54,8 +55,8 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
         }
         BeanUtil.copyProperties(creatorApplyDTO, creatorApply);
         creatorApply.setUserId(userId);
-        // 被拒绝过的话，重新提交申请，状态为PENDING
-        creatorApply.setStatus("PENDING");
+        // 被拒绝过的话，重新提交申请，状态为CreatorApplyStatus.PENDING
+        creatorApply.setStatus(CreatorApplyStatus.PENDING);
         saveOrUpdate(creatorApply);
     }
 
@@ -73,7 +74,7 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
     public IPage<AuditApplyVO> findAuditApplyPage(AuditQuery query) {
         Page<CreatorApply> page = new Page<>(query.getPageNum(), query.getPageSize());
         IPage<CreatorApply> iPage = creatorApplyMapper.selectPage(page, Wrappers.lambdaQuery(CreatorApply.class)
-                .eq(CreatorApply::getStatus, query.getStatus()));
+                .eq(CreatorApply::getStatus, query.getStatus() != null ? CreatorApplyStatus.valueOf(query.getStatus()) : null));
         return iPage.convert(creatorApply -> BeanUtil.copyProperties(creatorApply, AuditApplyVO.class));
     }
 
@@ -82,11 +83,11 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
     public void auditApply(ApplyAuditDTO applyAuditDTO) {
         CreatorApply creatorApply = getOne(Wrappers.lambdaQuery(CreatorApply.class)
                 .eq(CreatorApply::getId, applyAuditDTO.getApplyId()));
-        if (creatorApply == null || !"PENDING".equals(creatorApply.getStatus())) {
+        if (creatorApply == null || !CreatorApplyStatus.PENDING.equals(creatorApply.getStatus())) {
             throw new BaseException(400, "申请不存在或已处理");
         }
         if ("APPROVED".equals(applyAuditDTO.getStatus())) {
-            creatorApply.setStatus("APPROVED");
+            creatorApply.setStatus(CreatorApplyStatus.APPROVED);
             this.updateById(creatorApply);
             sysUserMapper.update(Wrappers.lambdaUpdate(SysUser.class)
                     .set(SysUser::getIsCreator, 1)
@@ -101,7 +102,7 @@ public class CreatorApplyServiceImpl extends ServiceImpl<CreatorApplyMapper, Cre
                     creatorApply.getId());
 
         } else if ("REJECTED".equals(applyAuditDTO.getStatus())) {
-            creatorApply.setStatus("REJECTED");
+            creatorApply.setStatus(CreatorApplyStatus.REJECTED);
             creatorApply.setReason(applyAuditDTO.getRejectReason());
             this.updateById(creatorApply);
             notificationService.send(creatorApply.getUserId(), "CREATOR_VERIFY_REJECT",

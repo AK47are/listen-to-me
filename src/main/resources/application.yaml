@@ -29,6 +29,10 @@ spring:
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
 
+mybatis-plus:
+  configuration:
+    default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
+
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.github.listen-to-me.domain.entity

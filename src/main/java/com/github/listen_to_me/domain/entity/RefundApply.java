@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import com.github.listen_to_me.common.enumeration.RefundStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,8 +36,8 @@ public class RefundApply implements Serializable {
     @Schema(description = "退款原因")
     private String reason;
 
-    @Schema(description = "申请状态: PENDING, PROCESSED")
-    private String status;
+    @Schema(description = RefundStatus.SCHEMA_DESC)
+    private RefundStatus status;
 
     @Schema(description = "拒绝原因")
     private String rejectReason;

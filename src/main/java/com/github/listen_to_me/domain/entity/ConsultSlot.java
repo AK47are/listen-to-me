@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import com.github.listen_to_me.common.enumeration.ConsultSlotStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -46,8 +47,8 @@ public class ConsultSlot implements Serializable {
     @Schema(description = "预约地址（如腾讯会议链接）")
     private String address;
 
-    @Schema(description = "状态: AVAILABLE, BOOKED, EXPIRED, CANCELLED")
-    private String status;
+    @Schema(description = ConsultSlotStatus.SCHEMA_DESC)
+    private ConsultSlotStatus status;
 
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
