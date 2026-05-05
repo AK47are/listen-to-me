@@ -5,6 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.common.enumeration.AiTaskStatus;
+import com.github.listen_to_me.common.enumeration.AiTaskType;
+import com.github.listen_to_me.common.enumeration.AudioPublishStatus;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.producer.AiTaskProducer;
 import com.github.listen_to_me.domain.entity.AiTask;
@@ -48,8 +51,8 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
 
         AiTaskVO vo = new AiTaskVO();
         vo.setTaskId(task.getTaskId());
-        vo.setType(task.getType());
-        vo.setStatus(task.getStatus());
+        vo.setType(task.getType().getCode());
+        vo.setStatus(task.getStatus().getCode());
 
         if (task.getResult() != null) {
             vo.setResult(JSONUtil.parse(task.getResult()));
@@ -68,7 +71,7 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
         if (audio == null || !audio.getCreatorId().equals(userId)) {
             throw new BaseException(404, "音频不存在");
         }
-        if (!"ONLINE".equals(audio.getStatus())) {
+        if (!AudioPublishStatus.ONLINE.equals(audio.getStatus())) {
             throw new BaseException(400, "音频尚未发布，无法申请AI任务");
         }
 
@@ -80,8 +83,8 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
         task.setTaskId(taskId);
         task.setUserId(userId);
         task.setAudioId(audioId);
-        task.setType("TRANSCRIPTION");
-        task.setStatus("PENDING");
+        task.setType(AiTaskType.TRANSCRIPTION);
+        task.setStatus(AiTaskStatus.PENDING);
 
         aiTaskProducer.sendTranscriptionTask(taskId, audioId);
 
@@ -104,7 +107,7 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
             throw new BaseException(403, "无权操作该任务");
         }
 
-        if (!"SUCCESS".equals(task.getStatus())) {
+        if (!AiTaskStatus.SUCCESS.equals(task.getStatus())) {
             throw new BaseException(400, "任务未完成，无法确认");
         }
 
@@ -140,7 +143,7 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
             throw new BaseException(404, "音频不存在");
         }
         // 校验音频发布状态
-        if (!"ONLINE".equals(audio.getStatus())) {
+        if (!AudioPublishStatus.ONLINE.equals(audio.getStatus())) {
             throw new BaseException(400, "音频尚未发布，无法申请AI任务");
         }
 
@@ -150,8 +153,8 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
         task.setTaskId(taskId);
         task.setUserId(userId);
         task.setAudioId(audioId);
-        task.setType("SUMMARIZATION");
-        task.setStatus("PENDING");
+        task.setType(AiTaskType.SUMMARIZATION);
+        task.setStatus(AiTaskStatus.PENDING);
 
         aiTaskProducer.sendSummarizationTask(taskId, audioId);
         save(task);
@@ -171,7 +174,7 @@ public class AiTaskServiceImpl extends ServiceImpl<AiTaskMapper, AiTask> impleme
         if (!task.getUserId().equals(userId)) {
             throw new BaseException(403, "无权操作该任务");
         }
-        if (!"SUCCESS".equals(task.getStatus())) {
+        if (!AiTaskStatus.SUCCESS.equals(task.getStatus())) {
             throw new BaseException(400, "任务未完成，无法确认");
         }
 

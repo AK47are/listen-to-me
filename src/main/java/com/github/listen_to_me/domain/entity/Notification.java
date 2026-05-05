@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import com.github.listen_to_me.common.enumeration.NotificationType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,8 +26,8 @@ public class Notification implements Serializable {
     @Schema(description = "接收者用户ID")
     private Long recipientId;
 
-    @Schema(description = "通知类型: AUDIT_PASS/AUDIT_REJECT/CREATOR_VERIFY_PASS/CREATOR_VERIFY_REJECT/SYSTEM")
-    private String type;
+    @Schema(description = NotificationType.SCHEMA_DESC)
+    private NotificationType type;
 
     @Schema(description = "通知标题")
     private String title;

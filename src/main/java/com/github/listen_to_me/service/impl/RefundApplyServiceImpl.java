@@ -9,6 +9,9 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.common.enumeration.ConsultOrderStatus;
+import com.github.listen_to_me.common.enumeration.ConsultSlotStatus;
+import com.github.listen_to_me.common.enumeration.RefundStatus;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.domain.dto.RefundAuditDTO;
@@ -69,7 +72,7 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
         if (apply == null) {
             throw new BaseException(404, "退款申请不存在");
         }
-        if (!"PENDING".equals(apply.getStatus())) {
+        if (!RefundStatus.PENDING.equals(apply.getStatus())) {
             throw new BaseException(400, "退款申请已处理");
         }
 
@@ -86,13 +89,13 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
             if (!added) {
                 throw new BaseException("退还余额失败");
             }
-            order.setStatus("REFUNDED");
+            order.setStatus(ConsultOrderStatus.REFUNDED);
             iConsultOrderService.updateById(order);
             iConsultSlotService.update(Wrappers.<ConsultSlot>lambdaUpdate()
                     .eq(ConsultSlot::getId, order.getSlotId())
-                    .set(ConsultSlot::getStatus, "AVAILABLE"));
+                    .set(ConsultSlot::getStatus, ConsultSlotStatus.AVAILABLE));
 
-            apply.setStatus("PROCESSED");
+            apply.setStatus(RefundStatus.PROCESSED);
             updateById(apply);
             notificationService.send(apply.getUserId(), "REFUND_PASS",
                     "退款申请已通过", "您的退款申请已通过审核，金额 " + order.getPayAmount() + " 元已退回账户余额",
@@ -104,9 +107,9 @@ public class RefundApplyServiceImpl extends ServiceImpl<RefundApplyMapper, Refun
                 throw new BaseException(400, "拒绝时必须填写原因");
             }
             // 默认设置为 CONFIRMED
-            order.setStatus("CONFIRMED");
+            order.setStatus(ConsultOrderStatus.CONFIRMED);
             iConsultOrderService.updateById(order);
-            apply.setStatus("PROCESSED");
+            apply.setStatus(RefundStatus.PROCESSED);
             apply.setRejectReason(auditDTO.getRejectReason());
             updateById(apply);
             notificationService.send(apply.getUserId(), "REFUND_REJECT",

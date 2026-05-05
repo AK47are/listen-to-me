@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import com.github.listen_to_me.common.enumeration.ConsultOrderStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,8 +40,8 @@ public class ConsultOrder implements Serializable {
     @Schema(description = "用户留言")
     private String message;
 
-    @Schema(description = "订单状态: PENDING_CONFIRM, CONFIRMED, COMPLETED, CANCELLED, REFUND_PENDING, REFUNDED")
-    private String status;
+    @Schema(description = ConsultOrderStatus.SCHEMA_DESC)
+    private ConsultOrderStatus status;
 
     @Schema(description = "预约地址（确认时填充）")
     private String address;

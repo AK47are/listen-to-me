@@ -24,6 +24,8 @@ import com.alibaba.dashscope.common.ResponseFormat;
 import com.alibaba.dashscope.common.Role;
 import com.alibaba.dashscope.utils.Constants;
 import com.github.listen_to_me.common.config.DashScopeConfig;
+import com.github.listen_to_me.common.enumeration.AiTaskStatus;
+import com.github.listen_to_me.common.enumeration.AiTaskType;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.domain.entity.AiTask;
 import com.github.listen_to_me.domain.vo.SlotVO;
@@ -97,8 +99,8 @@ public class AiService {
         AiTask task = new AiTask();
         task.setTaskId(taskId);
         task.setUserId(userId);
-        task.setType("SLOT_GENERATION");
-        task.setStatus("PROCESSING");
+        task.setType(AiTaskType.SLOT_GENERATION);
+        task.setStatus(AiTaskStatus.PROCESSING);
         aiTaskService.save(task);
 
         try {
@@ -107,13 +109,13 @@ public class AiService {
             List<SlotVO> slots = JSONUtil.toList(JSONUtil.parseArray(response), SlotVO.class);
 
             // 2. 更新任务状态为 SUCCESS，存储结果
-            task.setStatus("SUCCESS");
+            task.setStatus(AiTaskStatus.SUCCESS);
             task.setResult(response);
             aiTaskService.updateById(task);
 
             return slots;
         } catch (Exception e) {
-            task.setStatus("FAILED");
+            task.setStatus(AiTaskStatus.FAILED);
             task.setFailReason(e.getMessage());
             aiTaskService.updateById(task);
             throw e;

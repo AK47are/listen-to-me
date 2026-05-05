@@ -8,6 +8,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import com.github.listen_to_me.common.enumeration.PayChannel;
+import com.github.listen_to_me.common.enumeration.PayStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
@@ -39,11 +41,11 @@ public class AudioOrder implements Serializable {
 
     private BigDecimal payAmount;
 
-    @Schema(description = "0-待支付, 1-已支付, 2-已取消")
-    private Integer payStatus;
+    @Schema(description = PayStatus.SCHEMA_DESC)
+    private PayStatus payStatus;
 
-    @Schema(description = "alipay, wechat")
-    private String payChannel;
+    @Schema(description = PayChannel.SCHEMA_DESC)
+    private PayChannel payChannel;
 
     private LocalDateTime payTime;
 

@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.common.enumeration.PayStatus;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.util.MinioUtils;
 import com.github.listen_to_me.domain.entity.AudioInfo;
@@ -51,7 +52,7 @@ public class AudioOrderServiceImpl extends ServiceImpl<AudioOrderMapper, AudioOr
         LambdaQueryWrapper<AudioOrder> queryWrapper = Wrappers.lambdaQuery(AudioOrder.class)
                 .eq(AudioOrder::getUserId, userId)
                 .eq(AudioOrder::getAudioId, audioId)
-                .eq(AudioOrder::getPayStatus, 1);
+                .eq(AudioOrder::getPayStatus, PayStatus.PAID);
         AudioOrder audioOrder = audioOrderMapper.selectOne(queryWrapper);
         if (audioOrder != null) {
             throw new BaseException(409, "你已经购买过该音频");
@@ -63,7 +64,7 @@ public class AudioOrderServiceImpl extends ServiceImpl<AudioOrderMapper, AudioOr
         order.setUserId(userId);
         order.setAudioId(audioId);
         order.setPayAmount(audioInfo.getPrice());
-        order.setPayStatus(1);
+        order.setPayStatus(PayStatus.PAID);
         order.setOrderSn(orderSn);
         order.setPayTime(LocalDateTime.now());
         audioOrderMapper.insert(order);
@@ -93,7 +94,7 @@ public class AudioOrderServiceImpl extends ServiceImpl<AudioOrderMapper, AudioOr
         vo.setAudioTitle(audioInfo.getTitle());
         vo.setCoverUrl(MinioUtils.getPresignedUrl(MinioUtils.getPresignedUrl(audioInfo.getCoverPath())));
         vo.setPayAmount(order.getPayAmount());
-        vo.setStatus(order.getPayStatus() == 1 ? "SUCCESS" : "FAILED");
+        vo.setStatus(PayStatus.PAID.equals(order.getPayStatus()) ? "SUCCESS" : "FAILED");
         vo.setCreateTime(order.getCreateTime());
         vo.setPayTime(order.getPayTime());
         return vo;

@@ -8,6 +8,9 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
+import com.github.listen_to_me.common.enumeration.CreatorApplyStatus;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,9 +37,9 @@ public class CreatorApply implements Serializable {
 
     /**
      * 申请状态
-     * 可选值：PENDING(待审核)、APPROVED(已通过)、REJECTED(已拒绝)
      */
-    private String status;
+    @Schema(description = CreatorApplyStatus.SCHEMA_DESC)
+    private CreatorApplyStatus status;
 
     /**
      * 审核拒绝原因

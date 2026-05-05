@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.listen_to_me.common.enumeration.ConsultSlotStatus;
 import com.github.listen_to_me.common.exception.BaseException;
 import com.github.listen_to_me.common.exception.ConflictException;
 import com.github.listen_to_me.domain.dto.SlotDTO;
@@ -55,7 +56,7 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
                     slot.setEndTime(dto.getEndTime());
                     slot.setPrice(dto.getPrice());
                     slot.setAddress(dto.getAddress());
-                    slot.setStatus("AVAILABLE");
+                    slot.setStatus(ConsultSlotStatus.AVAILABLE);
                     return slot;
                 })
                 .collect(Collectors.toList());
@@ -96,7 +97,7 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
             vo.setEndTime(slot.getEndTime());
             vo.setPrice(slot.getPrice());
             vo.setAddress(slot.getAddress());
-            vo.setStatus(slot.getStatus());
+            vo.setStatus(slot.getStatus().getCode());
             return vo;
         });
     }
@@ -124,14 +125,14 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
         }
 
         // 校验状态是否可修改
-        String currentStatus = slot.getStatus();
-        if ("BOOKED".equals(currentStatus) || "EXPIRED".equals(currentStatus)) {
+        ConsultSlotStatus currentStatus = slot.getStatus();
+        if (ConsultSlotStatus.BOOKED.equals(currentStatus) || ConsultSlotStatus.EXPIRED.equals(currentStatus)) {
             log.debug("时间槽状态不可修改 - 当前状态: {}, ID: {}", currentStatus, slotId);
             throw new BaseException(400, "当前状态无法修改");
         }
 
         // 更新状态
-        slot.setStatus(status);
+        slot.setStatus(ConsultSlotStatus.valueOf(status));
         boolean success = updateById(slot);
         if (!success) {
             log.error("修改时间槽状态失败 - ID: {}", slotId);
@@ -158,7 +159,7 @@ public class ConsultSlotServiceImpl extends ServiceImpl<ConsultSlotMapper, Consu
         }
 
         // 校验状态是否可删除
-        if (!"AVAILABLE".equals(slot.getStatus())) {
+        if (!ConsultSlotStatus.AVAILABLE.equals(slot.getStatus())) {
             log.debug("时间槽状态不可删除 - 当前状态: {}, ID: {}", slot.getStatus(), slotId);
             throw new BaseException(400, "只能删除可用的时间槽");
         }
